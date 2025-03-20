@@ -1,0 +1,292 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Delius&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 250 20% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 250 20% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 250 20% 20%;
+
+    --primary: 265 83% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 40% 96.1%;
+    --secondary-foreground: 265 83% 45%;
+
+    --muted: 270 40% 96.1%;
+    --muted-foreground: 250 15% 45%;
+
+    --accent: 270 40% 96.1%;
+    --accent-foreground: 265 83% 45%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 265 83% 45%;
+
+    --radius: 0.8rem;
+  }
+
+  .dark {
+    --background: 250 20% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 250 20% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 250 20% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 265 83% 60%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 250 25% 18%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 250 25% 18%;
+    --muted-foreground: 250 10% 70%;
+
+    --accent: 250 25% 18%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 250 25% 18%;
+    --input: 250 25% 18%;
+    --ring: 265 83% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-purple-300/30 text-purple-900 dark:bg-purple-800/30 dark:text-purple-100;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-glass transition-all duration-300 dark:bg-black/20 dark:border-white/10;
+  }
+
+  .glass:hover {
+    @apply bg-white/50 shadow-glass-hover border-white/30 dark:bg-black/30 dark:border-white/20;
+  }
+
+  .btn-nebula {
+    @apply px-7 py-3 font-medium rounded-lg bg-gradient-button text-white relative overflow-hidden shadow-sm transition-all duration-300 dark:shadow-md;
+  }
+
+  .btn-nebula::before {
+    content: "";
+    @apply absolute inset-0 bg-white/0 transition-all duration-300;
+  }
+
+  .btn-nebula:hover::before {
+    @apply bg-white/10;
+  }
+
+  .btn-nebula:hover {
+    @apply shadow-nebula transform translate-y-[-1px];
+  }
+
+  .btn-nebula:active {
+    @apply transform translate-y-[0px] shadow-none transition-all duration-75;
+  }
+
+  .btn-purple {
+    @apply px-7 py-3 font-medium rounded-lg bg-gradient-purple text-white relative overflow-hidden shadow-sm transition-all duration-300 dark:shadow-md;
+  }
+
+  .btn-purple::before {
+    content: "";
+    @apply absolute inset-0 bg-white/0 transition-all duration-300;
+  }
+
+  .btn-purple:hover::before {
+    @apply bg-white/10;
+  }
+
+  .btn-purple:hover {
+    @apply shadow-purple transform translate-y-[-1px];
+  }
+
+  .btn-purple:active {
+    @apply transform translate-y-[0px] shadow-none transition-all duration-75;
+  }
+
+  .btn-outline {
+    @apply px-7 py-3 font-medium rounded-lg bg-transparent border border-nebula-200 text-nebula-700 transition-all duration-300 dark:border-purple-800 dark:text-purple-300;
+  }
+
+  .btn-outline:hover {
+    @apply border-nebula-300 bg-nebula-50 shadow-sm dark:border-purple-700 dark:bg-purple-900/20;
+  }
+
+  .feature-card {
+    @apply p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 dark:bg-gray-800 dark:border-gray-700;
+  }
+
+  .pricing-card {
+    @apply p-8 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden dark:bg-gray-800 dark:border-gray-700;
+  }
+
+  .link-underline {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-purple-500 after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100;
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::before {
+    content: "";
+    @apply absolute top-0 -left-[100%] w-[200%] h-full bg-shimmer-gradient animate-shimmer;
+  }
+
+  .dot {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(139, 92, 246, 0.2);
+    width: 4px;
+    height: 4px;
+    transition: transform 0.3s ease-out;
+  }
+}
+
+@layer utilities {
+  .grid-pattern {
+    background-size: 30px 30px;
+    background-image: radial-gradient(circle, #e0f2ff 1px, transparent 1px);
+  }
+
+  .grid-pattern-dark {
+    background-size: 30px 30px;
+    background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+
+  .hover-glow:hover {
+    @apply animate-glow;
+  }
+
+  .smooth-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Particle animation */
+  @keyframes float {
+    0% {
+      transform: translateY(0) translateX(0);
+    }
+    25% {
+      transform: translateY(-10px) translateX(10px);
+    }
+    50% {
+      transform: translateY(0) translateX(20px);
+    }
+    75% {
+      transform: translateY(10px) translateX(10px);
+    }
+    100% {
+      transform: translateY(0) translateX(0);
+    }
+  }
+
+  /* Dot hover animation */
+  .dot-hover {
+    transition: all 0.3s ease;
+  }
+
+  .dot-hover:hover {
+    transform: scale(1.5);
+    background-color: rgba(139, 92, 246, 0.4);
+  }
+}
+
+.inline-flex.animate-text-gradient {
+  background: linear-gradient(to right, #b2a8fd, #8678f9, #c7d2fe);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-flex;
+  animation: text-gradient 2s linear infinite;
+}
+
+@keyframes text-gradient {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.background-shine {
+  background-image: linear-gradient(110deg, #c084fc 45%, #a78bfa 55%, #c084fc);
+  animation: background-shine 2s linear infinite;
+}
+
+@keyframes background-shine {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
