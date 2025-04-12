@@ -11,7 +11,7 @@ import SignUp from "./pages/SignUp";
 import { Toaster } from "@/components/ui/sonner";
 import SingleTable from "./pages/SingleTable";
 
-export const url = import.meta.env.VITE_BACKEND_URL;
+export const url = import.meta.env.VITE_BACKEND_URL as string;
 
 const App = () => (
   <ThemeProvider defaultTheme="system">
