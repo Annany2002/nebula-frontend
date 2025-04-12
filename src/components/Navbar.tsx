@@ -5,8 +5,11 @@ import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/auth-context";
+import UserDropDown from "./UserDropDown";
 
 const Navbar = () => {
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -66,28 +69,27 @@ const Navbar = () => {
           </a>
         </nav>
 
+        {/* Desktop View*/}
         <div className="hidden md:flex md:gap-3 items-center">
-          <ThemeToggle />
-          <Link to={"/sign-in"}>
-            <Button
-              variant="ghost"
-              className="text-gray-700 hover:text-purple-700 hover:bg-purple-50 dark:text-white dark:hover:text-purple-300 dark:hover:bg-purple-900/20"
-            >
-              Sign In
-            </Button>
-          </Link>
+          {/* <ThemeToggle /> */}
+
+          {user && user.email ? (
+            <UserDropDown />
+          ) : (
+            <Link to={"/sign-up"}>Sign Up</Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center space-x-2">
-          <ThemeToggle />
-          <button
-            className="text-gray-800 dark:text-white p-1"
+          {/* <ThemeToggle /> */}
+          <Button
+            className="text-gray-800 dark:text-white px-2 rounded-full"
             onClick={toggleMobileMenu}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            {mobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
+          </Button>
         </div>
       </div>
 
@@ -99,7 +101,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg overflow-hidden dark:bg-gray-900 dark:border-b dark:border-gray-800"
+            className="md:hidden absolute top-full mx-6 rounded-md place-items-center left-0 right-0 bg-white shadow-lg overflow-hidden dark:bg-gray-900 dark:border-b dark:border-gray-800"
           >
             <div className="container mx-auto p-6 flex flex-col space-y-4">
               <a
@@ -132,15 +134,21 @@ const Navbar = () => {
               </a>
 
               <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                <Button
-                  variant="outline"
-                  className="w-full mb-3 border-purple-200 text-purple-700 hover:border-purple-300 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:border-purple-700 dark:hover:bg-purple-900/20"
-                >
-                  Sign In
-                </Button>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                  Get Started
-                </Button>
+                {user ? (
+                  <UserDropDown />
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full mb-3 border-purple-200 text-purple-700 hover:border-purple-300 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:border-purple-700 dark:hover:bg-purple-900/20"
+                    >
+                      Sign In
+                    </Button>
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

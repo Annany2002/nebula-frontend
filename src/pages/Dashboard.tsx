@@ -1,67 +1,80 @@
-import { useState } from "react";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import DashboardNav from "@/components/dashboard/DashboardNav";
-import StatsSection from "@/components/dashboard/StatsSection";
-import ActivitySection from "@/components/dashboard/ActivitySection";
-import EventsSection from "@/components/dashboard/EventsSection";
-import RecentActivitiesSection from "@/components/dashboard/RecentActivitiesSection";
-import ConversionChart from "@/components/dashboard/ConversionChart";
-import { ChartContainer } from "@/components/ui/chart";
-
-const conversionChartConfig = {
-  direct: {
-    label: "Direct",
-    color: "#9b87f5",
-  },
-  referral: {
-    label: "Referral",
-    color: "#7E69AB",
-  },
-  social: {
-    label: "Social",
-    color: "#6E59A5",
-  },
-  organic: {
-    label: "Organic",
-    color: "#D6BCFA",
-  },
-};
+import CreateDatabase from "@/components/Database/CreateDatabase";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { DatabaseIcon } from "lucide-react";
+import { useRefetch } from "@/hooks/use-refetch";
+import { EmptyState } from "@/components/ui/empty-state";
+import LoginNavBar from "@/components/LoginNavbar";
+import { DatabaseCard } from "@/components/Database/DatabaseCard";
+import BreadCrumbNav from "@/components/BreadCrumbNav";
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const { databases, refetchDb } = useRefetch();
+  const [openChange, setOpenChange] = useState(false);
+
+  useEffect(() => {
+    refetchDb();
+  }, [openChange]);
 
   return (
-    <div className="min-h-screen bg-transparent pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <DashboardHeader />
-        <div className="mb-8">
-          <DashboardNav activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="min-h-screen space-y-6">
+      <LoginNavBar />
+      <div className="px-3">
+        <BreadCrumbNav />
+      </div>
+      <div className="px-4 flex justify-between">
+        <div className="flex flex-col gap-1 justify-center">
+          <span className="text-3xl text-primary font-semibold">
+            Your Projects
+          </span>
+          <p className="text-muted-foreground text-sm">
+            View and Manage all your projects.
+          </p>
         </div>
-
-        <StatsSection />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12 mb-2">
-          <div className="lg:col-span-2">
-            <ActivitySection />
-          </div>
-          <div className="lg:col-span-1">
-            <ChartContainer config={conversionChartConfig}>
-              <ConversionChart />
-            </ChartContainer>
-          </div>
+        <div className="flex gap-2 items-center">
+          <CreateDatabase
+            openChange={openChange}
+            setOpenChange={setOpenChange}
+          />
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <EventsSection />
+      {!databases ||
+        (databases.length === 0 && (
+          <div className="my-12">
+            <NoProjects setOpenChange={setOpenChange} />
           </div>
-          <div className="lg:col-span-2">
-            <RecentActivitiesSection />
+        ))}
+
+      <div className="w-full px-2 mt-6">
+        {databases.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 px-2">
+            {databases.map((database, index) => (
+              <div key={index}>
+                <DatabaseCard database={database} />
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
+
+function NoProjects({
+  setOpenChange,
+}: {
+  setOpenChange: Dispatch<SetStateAction<boolean>>;
+}) {
+  return (
+    <EmptyState
+      icon={DatabaseIcon}
+      title="No databases yet"
+      description="Create your first database to get started."
+      actionLabel="Create Database"
+      actionOnClick={() => setOpenChange(true)}
+      className="mx-auto max-w-md mt-16"
+    />
+  );
+}
 
 export default Dashboard;

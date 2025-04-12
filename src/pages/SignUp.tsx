@@ -18,13 +18,14 @@ import { useAuth } from "@/context/auth-context";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  username: z.string().min(6, "Username must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"), 
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const SignIn = () => {
-  const { login, isLoading } = useAuth();
+const SignUp = () => {
+  const { signup, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
@@ -32,20 +33,21 @@ const SignIn = () => {
     defaultValues: {
       email: "",
       password: "",
+      username: ""
     },
   });
 
   const onSubmit = async (data: FormValues) => {
-    login({ email: data.email, password: data.password });
+    signup({ email: data.email, username: data.username, password: data.password });
   };
 
   return (
     <AuthLayout
-      title="Welcome Back"
-      description="Sign in to your account to continue"
-      footerText="Don't have an account?"
-      footerLinkText="Sign up"
-      footerLinkHref="/sign-up"
+      title="Create a new account"
+      description="Sign up to use our services"
+      footerText="Already a user?"
+      footerLinkText="Sign in"
+      footerLinkHref="/sign-in"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -59,6 +61,23 @@ const SignIn = () => {
                   <Input
                     placeholder="you@example.com"
                     type="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="nebula_user"
+                    type="text"
                     {...field}
                   />
                 </FormControl>
@@ -103,7 +122,7 @@ const SignIn = () => {
             className="w-full bg-purple-600 hover:bg-purple-700"
             disabled={isLoading}
           >
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? "Signing Up..." : "Sign Up"}
           </Button>
           <div className="w-full flex items-center gap-2">
             <div className="h-[0.5px] w-full  bg-white/10" />
@@ -119,4 +138,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
