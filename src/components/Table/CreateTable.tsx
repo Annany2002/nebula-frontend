@@ -18,7 +18,7 @@ import { url } from "@/App";
 import { useRefetch } from "@/hooks/use-refetch";
 
 export default function CreateSchema({ db_name }: { db_name: string }) {
-  const { token } = useRefetch();
+  const { token, refetchTables } = useRefetch();
   const [open, setOpen] = useState(false);
   const [tableName, setTableName] = useState("");
   const [columns, setColumns] = useState<TableColumnType[]>([
@@ -69,6 +69,7 @@ export default function CreateSchema({ db_name }: { db_name: string }) {
       if (ok) {
         toast.success(`Table '${tableName}' created successfully`);
         setTableName("");
+        refetchTables(db_name);
         setOpen(false);
       }
     } catch (error) {

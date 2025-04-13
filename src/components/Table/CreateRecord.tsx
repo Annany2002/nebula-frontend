@@ -120,6 +120,7 @@ export default function CreateRecord({
         );
         if (response.ok) {
           const data = await response.json();
+          console.log(data.schema);
           setRecordSchema(data.schema);
         }
       } catch (error) {
@@ -146,46 +147,49 @@ export default function CreateRecord({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="max-h-[60vh] overflow-y-auto space-y-4 px-1">
-              {recordSchema.map((record, _) => (
-                <FormField
-                  key={_}
-                  control={form.control}
-                  name={record.name}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{record.name}</FormLabel>
-                      <FormControl>
-                        {record.type === "TEXT" && field.value?.length > 50 ? (
-                          <Textarea
-                            placeholder={`Enter ${record.name}`}
-                            {...field}
-                          />
-                        ) : (
-                          <Input
-                            type={getInputType(record.type)}
-                            placeholder={`Enter ${record.name}`}
-                            {...field}
-                            checked={
-                              record.type === "BOOLEAN"
-                                ? field.value === true
-                                : undefined
-                            }
-                            onChange={(e) => {
-                              if (record.type === "BOOLEAN") {
-                                field.onChange(e.target.checked);
-                              } else {
-                                field.onChange(e.target.value);
+            <div className="max-h-[40vh] overflow-y-auto space-y-4 px-1">
+              {recordSchema
+                .filter((record) => record.name !== "id")
+                .map((record, _) => (
+                  <FormField
+                    key={_}
+                    control={form.control}
+                    name={record.name}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{record.name}</FormLabel>
+                        <FormControl>
+                          {record.type === "TEXT" &&
+                          field.value?.length > 50 ? (
+                            <Textarea
+                              placeholder={`Enter ${record.name}`}
+                              {...field}
+                            />
+                          ) : (
+                            <Input
+                              type={getInputType(record.type)}
+                              placeholder={`Enter ${record.name}`}
+                              {...field}
+                              checked={
+                                record.type === "BOOLEAN"
+                                  ? field.value === true
+                                  : undefined
                               }
-                            }}
-                          />
-                        )}
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
+                              onChange={(e) => {
+                                if (record.type === "BOOLEAN") {
+                                  field.onChange(e.target.checked);
+                                } else {
+                                  field.onChange(e.target.value);
+                                }
+                              }}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
             </div>
             <DialogFooter>
               <Button

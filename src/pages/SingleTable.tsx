@@ -19,14 +19,13 @@ import { RecordSchemaType } from "@/types/allType";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
+import { formatDateTime } from "@/lib/formatDate";
 
 export default function SingleTable() {
   const { pathname } = useLocation();
-  const [records, setRecords] = useState<RecordSchemaType[]>([]);
-  const [tableFields, setTableFields] = useState([]);
+  const { token, records, tableFields, refetchRecords } = useRefetch();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const { token } = useRefetch();
   const db_name = pathname.split("/")[2];
   const table_name = pathname.split("/")[4];
 
@@ -62,27 +61,7 @@ export default function SingleTable() {
   };
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const response = await fetch(
-          `${url}/api/v1/databases/${db_name}/tables/${table_name}/records`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await response.json();
-        setRecords(data);
-        if (data.length > 0) {
-          setTableFields(Object.keys(data[0]));
-        }
-        console.log(data);
-      } catch (error) {
-        console.error("Failed to fetch records:", error);
-      }
-    };
-    fetchRecords();
+    refetchRecords(db_name, table_name);
   }, [db_name, table_name]);
 
   return (
@@ -119,7 +98,7 @@ export default function SingleTable() {
         />
       </div>
       {records.length === 0 ? (
-        <div className="mt-16">
+        <div className="pt-16">
           <EmptyState
             icon={FileText}
             title="No records yet"
@@ -156,7 +135,9 @@ export default function SingleTable() {
                   <TableRow key={_}>
                     {Object.keys(record).map((column) => (
                       <TableCell key={`${record.id}-${column}`}>
-                        {record[column]?.toString() || "—"}
+                        {column === "created_at" || column === "updated_at"
+                          ? formatDateTime(record[column])
+                          : record[column]?.toString() || "—"}
                       </TableCell>
                     ))}
                     <TableCell>

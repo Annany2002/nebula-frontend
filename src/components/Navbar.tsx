@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import NebulaLogo from "@/assets/nebula-logo";
-import { Menu, X } from "lucide-react";
+import { LoaderCircleIcon, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -9,7 +9,7 @@ import { useAuth } from "@/context/auth-context";
 import UserDropDown from "./UserDropDown";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -74,7 +74,11 @@ const Navbar = () => {
           {/* <ThemeToggle /> */}
 
           {user && user.email ? (
-            <UserDropDown />
+            isLoading ? (
+              <LoaderCircleIcon className="animate-spin" />
+            ) : (
+              <UserDropDown />
+            )
           ) : (
             <Link to={"/sign-up"}>Sign Up</Link>
           )}

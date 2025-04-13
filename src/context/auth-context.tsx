@@ -35,22 +35,19 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// const api_url = import.meta.env.VITE_BACKEND_URL
-// console.log(api_url)
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const token = localStorage.getItem("token") || "";
   const user_id = localStorage.getItem("user_id") || "";
 
   useEffect(() => {
     const getUserById = async () => {
-      if (!user_id || !token) {
-        setIsLoading(false);
+      if (!user_id || !token || user !== null) {
         return;
       }
+      setIsLoading(true);
       try {
         const response = await fetch(`${url}/api/v1/user/${user_id}`, {
           headers: {
@@ -120,6 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
         body: JSON.stringify(userData),
       });
+      console.log(response);
       const result = await response.json();
       localStorage.setItem("token", result.token);
       localStorage.setItem("user_id", result.user.userId);
