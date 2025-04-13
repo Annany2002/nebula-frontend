@@ -120,7 +120,6 @@ export default function CreateRecord({
         );
         if (response.ok) {
           const data = await response.json();
-          console.log(data.schema);
           setRecordSchema(data.schema);
         }
       } catch (error) {

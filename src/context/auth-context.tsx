@@ -9,6 +9,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+// Route constants (optional but recommended)
+const ROUTES = {
+  SIGN_IN: "/sign-in",
+  HOME: "/",
+  DASHBOARD: (userId: string) => `/dashboard/${userId}`,
+};
+
 // Define the shape of the user object
 interface User {
   email: string;
@@ -24,7 +31,9 @@ interface AuthContextType {
   signup: (userData: User) => void;
   login: (userData: User) => void;
   logout: () => void;
+  refreshUser: () => void;
   isLoading: boolean;
+  isAuthenticated: boolean;
 }
 
 // Create the AuthContext with a default value
@@ -37,46 +46,49 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>();
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const token = localStorage.getItem("token") || "";
-  const user_id = localStorage.getItem("user_id") || "";
 
-  useEffect(() => {
-    const getUserById = async () => {
-      if (!user_id || !token || user !== null) {
+  const refreshUser = async () => {
+    const token = localStorage.getItem("token");
+    const user_id = localStorage.getItem("user_id");
+
+    if (!token || !user_id) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${url}/api/v1/user/${user_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user_id");
+          navigate(ROUTES.HOME);
+          toast.error("Session expired, please log in.");
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.error || "Failed to fetch user.");
+        }
         return;
       }
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${url}/api/v1/user/${user_id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          if (response.status === 401) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user_id");
-            navigate("/");
-            toast.error("Session expired, please log in.");
-          } else {
-            const errorData = await response.json();
-            toast.error(errorData.error || "Failed to fetch user.");
-          }
-          return;
-        }
-        const userData = await response.json();
-        setUser(userData);
-      } catch (error) {
-        toast.error("Failed to fetch user.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    getUserById();
-  }, [user_id, token, navigate]);
+
+      const userData = await response.json();
+      setUser(userData);
+    } catch (error) {
+      toast.error("Failed to fetch user.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshUser();
+  }, [navigate]);
 
   const signup = async (userData: User) => {
     try {
@@ -97,11 +109,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const result = await response.json();
       localStorage.setItem("user_id", result.user_id);
-      toast.success(`${result.message}`);
-      navigate("/sign-in");
+      toast.success(result.message);
+      navigate(ROUTES.SIGN_IN);
     } catch (error) {
       toast.error("Failed to sign up. Please try again.");
-      console.log("Sign up error:", error);
+      console.error("Sign up error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -117,13 +129,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
         body: JSON.stringify(userData),
       });
-      console.log(response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to sign in. Please try again.");
+        return;
+      }
+
       const result = await response.json();
       localStorage.setItem("token", result.token);
       localStorage.setItem("user_id", result.user.userId);
-      toast.success(result.message);
       setUser(result.user);
-      navigate(`/dashboard/${result.user.userId}`);
+      toast.success(result.message);
+      navigate(ROUTES.DASHBOARD(result.user.userId));
     } catch (error) {
       toast.error("Failed to sign in. Please try again.");
       console.error("Sign in error:", error);
@@ -136,10 +154,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
-    navigate("/");
+    navigate(ROUTES.HOME);
   };
 
-  const value = { user, signup, login, logout, isLoading };
+  const value: AuthContextType = {
+    user,
+    signup,
+    login,
+    logout,
+    refreshUser,
+    isLoading,
+    isAuthenticated: !!user,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
