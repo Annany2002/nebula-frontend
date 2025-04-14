@@ -13,7 +13,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     refetchDb();
-  }, [openChange]);
+  }, []);
 
   return (
     <div className="min-h-screen space-y-6">

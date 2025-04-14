@@ -23,7 +23,7 @@ export default function CreateDatabase({
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [projectName, setProjectName] = useState<string>("");
-  const { token } = useRefetch();
+  const { token, setDatabases } = useRefetch();
 
   const createDatabase = async () => {
     setIsLoading(true);
@@ -40,6 +40,9 @@ export default function CreateDatabase({
         toast.error(`Project with ${projectName} already exists`);
       } else if (response.status === 201) {
         await response.json();
+        setDatabases((prevDb) =>
+          prevDb.filter((db) => db.dbName !== projectName)
+        );
         toast.success("Project Created Successfully");
         setOpenChange(false);
       }

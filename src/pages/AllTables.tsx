@@ -17,6 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/formatDate";
 import { toast } from "sonner";
+import { ApiKeyManager } from "@/components/Database/ApiKeyManager";
+import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
 
 export default function AllTables() {
   const { db_name } = useParams();
@@ -55,6 +57,9 @@ export default function AllTables() {
       <LoginNavBar />
       <div className="px-3">
         <BreadCrumbNav db_name={db_name} />
+      </div>
+      <div className="px-3">
+        <DatabaseApiKey databaseName={db_name} />
       </div>
       <div className="mt-4 px-4 flex justify-between">
         <div className="flex flex-col gap-1">

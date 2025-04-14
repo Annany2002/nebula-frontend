@@ -1,4 +1,11 @@
-import { Database as DatabaseIcon, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Database as DatabaseIcon,
+  EyeClosedIcon,
+  EyeIcon,
+  Trash2,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,9 +19,13 @@ import { url } from "@/App";
 import { toast } from "sonner";
 import { DataBaseType } from "@/types/allType";
 import { formatDateTime } from "@/lib/formatDate";
+import { useState } from "react";
+import { Input } from "../ui/input";
 
 export function DatabaseCard({ database }: { database: DataBaseType }) {
-  const { refetchDb, token } = useRefetch();
+  const { refetchDb, token, setDatabases } = useRefetch();
+  const [showAPIKey, setShowAPIKey] = useState(false);
+  let api_key = "";
 
   const deleteProject = async () => {
     try {
@@ -28,7 +39,10 @@ export function DatabaseCard({ database }: { database: DataBaseType }) {
         }
       );
       if (response.ok) {
-        await refetchDb();
+        setDatabases((prevDb) =>
+          prevDb.filter((db) => db.dbName !== database.dbName)
+        );
+        refetchDb();
         toast.success(`Project ${database.dbName} successfully deleted`);
       }
     } catch (error) {
@@ -50,16 +64,46 @@ export function DatabaseCard({ database }: { database: DataBaseType }) {
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="text-sm text-muted-foreground">
-          <p>
-            <span className="text-primary pr-1">
-              {database.tables === 0 ? 0 : database.tables - 1}
-            </span>
-            Tables
-          </p>
-          <p className="mt-1 font-semibold">
-            Created at {formatDateTime(database.createdAt)}
-          </p>
+        <div className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            <p>
+              <span className="text-primary pr-1">
+                {database.tables === 0 ? 0 : database.tables - 1}
+              </span>
+              Tables
+            </p>
+            <p className="mt-1 font-semibold">
+              Created at {formatDateTime(database.createdAt)}
+            </p>
+          </div>
+
+          <div className="mt-2">
+            <p className="text-sm text-primary">API Key</p>
+            <div className="flex flex-1 gap-2 items-center mt-2">
+              {api_key ? (
+                <>
+                  <Input
+                    readOnly
+                    value={"r4t5"}
+                    type={`${showAPIKey ? "text" : "password"}`}
+                    className="text-sm font-mono"
+                  />
+                  {showAPIKey ? (
+                    <EyeClosedIcon
+                      size={16}
+                      onClick={() => setShowAPIKey(false)}
+                    />
+                  ) : (
+                    <EyeIcon size={16} onClick={() => setShowAPIKey(true)} />
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-red-800">
+                  You don&apos;t have any API Key related to this project
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="border-t bg-muted/50 p-2">
