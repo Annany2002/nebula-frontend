@@ -1,29 +1,30 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useRefetch } from "@/hooks/use-refetch";
 import { url } from "@/App";
 import LoginNavBar from "@/components/LoginNavbar";
 import BreadCrumbNav from "@/components/BreadCrumbNav";
-import CreateSchema from "@/components/Table/CreateTable";
+import CreateTableSchema from "@/components/Table/CreateTableSchema";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { LoaderCircleIcon, TableIcon, Trash2 } from "lucide-react";
+import { LoaderCircleIcon, Table, TableIcon, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/formatDate";
 import { toast } from "sonner";
-import { ApiKeyManager } from "@/components/Database/ApiKeyManager";
 import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function AllTables() {
   const { db_name } = useParams();
   const { token, refetchTables, tables } = useRefetch();
   const [isLoading, setIsLoading] = useState(false);
+  const [openChange, setOpenChange] = useState(false);
 
   useEffect(() => {
     refetchTables(db_name);
@@ -71,12 +72,19 @@ export default function AllTables() {
           </span>
         </div>
 
-        <CreateSchema db_name={db_name} />
+        <CreateTableSchema
+          openChange={openChange}
+          setOpenChange={setOpenChange}
+          db_name={db_name}
+        />
       </div>
       {isLoading ? (
         <LoaderCircleIcon className="animate-spin" />
       ) : (
         <div className="space-y-4 px-4">
+          {(!tables || tables.length === 0) && (
+            <NoTables setOpenChange={setOpenChange} />
+          )}
           {tables.map((table, _) => (
             <Card key={_} className="overflow-hidden">
               <CardHeader className="bg-primary/5 p-4">
@@ -139,5 +147,22 @@ export default function AllTables() {
         </div>
       )}
     </div>
+  );
+}
+
+function NoTables({
+  setOpenChange,
+}: {
+  setOpenChange: Dispatch<SetStateAction<boolean>>;
+}) {
+  return (
+    <EmptyState
+      icon={Table}
+      title="No tables yet"
+      description="Create your first table to get started."
+      actionLabel="Create Table"
+      actionOnClick={() => setOpenChange(true)}
+      className="mx-auto max-w-md mt-16"
+    />
   );
 }

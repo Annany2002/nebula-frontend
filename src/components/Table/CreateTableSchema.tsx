@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "../ui/dialog";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { TableColumnType } from "@/types/allType";
 import { toast } from "sonner";
 import { Label } from "../ui/label";
@@ -17,9 +17,16 @@ import { Input } from "../ui/input";
 import { url } from "@/App";
 import { useRefetch } from "@/hooks/use-refetch";
 
-export default function CreateSchema({ db_name }: { db_name: string }) {
+export default function CreateTableSchema({
+  db_name,
+  openChange,
+  setOpenChange,
+}: {
+  db_name: string;
+  openChange: boolean;
+  setOpenChange: Dispatch<SetStateAction<boolean>>;
+}) {
   const { token, refetchTables } = useRefetch();
-  const [open, setOpen] = useState(false);
   const [tableName, setTableName] = useState("");
   const [columns, setColumns] = useState<TableColumnType[]>([
     { name: "", type: "TEXT" },
@@ -70,7 +77,7 @@ export default function CreateSchema({ db_name }: { db_name: string }) {
         toast.success(`Table '${tableName}' created successfully`);
         setTableName("");
         refetchTables(db_name);
-        setOpen(false);
+        setOpenChange(false);
       }
     } catch (error) {
       toast.error("Failed to create table. Please try again.");
@@ -80,7 +87,7 @@ export default function CreateSchema({ db_name }: { db_name: string }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={openChange} onOpenChange={setOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Plus /> Add
@@ -166,7 +173,7 @@ export default function CreateSchema({ db_name }: { db_name: string }) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => setOpenChange(false)}
               disabled={isLoading}
             >
               Cancel

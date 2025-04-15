@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useForm } from "react-hook-form";
-import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { toast } from "../ui/use-toast";
 
@@ -94,6 +93,7 @@ export default function CreateRecord({
   const getInputType = (columnType: string) => {
     switch (columnType) {
       case "INTEGER":
+        return "number";
       case "DECIMAL":
         return "number";
       case "BOOLEAN":
@@ -127,7 +127,7 @@ export default function CreateRecord({
       }
     };
     fetchSchema();
-  }, [open]);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -148,7 +148,10 @@ export default function CreateRecord({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="max-h-[40vh] overflow-y-auto space-y-4 px-1">
               {recordSchema
-                .filter((record) => record.name !== "id")
+                .filter(
+                  (record) =>
+                    record.name !== "id" && record.name !== "created_at"
+                )
                 .map((record, _) => (
                   <FormField
                     key={_}
@@ -158,31 +161,23 @@ export default function CreateRecord({
                       <FormItem>
                         <FormLabel>{record.name}</FormLabel>
                         <FormControl>
-                          {record.type === "TEXT" &&
-                          field.value?.length > 50 ? (
-                            <Textarea
-                              placeholder={`Enter ${record.name}`}
-                              {...field}
-                            />
-                          ) : (
-                            <Input
-                              type={getInputType(record.type)}
-                              placeholder={`Enter ${record.name}`}
-                              {...field}
-                              checked={
-                                record.type === "BOOLEAN"
-                                  ? field.value === true
-                                  : undefined
+                          <Input
+                            type={getInputType(record.type)}
+                            placeholder={`Enter ${record.name}`}
+                            {...field}
+                            checked={
+                              record.type === "BOOLEAN"
+                                ? field.value === true
+                                : undefined
+                            }
+                            onChange={(e) => {
+                              if (record.type === "BOOLEAN") {
+                                field.onChange(e.target.checked);
+                              } else {
+                                field.onChange(e.target.value);
                               }
-                              onChange={(e) => {
-                                if (record.type === "BOOLEAN") {
-                                  field.onChange(e.target.checked);
-                                } else {
-                                  field.onChange(e.target.value);
-                                }
-                              }}
-                            />
-                          )}
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

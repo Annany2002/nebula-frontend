@@ -63,24 +63,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           "Content-Type": "application/json",
         },
       });
-
       if (!response.ok) {
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 404) {
           localStorage.removeItem("token");
           localStorage.removeItem("user_id");
           navigate(ROUTES.HOME);
           toast.error("Session expired, please log in.");
         } else {
           const errorData = await response.json();
-          toast.error(errorData.error || "Failed to fetch user.");
+          toast.error(
+            errorData.error || "Invalid user id or token, please login again"
+          );
         }
         return;
       }
-
       const userData = await response.json();
       setUser(userData);
     } catch (error) {
-      toast.error("Failed to fetch user.");
+      toast.error("Invalid user id or token, please login again");
     } finally {
       setIsLoading(false);
     }

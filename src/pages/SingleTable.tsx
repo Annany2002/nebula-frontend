@@ -10,16 +10,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit2, FileText, Trash2 } from "lucide-react";
+import { FileText, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRefetch } from "@/hooks/use-refetch";
 import { url } from "../App";
 import CreateRecord from "@/components/Table/CreateRecord";
-import { RecordSchemaType } from "@/types/allType";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDateTime } from "@/lib/formatDate";
+import EditRecord from "@/components/Table/EditRecord";
 
 export default function SingleTable() {
   const { pathname } = useLocation();
@@ -41,10 +41,10 @@ export default function SingleTable() {
     setSearchTerm(e.target.value);
   };
 
-  const deleteRecord = async (id: number) => {
+  const deleteRecord = async (record_id: number) => {
     try {
       const response = await fetch(
-        `${url}/api/v1/databases/${db_name}/tables/${table_name}/records/${id}`,
+        `${url}/api/v1/databases/${db_name}/tables/${table_name}/records/${record_id}`,
         {
           method: "DELETE",
           headers: {
@@ -53,16 +53,16 @@ export default function SingleTable() {
         }
       );
       if (response.status === 204) {
-        toast.success(`Record with id ${id} deleted successfully`);
+        toast.success(`Record with id ${record_id} deleted successfully`);
       }
     } catch (error) {
-      toast.error(`Error in deleting record ${id}`);
+      toast.error(`Error in deleting record with id ${record_id}`);
     }
   };
 
   useEffect(() => {
     refetchRecords(db_name, table_name);
-  }, [db_name, table_name]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-transparent space-y-6">
@@ -142,10 +142,12 @@ export default function SingleTable() {
                     ))}
                     <TableCell>
                       <div className="flex items-center space-x-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Edit2 className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
+                        <EditRecord
+                          setOpen={setOpen}
+                          db_name={db_name}
+                          table_name={table_name}
+                          record={record}
+                        />
                         <Button
                           variant="ghost"
                           size="icon"

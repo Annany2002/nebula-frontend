@@ -9,34 +9,42 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Eye, EyeOff, Key, RefreshCw, Copy } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { url } from "@/App";
+import { useRefetch } from "@/hooks/use-refetch";
+import { toast } from "sonner";
 
 interface DatabaseApiKeyProps {
   databaseName: string;
 }
 
 export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const { token } = useRefetch();
+  const [apiKey, setApiKey] = useState<string | "">("");
   const [loading, setLoading] = useState(true);
   const [showKey, setShowKey] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
-        const key = "";
-        setApiKey(key);
+        const response = await fetch(
+          `${url}/api/v1/account/databases/${databaseName}/apikey`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setApiKey(data.key);
+        }
       } catch (error) {
         console.error(
           `Failed to fetch API key for database ${databaseName}:`,
           error
         );
-        toast({
-          title: "Error",
-          description: `Failed to fetch API key for database ${databaseName}`,
-          variant: "destructive",
-        });
+        toast.error(`Failed to fetch API key for database ${databaseName}`);
       } finally {
         setLoading(false);
       }
@@ -48,23 +56,27 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
   const handleGenerateKey = async () => {
     setGenerating(true);
     try {
-      const newKey = "";
-      setApiKey(newKey);
-      setShowKey(true);
-      toast({
-        title: "Success",
-        description: `API key for database ${databaseName} generated successfully`,
-      });
-    } catch (error) {
-      console.error(
-        `Failed to generate API key for database ${databaseName}:`,
-        error
+      const response = await fetch(
+        `${url}/api/v1/account/databases/${databaseName}/apikey`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      toast({
-        title: "Error",
-        description: `Failed to generate API key for database ${databaseName}`,
-        variant: "destructive",
-      });
+      console.log(response);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setApiKey(data.api_key);
+        setShowKey(true);
+        toast.success(
+          `API key for database ${databaseName} generated successfully`
+        );
+      }
+    } catch (error) {
+      toast.error(`Failed to generate API key for database ${databaseName}`);
     } finally {
       setGenerating(false);
     }
@@ -74,21 +86,10 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
     setShowKey(!showKey);
   };
 
-  const copyToClipboard = () => {
-    if (apiKey) {
-      navigator.clipboard.writeText(apiKey);
-      toast({
-        title: "Copied",
-        description: `API key for database ${databaseName} copied to clipboard`,
-      });
-    }
+  const copyToClipboard = (text: string) => {
+    window.navigator.clipboard.writeText(text);
+    toast.success("API key copied successfully");
   };
-
-  const displayKey = apiKey
-    ? showKey
-      ? apiKey
-      : apiKey.replace(/./g, "•")
-    : "No API key generated";
 
   return (
     <Card className="w-full">
@@ -107,9 +108,10 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
             <div className="flex items-center space-x-2">
               <div className="relative flex-1">
                 <Input
-                  value={displayKey}
+                  value={apiKey}
                   readOnly
-                  disabled={loading || !apiKey}
+                  disabled={loading || apiKey === ""}
+                  type={`${showKey ? "text" : "password"}`}
                   className="pr-10 font-mono text-sm"
                 />
                 {apiKey && (
@@ -131,7 +133,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={copyToClipboard}
+                  onClick={() => copyToClipboard(apiKey)}
                   disabled={loading}
                 >
                   <Copy className="h-4 w-4" />
@@ -142,15 +144,17 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button
-          onClick={handleGenerateKey}
-          disabled={generating}
-          className="w-full sm:w-auto"
-          size="sm"
-        >
-          {generating && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-          {apiKey ? "Regenerate Key" : "Generate Key"}
-        </Button>
+        {apiKey === "" && (
+          <Button
+            onClick={handleGenerateKey}
+            disabled={generating}
+            className="w-full sm:w-auto"
+            size="sm"
+          >
+            {generating && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
+            Generate
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

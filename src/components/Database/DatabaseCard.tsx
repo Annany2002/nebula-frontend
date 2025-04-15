@@ -1,6 +1,7 @@
 import {
   ChevronDown,
   ChevronUp,
+  Copy,
   Database as DatabaseIcon,
   EyeClosedIcon,
   EyeIcon,
@@ -24,8 +25,7 @@ import { Input } from "../ui/input";
 
 export function DatabaseCard({ database }: { database: DataBaseType }) {
   const { refetchDb, token, setDatabases } = useRefetch();
-  const [showAPIKey, setShowAPIKey] = useState(false);
-  let api_key = "";
+  const [showKey, setShowKey] = useState(false);
 
   const deleteProject = async () => {
     try {
@@ -80,26 +80,36 @@ export function DatabaseCard({ database }: { database: DataBaseType }) {
           <div className="mt-2">
             <p className="text-sm text-primary">API Key</p>
             <div className="flex flex-1 gap-2 items-center mt-2">
-              {api_key ? (
-                <>
+              {database?.apiKey !== "" ? (
+                <div className="w-full flex gap-1 items-center">
                   <Input
+                    value={database.apiKey}
                     readOnly
-                    value={"r4t5"}
-                    type={`${showAPIKey ? "text" : "password"}`}
-                    className="text-sm font-mono"
+                    type={showKey ? "text" : "password"}
+                    className="w-fit flex-1"
                   />
-                  {showAPIKey ? (
-                    <EyeClosedIcon
-                      size={16}
-                      onClick={() => setShowAPIKey(false)}
-                    />
+                  {showKey ? (
+                    <Button variant="outline" onClick={() => setShowKey(false)}>
+                      <EyeIcon size={20} />
+                    </Button>
                   ) : (
-                    <EyeIcon size={16} onClick={() => setShowAPIKey(true)} />
+                    <Button variant="outline" onClick={() => setShowKey(true)}>
+                      <EyeClosedIcon size={20} />
+                    </Button>
                   )}
-                </>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      window.navigator.clipboard.writeText(database.apiKey);
+                      toast.success("API key copied to clipboard");
+                    }}
+                  >
+                    <Copy size={20} />
+                  </Button>
+                </div>
               ) : (
                 <p className="text-sm text-red-800">
-                  You don&apos;t have any API Key related to this project
+                  You don&apos;t have any API Keys related to this project
                 </p>
               )}
             </div>

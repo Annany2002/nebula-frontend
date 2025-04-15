@@ -5,6 +5,7 @@ export interface DataBaseType {
   userId: string;
   filePath: string;
   tables: number;
+  apiKey: string;
 }
 
 export interface TableColumnType {
