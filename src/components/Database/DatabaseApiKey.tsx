@@ -65,10 +65,8 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
           },
         }
       );
-      console.log(response);
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setApiKey(data.api_key);
         setShowKey(true);
         toast.success(
@@ -102,8 +100,9 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
       <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm font-medium">
-              Use this key with SDK to access {databaseName}
+            <p className="text-sm text-primary-foreground">
+              Use this key with SDK to access project{" "}
+              <span className="text-primary font-medium">{databaseName}</span>
             </p>
             <div className="flex items-center space-x-2">
               <div className="relative flex-1">

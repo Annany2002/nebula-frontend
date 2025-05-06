@@ -1,0 +1,12 @@
+node_modules
+dist
+.cache
+.vscode
+.idea
+*.log
+*.tmp
+Dockerfile
+.dockerignore
+.git
+.env*
+package-lock.json

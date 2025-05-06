@@ -12,6 +12,8 @@ export const useRefetch = () => {
   const [tableFields, setTableFields] = useState([]);
 
   const [dbLoading, setDbLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [recordsLoading, setRecordsLoading] = useState(false);
 
   const refetchDb = async () => {
     setDbLoading(true);
@@ -31,6 +33,7 @@ export const useRefetch = () => {
   };
 
   const refetchTables = async (db_name: string) => {
+    setTableLoading(true);
     try {
       const response = await fetch(
         `${url}/api/v1/databases/${db_name}/tables`,
@@ -45,10 +48,13 @@ export const useRefetch = () => {
       setTables(data.tables);
     } catch (error) {
       console.log(error);
+    } finally {
+      setTableLoading(false);
     }
   };
 
   const refetchRecords = async (db_name: string, table_name: string) => {
+    setRecordsLoading(true);
     try {
       const response = await fetch(
         `${url}/api/v1/databases/${db_name}/tables/${table_name}/records`,
@@ -65,21 +71,26 @@ export const useRefetch = () => {
       }
     } catch (error) {
       console.error("Failed to fetch records:", error);
+    } finally {
+      setRecordsLoading(false);
     }
   };
 
   return {
     databases,
-    setDatabases,
+    tables,
+    records,
+    tableFields,
     dbLoading,
+    tableLoading,
+    recordsLoading,
     token,
     refetchDb,
     user_id,
-    tables,
+    setDatabases,
+    setRecords,
     setTables,
     refetchTables,
-    records,
-    tableFields,
     refetchRecords,
   };
 };

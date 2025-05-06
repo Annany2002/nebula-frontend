@@ -12,7 +12,6 @@ import { Toaster } from "@/components/ui/sonner";
 import SingleTable from "./pages/SingleTable";
 
 export const url = import.meta.env.VITE_BACKEND_URL as string;
-// export const url = import.meta.env.VITE_DEV_BACKEND_URL as string;
 
 const App = () => (
   <ThemeProvider defaultTheme="system">

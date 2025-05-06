@@ -1,3 +1,10 @@
+import { Dispatch, SetStateAction, useState } from "react";
+import { Edit2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { url } from "@/App";
+import { useRefetch } from "@/hooks/use-refetch";
+import { RecordSchemaType } from "@/types/allType";
 import {
   Dialog,
   DialogContent,
@@ -7,31 +14,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
-import { Edit2 } from "lucide-react";
-import { RecordSchemaType } from "@/types/allType";
-import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
-import { Dispatch, SetStateAction } from "react";
-import { useRefetch } from "@/hooks/use-refetch";
-import { url } from "@/App";
-import { toast } from "sonner";
 
 export default function EditRecord({
   record,
-  setOpen,
   db_name,
   table_name,
 }: {
   record: RecordSchemaType;
   db_name: string;
   table_name: string;
-  setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
   const form = useForm<Record<string, any>>({
     defaultValues: record,
   });
   const { token } = useRefetch();
+  const [open, setOpen] = useState(false);
 
   const onSubmit = async (data: Record<string, any>) => {
     const parsedData: Record<string, any> = {};
@@ -60,14 +59,13 @@ export default function EditRecord({
           },
         }
       );
-      console.log(response);
       if (response.ok) {
         form.reset();
         setOpen(false);
         toast.success(`Record with id ${record.id} edited successfully`);
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Cannot edit record, please try again");
     }
   };
 
@@ -88,10 +86,8 @@ export default function EditRecord({
     }
   };
 
-  console.log("Current Record:", record);
-
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <Edit2 className="h-4 w-4" />
@@ -124,6 +120,18 @@ export default function EditRecord({
                             placeholder={`Enter ${key}`}
                             defaultValue={value}
                             {...field}
+                            checked={
+                              record.type === "BOOLEAN"
+                                ? field.value === true
+                                : undefined
+                            }
+                            onChange={(e) => {
+                              if (record.type === "BOOLEAN") {
+                                field.onChange(e.target.checked);
+                              } else {
+                                field.onChange(e.target.value);
+                              }
+                            }}
                           />
                         </FormControl>
                       </FormItem>
