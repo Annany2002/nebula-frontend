@@ -9,6 +9,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/context/auth-context";
 
 // Define proper type for terminal lines
 interface TerminalLine {
@@ -19,6 +21,7 @@ interface TerminalLine {
 }
 
 const Hero = () => {
+  const { isAuthenticated, user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const [terminalText, setTerminalText] = useState<TerminalLine[]>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -174,7 +177,18 @@ const Hero = () => {
                 size="lg"
                 className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md shadow-purple-200 dark:shadow-purple-900/20 animate-slide-in-left"
               >
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                {isAuthenticated ? (
+                  <Link
+                    className="flex items-center w-fit"
+                    to={`/dashboard/${user?.userId}`}
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
               <Button
                 size="lg"
@@ -182,7 +196,13 @@ const Hero = () => {
                 className="border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300
                 dark:bg-transparent dark:hover:bg-purple-900/20 backdrop-blur-sm bg-white/10 animate-slide-in-right"
               >
-                View Documentation <ExternalLink className="ml-2 h-4 w-4" />
+                <Link
+                  className="flex items-center"
+                  to="https://nebula-api-docs.vercel.app/"
+                  target="_blank"
+                >
+                  View Docs <ExternalLink className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </motion.div>
 

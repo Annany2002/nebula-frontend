@@ -19,7 +19,7 @@ import { useAuth } from "@/context/auth-context";
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   username: z.string().min(6, "Username must be at least 6 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"), 
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -33,12 +33,16 @@ const SignUp = () => {
     defaultValues: {
       email: "",
       password: "",
-      username: ""
+      username: "",
     },
   });
 
   const onSubmit = async (data: FormValues) => {
-    signup({ email: data.email, username: data.username, password: data.password });
+    signup({
+      email: data.email,
+      username: data.username,
+      password: data.password,
+    });
   };
 
   return (
@@ -75,11 +79,7 @@ const SignUp = () => {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="nebula_user"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="nebula_user" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

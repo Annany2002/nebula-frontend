@@ -42,36 +42,28 @@ const Navbar = () => {
         <NebulaLogo />
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-8">
-          <a
-            href="#features"
-            className="text-gray-700 hover:text-purple-700 font-medium transition-colors dark:text-gray-200 dark:hover:text-purple-400"
-          >
-            Features
-          </a>
-          <a
-            href="#pricing"
-            className="text-gray-700 hover:text-purple-700 font-medium transition-colors dark:text-gray-200 dark:hover:text-purple-400"
-          >
-            Pricing
-          </a>
-          <a
-            href="#docs"
-            className="text-gray-700 hover:text-purple-700 font-medium transition-colors dark:text-gray-200 dark:hover:text-purple-400"
-          >
-            Documentation
-          </a>
-          <a
-            href="#support"
-            className="text-gray-700 hover:text-purple-700 font-medium transition-colors dark:text-gray-200 dark:hover:text-purple-400"
-          >
-            Support
-          </a>
-        </nav>
+        <ul className="flex space-x-6">
+          {["Use Cases", "Features", "Pricing"].map((item, i) => (
+            <motion.li
+              key={i}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.1 }}
+            >
+              <a
+                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                className="text-gray-700 hover:text-nebula-primary transition-colors relative group"
+              >
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-nebula-primary transition-all duration-300 group-hover:w-full" />
+              </a>
+            </motion.li>
+          ))}
+        </ul>
 
         {/* Desktop View*/}
         <div className="hidden md:flex md:gap-3 items-center">
-          {/* <ThemeToggle /> */}
+          <ThemeToggle />
 
           {user && user.email ? (
             isLoading ? (
@@ -86,7 +78,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center space-x-2">
-          {/* <ThemeToggle /> */}
+          <ThemeToggle />
           <Button
             className="text-gray-800 dark:text-white px-2 rounded-full"
             onClick={toggleMobileMenu}

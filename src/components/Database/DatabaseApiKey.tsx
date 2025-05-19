@@ -100,7 +100,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
       <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm text-primary-foreground">
+            <p className="text-sm text-primary">
               Use this key with SDK to access project{" "}
               <span className="text-primary font-medium">{databaseName}</span>
             </p>

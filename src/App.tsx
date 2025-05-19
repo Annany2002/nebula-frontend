@@ -14,7 +14,7 @@ import SingleTable from "./pages/SingleTable";
 export const url = import.meta.env.VITE_BACKEND_URL as string;
 
 const App = () => (
-  <ThemeProvider defaultTheme="system">
+  <ThemeProvider defaultTheme="system" storageKey="nebula-ui-theme">
     <Toaster />
     <div className="min-h-screen relative">
       <AnimatedBackground />

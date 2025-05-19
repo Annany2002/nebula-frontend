@@ -26,7 +26,7 @@ export default function UserDropDown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="p-2 w-fit rounded-full border border-gray-900 bg-slate-800 cursor-pointer text-primary font-semibold">
+        <div className="p-2 w-fit rounded-full border bg-primary-foreground border-gray-900 dark:bg-slate-800 cursor-pointer text-primary font-semibold">
           {isLoading ? (
             <Loader className="animate-spin" />
           ) : initials ? (
@@ -48,7 +48,7 @@ export default function UserDropDown() {
           ) : user && user.userId ? (
             <Link to={`/dashboard/${user.userId}`}>Dashboard</Link>
           ) : (
-            "Dashboard" // Or disable the link, or show a message
+            "Dashboard"
           )}
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer" onClick={logout}>
