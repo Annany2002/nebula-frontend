@@ -52,10 +52,10 @@ const Navbar = () => {
             >
               <a
                 href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-gray-700 hover:text-nebula-primary transition-colors relative group"
+                className="text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary transition-colors relative group"
               >
                 {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-nebula-primary transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
               </a>
             </motion.li>
           ))}
@@ -72,7 +72,12 @@ const Navbar = () => {
               <UserDropDown />
             )
           ) : (
-            <Link to={"/sign-up"}>Sign Up</Link>
+            <Link
+              className="text-gray-700 dark:text-white hover:text-primary dark:hover:text-primary transition-colors"
+              to={"/sign-up"}
+            >
+              Sign Up
+            </Link>
           )}
         </div>
 
