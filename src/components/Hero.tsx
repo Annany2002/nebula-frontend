@@ -185,7 +185,7 @@ const Hero = () => {
                     Dashboard
                   </Link>
                 ) : (
-                  <Link to={"/login"} className="flex gap-1 items-center">
+                  <Link to={"/sign-in"} className="flex gap-1 items-center">
                     Get Started <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 )}

@@ -64,10 +64,10 @@ const Navbar = () => {
         {/* Desktop View*/}
         <div className="hidden md:flex md:gap-3 items-center">
           <Link
-            to={"https://github.com/Annany2002/nebula-frontend"}
+            to={"https://github.com/Annany2002/nebula-backend"}
             target="_blank"
           >
-            <Github size={18} />
+            <Github size={18} className="hover:text-purple-500" />
           </Link>
           <ThemeToggle />
 
