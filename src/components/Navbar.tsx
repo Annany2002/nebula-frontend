@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Github, LoaderCircleIcon, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NebulaLogo from "@/assets/nebula-logo";
-import { LoaderCircleIcon, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 import UserDropDown from "./UserDropDown";
 
@@ -63,6 +63,12 @@ const Navbar = () => {
 
         {/* Desktop View*/}
         <div className="hidden md:flex md:gap-3 items-center">
+          <Link
+            to={"https://github.com/Annany2002/nebula-frontend"}
+            target="_blank"
+          >
+            <Github size={18} />
+          </Link>
           <ThemeToggle />
 
           {user && user.email ? (
