@@ -40,10 +40,9 @@ const Footer = () => {
   ];
   
   const socialLinks = [
-    { icon: <Twitter size={18} />, label: "Twitter", href: "#" },
-    { icon: <Github size={18} />, label: "GitHub", href: "#" },
-    { icon: <Linkedin size={18} />, label: "LinkedIn", href: "#" },
-    { icon: <Mail size={18} />, label: "Email", href: "#" }
+    { icon: <Twitter size={18} />, label: "Twitter", href: "https://x.com/annanyvishwaka1" },
+    { icon: <Github size={18} />, label: "GitHub", href: "https://github.com/Annany2002/nebula-backend" },
+    { icon: <Linkedin size={18} />, label: "LinkedIn", href: "https://www.linkedin.com/in/annany-vishwakarma-29b727232" },
   ];
 
   return (
