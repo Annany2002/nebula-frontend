@@ -51,8 +51,8 @@ export function DatabaseCard({ database }: { database: DataBaseType }) {
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-primary/5 p-4">
+    <Card className="bg-transparent backdrop-blur-sm">
+      <CardHeader className="border-b p-4">
         <div className="flex items-center space-x-2">
           <DatabaseIcon className="h-5 w-5 text-primary" />
           <Link
@@ -86,19 +86,28 @@ export function DatabaseCard({ database }: { database: DataBaseType }) {
                     value={database.apiKey}
                     readOnly
                     type={showKey ? "text" : "password"}
-                    className="w-fit flex-1"
+                    className="flex-1 bg-transparent"
                   />
                   {showKey ? (
-                    <Button variant="outline" onClick={() => setShowKey(false)}>
+                    <Button
+                      className="bg-transparent"
+                      variant="outline"
+                      onClick={() => setShowKey(false)}
+                    >
                       <EyeIcon size={20} />
                     </Button>
                   ) : (
-                    <Button variant="outline" onClick={() => setShowKey(true)}>
+                    <Button
+                      className="bg-transparent"
+                      variant="outline"
+                      onClick={() => setShowKey(true)}
+                    >
                       <EyeClosedIcon size={20} />
                     </Button>
                   )}
                   <Button
                     variant="outline"
+                    className="bg-transparent"
                     onClick={() => {
                       window.navigator.clipboard.writeText(database.apiKey);
                       toast.success("API key copied to clipboard");
@@ -116,9 +125,9 @@ export function DatabaseCard({ database }: { database: DataBaseType }) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="border-t bg-muted/50 p-2">
+      <CardFooter className="border-t p-2">
         <div className="flex w-full items-center justify-between">
-          <Button variant="ghost" size="sm" className="text-xs" asChild>
+          <Button variant="link" size="sm" className="text-xs" asChild>
             <Link to={`/databases/${database.dbName}/tables`}>View Tables</Link>
           </Button>
           <Button

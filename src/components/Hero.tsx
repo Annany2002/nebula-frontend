@@ -173,37 +173,39 @@ const Hero = () => {
             </motion.p>
 
             <motion.div variants={item} className="flex flex-wrap gap-4 pt-2">
-              <Button
-                size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md shadow-purple-200 dark:shadow-purple-900/20 animate-slide-in-left"
-              >
-                {isAuthenticated ? (
-                  <Link
-                    className="flex items-center w-fit"
-                    to={`/dashboard/${user?.userId}`}
+              {isAuthenticated ? (
+                <Link
+                  className="flex items-center w-fit"
+                  to={`/dashboard/${user?.userId}`}
+                >
+                  <Button
+                    size="lg"
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md shadow-purple-200 dark:shadow-purple-900/20 animate-slide-in-left"
                   >
                     Dashboard
-                  </Link>
-                ) : (
-                  <Link to={"/sign-in"} className="flex gap-1 items-center">
+                  </Button>
+                </Link>
+              ) : (
+                <Link to={"/sign-in"} className="flex gap-1 items-center">
+                  <Button
+                    size="lg"
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md shadow-purple-200 dark:shadow-purple-900/20 animate-slide-in-left"
+                  >
                     Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                )}
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300
+                  </Button>
+                </Link>
+              )}
+
+              <Link to="https://nebula-api-docs.vercel.app" target="_blank">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300
                 dark:bg-transparent dark:hover:bg-purple-900/20 backdrop-blur-sm bg-white/10 animate-slide-in-right"
-              >
-                <Link
-                  className="flex items-center"
-                  to="https://nebula-api-docs.vercel.app/"
-                  target="_blank"
                 >
                   View Docs <ExternalLink className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </motion.div>
 
             {/* New section to replace the "Ready to Transform Your Backend" */}

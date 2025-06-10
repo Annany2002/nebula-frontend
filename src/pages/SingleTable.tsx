@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { FileText, LoaderCircle, RefreshCcw, Trash2 } from "lucide-react";
 import { formatDateTime } from "@/lib/formatDate";
 import BreadCrumbNav from "@/components/BreadCrumbNav";
 import LoginNavBar from "@/components/LoginNavbar";
@@ -13,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileText, LoaderCircle, RefreshCcw, Trash2 } from "lucide-react";
 import { useRefetch } from "@/hooks/use-refetch";
 import { url } from "../App";
 import CreateRecord from "@/components/Table/CreateRecord";
@@ -73,7 +73,7 @@ export default function SingleTable() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent space-y-6">
+    <div className="min-h-screen space-y-6">
       <LoginNavBar />
       <div className="px-3">
         <BreadCrumbNav
@@ -94,7 +94,7 @@ export default function SingleTable() {
         <Input
           type="search"
           placeholder="Search records..."
-          className="max-w-xs"
+          className="max-w-xs bg-transparent backdrop:blur-sm"
           value={searchTerm}
           onChange={handleSearch}
         />
@@ -132,10 +132,7 @@ export default function SingleTable() {
               <TableBody>
                 {filteredRecords.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={records.length + 1}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={1000} className="h-24 text-center">
                       No records found.
                     </TableCell>
                   </TableRow>

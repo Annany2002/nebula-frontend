@@ -29,7 +29,7 @@ const AuthLayout = ({
 }: AuthLayoutProps) => {
   return (
     <div className="flex items-center justify-center min-h-screen p-4 z-10 relative">
-      <Card className="w-full max-w-md bg-background/50 backdrop-blur-lg border border-white/10">
+      <Card className="w-full max-w-md bg-transparent backdrop-blur-sm border border-primary/50">
         <CardHeader className="space-y-1 flex flex-col items-center text-center">
           <div className="w-full flex justify-center h-12 mb-2">
             <NebulaLogo />

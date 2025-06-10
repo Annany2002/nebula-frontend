@@ -17,8 +17,7 @@ export const NebulaLogo: React.FC<NebulaLogoProps> = () => {
         />
         <span
           style={{ fontFamily: "Delius" }}
-          // className="font-semibold text-xl bg-gradient-to-r bg-clip-text text-transparent dark:from-violet-600 dark:via-violet-400 dark:to-purple-400"
-          className="inline-flex background-shine bg-[length:250%_100%] bg-clip-text text-xl text-transparent"
+          className="inline-flex background-shine font-semibold bg-[length:250%_100%] bg-clip-text text-xl text-transparent"
         >
           nebula
         </span>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Github } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Github } from "lucide-react";
 import AuthLayout from "@/layout/AuthLayout";
 import { useAuth } from "@/context/auth-context";
 
@@ -60,6 +60,7 @@ const SignIn = () => {
                     placeholder="you@example.com"
                     type="email"
                     {...field}
+                    className="bg-transparent"
                   />
                 </FormControl>
                 <FormMessage />
@@ -78,6 +79,7 @@ const SignIn = () => {
                       placeholder="••••••••"
                       type={showPassword ? "text" : "password"}
                       {...field}
+                      className="bg-transparent"
                     />
                     <Button
                       type="button"
@@ -100,17 +102,17 @@ const SignIn = () => {
           />
           <Button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-purple-700"
+            className="w-full rounded-2xl"
             disabled={isLoading}
           >
             {isLoading ? "Signing In..." : "Sign In"}
           </Button>
           <div className="w-full flex items-center gap-2">
-            <div className="h-[0.5px] w-full  bg-white/10" />
+            <div className="h-[0.5px] w-full bg-primary dark:bg-white/10" />
             or
-            <div className="h-[0.5px] w-full  bg-white/10" />
+            <div className="h-[0.5px] w-full bg-primary dark:bg-white/10" />
           </div>
-          <Button className="w-full bg-transparent border border-white/10 hover:bg-transparent hover:border-purple-500 rounded-3xl">
+          <Button disabled className="w-full rounded-2xl">
             Continue with Github <Github />
           </Button>
         </form>

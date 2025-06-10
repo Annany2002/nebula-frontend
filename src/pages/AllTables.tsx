@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { useRefetch } from "@/hooks/use-refetch";
 import { url } from "@/App";
 import LoginNavBar from "@/components/LoginNavbar";
@@ -22,7 +23,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/formatDate";
-import { toast } from "sonner";
 import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -104,18 +104,30 @@ export default function AllTables() {
             <LoaderCircleIcon className="animate-spin" />
           ) : (
             tables.map((table, _) => (
-              <Card key={_} className="overflow-hidden">
-                <CardHeader className="bg-primary/5 p-4">
+              <Card
+                key={_}
+                className="overflow-hidden bg-transparent backdrop-blur-sm"
+              >
+                <CardHeader className="px-4 py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <TableIcon className="h-5 w-5 text-primary" />
                       <Link
                         to={`/databases/${db_name}/tables/${table.name}`}
-                        className="font-medium text-primary hover:underline"
+                        className="font-medium text-primary hover:underline hover:underline-offset-2"
                       >
                         {table.name}
                       </Link>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="cursor-pointer"
+                      onClick={() => deleteTable(table.name)}
+                    >
+                      <Trash2 className="h-12 w-12 " color="red" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -142,26 +154,17 @@ export default function AllTables() {
                     Created at {formatDateTime(table.createdAt)}
                   </p>
                 </CardContent>
-                <CardFooter className="border-t bg-muted/50 p-2">
-                  <div className="flex w-full items-center justify-between">
+                <CardFooter className="border-t p-2">
+                  <div className="flex w-full items-center justify-center">
                     <Button
-                      variant="ghost"
+                      variant="link"
                       size="sm"
-                      className="text-xs"
+                      className="text-xs bg-transparent text-primary"
                       asChild
                     >
                       <Link to={`/databases/${db_name}/tables/${table.name}`}>
                         View Records
                       </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive"
-                      onClick={() => deleteTable(table.name)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
                     </Button>
                   </div>
                 </CardFooter>

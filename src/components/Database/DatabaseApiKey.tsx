@@ -51,7 +51,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
     };
 
     fetchApiKey();
-  }, [databaseName, toast]);
+  }, [databaseName]);
 
   const handleGenerateKey = async () => {
     setGenerating(true);
@@ -90,7 +90,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full bg-transparent backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Key className="h-4 w-4" />
@@ -111,7 +111,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
                   readOnly
                   disabled={loading || apiKey === ""}
                   type={`${showKey ? "text" : "password"}`}
-                  className="pr-10 font-mono text-sm"
+                  className="pr-10 font-mono text-sm bg-transparent"
                 />
                 {apiKey && (
                   <Button
@@ -132,6 +132,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
                 <Button
                   variant="outline"
                   size="icon"
+                  className="bg-transparent"
                   onClick={() => copyToClipboard(apiKey)}
                   disabled={loading}
                 >

@@ -26,7 +26,7 @@ export default function UserDropDown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="p-2 w-fit rounded-full border bg-primary-foreground border-gray-900 dark:bg-slate-800 cursor-pointer text-primary font-semibold">
+        <div className="p-2 w-fit rounded-full border-[1px] bg-transparent backdrop-blur-sm border-gray-900 dark:bg-slate-800 cursor-pointer text-primary font-semibold">
           {isLoading ? (
             <Loader className="animate-spin" />
           ) : initials ? (
@@ -36,7 +36,7 @@ export default function UserDropDown() {
           )}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="bg-transparent backdrop-blur-sm">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {user && user.username && (
