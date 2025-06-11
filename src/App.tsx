@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "./context/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,6 +17,7 @@ export const url = import.meta.env.VITE_BACKEND_URL as string;
 const App = () => {
   return (
     <ThemeProvider defaultTheme="system" storageKey="nebula-ui-theme">
+      <Analytics />
       <Toaster />
       <div className="min-h-screen relative">
         <AnimatedBackground />
