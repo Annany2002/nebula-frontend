@@ -1,100 +1,135 @@
 # Nebula Frontend
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-This repository contains the frontend web application for the [Nebula BaaS](https://github.com/Annany2002/nebula-backend) project. It provides a user interface for interacting with the backend API to manage databases, schemas, API keys, and potentially data.
+This repository contains the frontend web application for the **Nebula BaaS** project. It provides a modern, user-friendly interface for interacting with the backend API to manage databases, schemas, API keys, and data.
 
-Built with:
+---
+
+## Built With
 
 - **Framework:** React
 - **Build Tool:** Vite
 - **Language:** TypeScript
-- **(Optional Styling):** Tailwind CSS & Shadcn UI
+- **Styling:** Tailwind CSS, Shadcn UI
 
 ---
 
-## ✨ Features (UI)
+## Features
 
-- User-friendly interface for **Signup** and **Login**.
-- Dashboard area for managing BaaS resources (Databases, Tables, API Keys).
-- UI components for **Listing, Creating, and Deleting** Database registrations.
-- Interface for **Defining Table Schemas** (specifying columns and types).
-- UI for **Listing and Deleting Tables** within a selected database.
-- Secure **API Key Generation** and management interface.
-- Modern, fast development experience powered by Vite and TypeScript.
-
-## 🧰 Prerequisites
-
-- [Node.js](https://nodejs.org/) (LTS version recommended, e.g., v18 or v20+)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- **A running instance of the [Nebula BaaS Backend API](https://github.com/Annany2002/nebula-backend).** This frontend communicates with the backend API.
+- 🚪 Signup / Login UI with JWT-based authentication
+- 📊 Dashboard for managing:
+  - Databases
+  - Tables (with column schema definition)
+  - API Keys
+- 🔐 Secure API Key generation and management
+- ⚡️ Fast, modern DX with Vite + HMR
+- 🌙 Dark mode (Shadcn-powered)
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## Prerequisites
 
-1.  **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/Annany2002/nebula-frontend.git
-    cd nebula-frontend
-    ```
-
-2.  **Install Dependencies:**
-
-    ```bash
-    npm install
-    # OR
-    # yarn install
-    ```
-
-3.  **Configure Backend API URL:**
-
-    - Create a local environment file by copying the example:
-      ```bash
-      cp .env.example .env.local
-      ```
-    - Edit the `.env.local` file.
-    - Set the `VITE_NEBULA_API_BASE_URL` variable to point to your **running Nebula BaaS backend instance**.
-      - For local backend development (usually running on port 8080):
-        `dotenv
-    VITE_NEBULA_API_BASE_URL=http://localhost:8080
-    `
-        _(Note: Vite requires environment variables exposed to the browser to be prefixed with `VITE_`)_
-
-4.  **Run the Development Server:**
-    ```bash
-    npm run dev
-    # OR
-    # yarn dev
-    ```
-    This will start the Vite development server, typically accessible at `http://localhost:5173` (check terminal output for the exact URL). The app will have hot module replacement (HMR) enabled.
+- Node.js (v18 or v20+ recommended)
+- npm or yarn
+- A running instance of the [Nebula Backend](https://github.com/Annany2002/nebula-backend)
 
 ---
 
-## 🛠 Building for Production
+## Getting Started
 
-1.  **Ensure `VITE_NEBULA_API_BASE_URL`** in your production environment configuration (or `.env.production.local`) points to the correct deployed backend URL (e.g., `https://nebula-backend.duckdns.org`).
-2.  Run the build command:
-    ```bash
-    npm run build
-    # OR
-    # yarn build
-    ```
-3.  This will create an optimized static build in the `dist/` directory, ready for deployment to any static hosting provider (like Netlify, Vercel, S3/CloudFront, or served via Nginx).
+Clone the repository:
+
+```bash
+git clone https://github.com/Annany2002/nebula-frontend.git
+cd nebula-frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+# OR
+yarn install
+```
+
+Configure backend URL:
+
+```bash
+cp .env.example .env.local
+# Edit `.env.local` and set:
+```
+
+Start development server:
+
+```bash
+npm run dev
+```
+
+App runs at: [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 🔗 Connecting to the Backend
+## Building for Production
 
-This frontend application is designed explicitly to consume the [Nebula BaaS Backend API](https://github.com/Annany2002/nebula-backend).
+Set production backend URL in `.env.production.local`, then run:
 
-- It makes HTTP requests (using `Workspace` or libraries like `axios`) to the backend URL specified by the `VITE_NEBULA_API_BASE_URL` environment variable.
-- It handles user authentication (Signup/Login) to obtain JWTs, which are then used primarily to access the API key generation endpoint on the backend.
-- For most data operations (DB/Schema/Table/Record management), it expects the user to provide a database-scoped API Key (obtained via the UI) which is then sent in the `Authorization: ApiKey <key>` header for backend requests.
-- Ensure the backend has appropriate CORS configuration (via its `.env` `ALLOWED_ORIGINS`) to accept requests from the domain where this frontend is hosted.
+```bash
+npm run build
+```
+
+Output goes to `dist/` – ready to deploy to Netlify, Vercel, S3, etc.
 
 ---
 
-## 📜 License
+## Backend Integration
 
-MIT License
+- Communicates with backend via `VITE_NEBULA_API_BASE_URL`
+- Handles:
+
+  - Signup/Login → receives JWT
+  - API Key actions → uses `Authorization: ApiKey <key>`
+
+- Ensure backend CORS is configured to allow frontend origin
+
+---
+
+## Contributing
+
+We welcome contributions!
+Please check out the following before opening an issue or PR:
+
+- [📜 Contribution Guide](./CONTRIBUTING.md)
+- [🐞 Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.yaml)
+- [✨ Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.yaml)
+- [🔁 Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md)
+
+To begin:
+
+```bash
+# Fork + Clone
+# Create a new branch
+git checkout -b feat/improve-auth-ui
+
+# After changes:
+npm run lint   # Check code style
+npm run dev    # Run locally
+```
+
+---
+
+## Testing
+
+We encourage testing UI changes manually for visual accuracy.
+If applicable, add/modify unit or integration tests.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+---
+
+## Acknowledgements
+
+Thanks for checking out Nebula Frontend!
+Join us in building a developer-friendly, open-source BaaS ✨

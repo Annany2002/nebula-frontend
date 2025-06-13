@@ -1,0 +1,75 @@
+name: "🐞 Bug Report"
+description: File a bug report to help us improve the Nebula Frontend.
+title: "[Bug] <short summary>"
+labels: ["bug", "needs-triage"]
+assignees:
+  - Annany2002
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for helping improve Nebula Frontend!
+        Please fill out the following details so we can understand and fix the issue efficiently.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: "When I click 'Create Table', the UI freezes..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to Dashboard
+        2. Click on 'Create Table'
+        3. Enter schema info
+        4. Click Submit
+        5. Error occurs
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "A new table should appear in the tables list."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: "An error modal appears with 500 Internal Server Error."
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        OS: macOS Ventura 13.3
+        Browser: Chrome 125
+        Node.js: v20.x
+        Vite: v5.x
+        Tailwind: v3.x
+
+  - type: input
+    id: backend-url
+    attributes:
+      label: Backend API URL
+      description: If applicable, the backend endpoint used (local/staging/prod).
+      placeholder: http://localhost:8080
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots / Logs
+      description: Paste any relevant logs or screenshots here.

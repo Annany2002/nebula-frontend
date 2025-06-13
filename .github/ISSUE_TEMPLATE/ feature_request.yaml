@@ -1,0 +1,52 @@
+name: "✨ Feature Request"
+description: Suggest a new feature or enhancement for Nebula Frontend.
+title: "[Feature] <short summary>"
+labels: ["enhancement", "needs-triage"]
+assignees:
+  - Annany2002
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Have a cool idea? Let us know!
+        Please share your proposed feature below with as much context as possible.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Describe the feature
+      placeholder: "Add table cloning functionality with schema reuse"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem this feature would solve
+      placeholder: "Currently, users have to manually recreate similar table structures."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution or design
+      placeholder: |
+        Add a 'Clone Table' button in the tables list.
+        Pre-fill schema modal with selected table’s structure.
+
+  - type: checkboxes
+    id: benefits
+    attributes:
+      label: Benefits
+      options:
+        - label: Improves user experience
+        - label: Saves development/debugging time
+        - label: Aligns with other tools/platforms
+        - label: Adds flexibility for API consumers
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      placeholder: Add screenshots, diagrams, or references if applicable.
