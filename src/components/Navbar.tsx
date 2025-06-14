@@ -42,7 +42,7 @@ const Navbar = () => {
         <NebulaLogo />
 
         {/* Desktop Navigation */}
-        <ul className="flex space-x-6">
+        <ul className="hidden md:flex space-x-6">
           {["Use Cases", "Features", "Pricing"].map((item, i) => (
             <motion.li
               key={i}
@@ -88,14 +88,15 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center space-x-2">
+        <div className="md:hidden flex items-center">
           <ThemeToggle />
           <Button
-            className="text-gray-800 dark:text-white px-2 rounded-full"
+            variant="ghost"
+            className="rounded-full"
             onClick={toggleMobileMenu}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
+            {mobileMenuOpen ? <X size={32} /> : <Menu className="w-12 h-12" />}
           </Button>
         </div>
       </div>
@@ -108,52 +109,45 @@ const Navbar = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden absolute top-full mx-6 rounded-md place-items-center left-0 right-0 bg-white shadow-lg overflow-hidden dark:bg-gray-900 dark:border-b dark:border-gray-800"
+            className="md:hidden absolute top-full mx-6 rounded-md place-items-center left-0 right-0 bg-transparent backdrop-blur-md shadow-lg border border-purple-500 dark:border-gray-500"
           >
-            <div className="container mx-auto p-6 flex flex-col space-y-4">
-              <a
-                href="#features"
-                className="py-3 px-4 text-gray-800 rounded-lg hover:bg-purple-50 transition-colors dark:text-white dark:hover:bg-purple-900/20"
-                onClick={() => setMobileMenuOpen(false)}
+            <div className="container mx-auto p-6 flex flex-col space-y-4 items-center">
+              <Link to={"https://nebula-api-docs.vercel.app/"} target="_blank">
+                <Button
+                  size="lg"
+                  variant="link"
+                  className="text-primary dark:text-white"
+                >
+                  Docs
+                </Button>
+              </Link>
+              <Link
+                to={"https://github.com/Annany2002/nebula-frontend"}
+                target="_blank"
               >
-                Features
-              </a>
-              <a
-                href="#pricing"
-                className="py-3 px-4 text-gray-800 rounded-lg hover:bg-purple-50 transition-colors dark:text-white dark:hover:bg-purple-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
-              </a>
-              <a
-                href="#docs"
-                className="py-3 px-4 text-gray-800 rounded-lg hover:bg-purple-50 transition-colors dark:text-white dark:hover:bg-purple-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Documentation
-              </a>
-              <a
-                href="#support"
-                className="py-3 px-4 text-gray-800 rounded-lg hover:bg-purple-50 transition-colors dark:text-white dark:hover:bg-purple-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Support
-              </a>
+                <Button
+                  size="lg"
+                  variant="link"
+                  className="text-primary dark:text-white"
+                >
+                  Github
+                </Button>
+              </Link>
 
-              <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <div className="border-gray-100 dark:border-gray-800">
                 {user ? (
                   <UserDropDown />
                 ) : (
                   <>
-                    <Button
-                      variant="outline"
-                      className="w-full mb-3 border-purple-200 text-purple-700 hover:border-purple-300 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:border-purple-700 dark:hover:bg-purple-900/20"
-                    >
-                      Sign In
-                    </Button>
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                      Get Started
-                    </Button>
+                    <Link to={"/sign-up"}>
+                      <Button
+                        size="lg"
+                        variant="link"
+                        className="text-primary dark:text-white"
+                      >
+                        Sign Up
+                      </Button>
+                    </Link>
                   </>
                 )}
               </div>

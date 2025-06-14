@@ -23,7 +23,7 @@ const Dashboard = () => {
       </div>
       <div className="px-4 flex justify-between">
         <div className="flex flex-col gap-1 justify-center">
-          <span className="text-3xl text-primary font-semibold">
+          <span className="text-xl md:text-3xl text-primary font-semibold">
             Your Projects
           </span>
           <p className="text-muted-foreground text-sm">

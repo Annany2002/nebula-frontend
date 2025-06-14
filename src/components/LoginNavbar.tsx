@@ -15,8 +15,8 @@ export default function LoginNavBar() {
           size="lg"
           className="dark:text-white text-purple-500"
         >
-          View Docs
-          <ExternalLink size={12} />
+          Docs
+          <ExternalLink className="w-6 h-6" />
         </Button>
       </Link>
       <div className="flex items-center gap-2">
