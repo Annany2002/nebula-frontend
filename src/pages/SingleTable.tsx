@@ -70,7 +70,7 @@ export default function SingleTable() {
 
   useEffect(() => {
     refetchRecords(db_name, table_name);
-  }, []);
+  }, [open]);
 
   return (
     <div className="min-h-screen space-y-6">

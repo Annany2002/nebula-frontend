@@ -51,7 +51,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
     };
 
     fetchApiKey();
-  }, [databaseName]);
+  }, [databaseName, apiKey]);
 
   const handleGenerateKey = async () => {
     setGenerating(true);
@@ -87,6 +87,29 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
   const copyToClipboard = (text: string) => {
     window.navigator.clipboard.writeText(text);
     toast.success("API key copied successfully");
+  };
+
+  const deleteAPIKey = async () => {
+    try {
+      const response = await fetch(
+        `${url}/api/v1/account/databases/${databaseName}/apikey`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 204) {
+        toast.success(`Api key deleted for project ${databaseName}`);
+        setApiKey("");
+        return;
+      }
+      toast.error(`Error in deleting the api key for project ${databaseName}`);
+    } catch (error) {
+      toast.error(`Error in deleting the api key for project ${databaseName}`);
+      console.log(error);
+    }
   };
 
   return (
@@ -144,7 +167,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
         </div>
       </CardContent>
       <CardFooter>
-        {apiKey === "" && (
+        {apiKey === "" ? (
           <Button
             onClick={handleGenerateKey}
             disabled={generating}
@@ -153,6 +176,10 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
           >
             {generating && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
             Generate
+          </Button>
+        ) : (
+          <Button onClick={deleteAPIKey} size="sm" variant="destructive">
+            Delete
           </Button>
         )}
       </CardFooter>
