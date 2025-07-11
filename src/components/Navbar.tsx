@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, LoaderCircleIcon, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import NebulaLogo from "@/assets/nebula-logo";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/context/auth-context";
 import UserDropDown from "./UserDropDown";
@@ -32,17 +32,17 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-6 z-50 w-5/6 md:w-3/4 place-self-center transition-all duration-300 rounded-full py-3 border ${
         scrolled
-          ? "py-3 backdrop-blur-md shadow-sm border-b"
-          : "py-5 bg-transparent"
+          ? "backdrop-blur-sm shadow-sm border-purple-600/50"
+          : "bg-purple-900/10 border-gray-800"
       }`}
     >
-      <div className="container max-w-7xl mx-auto px-3 flex items-center justify-between">
+      <div className="flex items-center justify-between px-1 md:px-6">
         <NebulaLogo />
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex space-x-6">
+        <ul className="hidden md:flex space-x-5">
           {["Use Cases", "Features", "Pricing"].map((item, i) => (
             <motion.li
               key={i}

@@ -135,7 +135,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="pt-28 pb-16 relative z-10">
+    <section className="pt-32 pb-16 relative z-10">
       <div className="container max-w-7xl mx-auto px-6 relative">
         <motion.div
           initial="hidden"
