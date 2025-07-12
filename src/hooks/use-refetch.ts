@@ -1,8 +1,10 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { url } from "@/App";
 import { DataBaseType, RecordSchemaType, TableType } from "@/types/allType";
-import { useState } from "react";
 
 export const useRefetch = () => {
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const user_id = localStorage.getItem("user_id");
 
@@ -23,6 +25,10 @@ export const useRefetch = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      if (response.status === 401 || response.status === 403) {
+        navigate("/");
+        return;
+      }
       const data = await response.json();
       setDatabases(data.databases);
     } catch (error) {
@@ -44,6 +50,10 @@ export const useRefetch = () => {
           },
         }
       );
+      if (response.status === 401 || response.status === 403) {
+        navigate("/");
+        return;
+      }
       const data = await response.json();
       setTables(data.tables);
     } catch (error) {
@@ -64,6 +74,10 @@ export const useRefetch = () => {
           },
         }
       );
+      if (response.status === 401 || response.status === 403) {
+        navigate("/");
+        return;
+      }
       const data = await response.json();
       setRecords(data);
       if (data.length > 0) {

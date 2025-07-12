@@ -67,7 +67,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.status === 401 || response.status === 404) {
           localStorage.removeItem("token");
           localStorage.removeItem("user_id");
-          navigate(ROUTES.HOME);
           toast.error("Session expired, please log in.");
         } else {
           const errorData = await response.json();
@@ -75,12 +74,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             errorData.error || "Invalid user id or token, please login again"
           );
         }
+        navigate(ROUTES.HOME);
         return;
       }
       const userData = await response.json();
       setUser(userData);
     } catch (error) {
       toast.error("Invalid user id or token, please login again");
+      navigate(ROUTES.SIGN_IN);
     } finally {
       setIsLoading(false);
     }

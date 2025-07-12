@@ -32,7 +32,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-6 z-50 w-5/6 md:w-3/4 place-self-center transition-all duration-300 rounded-full py-3 border ${
+      className={`fixed top-6 z-50 w-5/6 lg:w-3/4 place-self-center transition-all duration-300 rounded-3xl py-3 border ${
         scrolled
           ? "backdrop-blur-sm shadow-sm border-purple-600/50"
           : "bg-purple-900/10 border-gray-800"
@@ -109,7 +109,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden absolute top-full mx-6 rounded-md place-items-center left-0 right-0 bg-transparent backdrop-blur-md shadow-lg border border-purple-500 dark:border-gray-500"
+            className="md:hidden absolute mt-8 mx-6 rounded-md place-items-center left-0 right-0 bg-purple-900/20 backdrop-blur-sm border border-purple-500 dark:border-gray-500 z-50"
           >
             <div className="container mx-auto p-6 flex flex-col space-y-4 items-center">
               <Link to={"https://nebula-api-docs.vercel.app/"} target="_blank">
