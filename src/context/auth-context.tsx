@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           const errorData = await response.json();
           toast.error(
-            errorData.error || "Invalid user id or token, please login again"
+            errorData.error || "Invalid user id or token, please login again."
           );
         }
         navigate(ROUTES.HOME);
@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = await response.json();
       setUser(userData);
     } catch (error) {
-      toast.error("Invalid user id or token, please login again");
+      toast.error("Invalid user id or token, please login again.");
       navigate(ROUTES.SIGN_IN);
     } finally {
       setIsLoading(false);

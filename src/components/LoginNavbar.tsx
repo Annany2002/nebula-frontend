@@ -7,7 +7,7 @@ import { ExternalLink, Github } from "lucide-react";
 
 export default function LoginNavBar() {
   return (
-    <div className="flex p-[10px] w-full justify-between items-center border-b">
+    <div className="flex p-[10px] w-full justify-between items-center border-b bg-white/40 dark:bg-black/40 backdrop-blur-md border-white/20 shadow-sm sticky top-0 z-50">
       <NebulaLogo />
       <Link to={"https://nebula-api-docs.vercel.app"} target="_blank">
         <Button

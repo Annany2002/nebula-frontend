@@ -24,5 +24,5 @@ export interface TableType {
 }
 
 export interface RecordSchemaType {
-  [key: string]: any;
+  [key: string]: unknown;
 }

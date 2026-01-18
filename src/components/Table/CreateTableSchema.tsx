@@ -16,6 +16,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { url } from "@/App";
 import { useRefetch } from "@/hooks/use-refetch";
+import { useCreateTable } from "@/hooks/queries";
 
 export default function CreateTableSchema({
   db_name,
@@ -26,12 +27,11 @@ export default function CreateTableSchema({
   openChange: boolean;
   setOpenChange: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { token, refetchTables } = useRefetch();
+  const { mutate: createTable, isPending } = useCreateTable();
   const [tableName, setTableName] = useState("");
   const [columns, setColumns] = useState<TableColumnType[]>([
     { name: "", type: "TEXT" },
   ]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddColumn = () => {
     setColumns([...columns, { name: "", type: "TEXT" }]);
@@ -55,7 +55,7 @@ export default function CreateTableSchema({
     setColumns(newColumns);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!tableName.trim()) {
@@ -70,20 +70,16 @@ export default function CreateTableSchema({
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const ok = await createTable(token, db_name, tableName, validColumns);
-      if (ok) {
-        toast.success(`Table '${tableName}' created successfully`);
-        setTableName("");
-        refetchTables(db_name);
-        setOpenChange(false);
+    createTable(
+      { dbName: db_name, tableName, schema: validColumns },
+      {
+        onSuccess: () => {
+          setTableName("");
+          setColumns([{ name: "", type: "TEXT" }]); // Reset columns too?
+          setOpenChange(false);
+        },
       }
-    } catch (error) {
-      toast.error("Failed to create table. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
   return (
@@ -110,7 +106,7 @@ export default function CreateTableSchema({
                 onChange={(e) => setTableName(e.target.value)}
                 placeholder="users"
                 autoComplete="off"
-                disabled={isLoading}
+                disabled={isPending}
               />
             </div>
 
@@ -149,7 +145,7 @@ export default function CreateTableSchema({
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => handleRemoveColumn(index)}
-                      disabled={index === 0 || isLoading}
+                      disabled={index === 0 || isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -162,7 +158,7 @@ export default function CreateTableSchema({
                 size="sm"
                 onClick={handleAddColumn}
                 className="mt-2"
-                disabled={isLoading}
+                disabled={isPending}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Column
@@ -174,12 +170,12 @@ export default function CreateTableSchema({
               type="button"
               variant="outline"
               onClick={() => setOpenChange(false)}
-              disabled={isLoading}
+              disabled={isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create Table"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Creating..." : "Create Table"}
             </Button>
           </DialogFooter>
         </form>

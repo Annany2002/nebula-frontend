@@ -1,6 +1,4 @@
 import {
-  ChevronDown,
-  ChevronUp,
   Copy,
   Database as DatabaseIcon,
   EyeClosedIcon,
@@ -15,8 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useRefetch } from "@/hooks/use-refetch";
-import { url } from "@/App";
+import { useDeleteDatabase } from "@/hooks/queries";
 import { toast } from "sonner";
 import { DataBaseType } from "@/types/allType";
 import { formatDateTime } from "@/lib/formatDate";
@@ -24,30 +21,11 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 
 export function DatabaseCard({ database }: { database: DataBaseType }) {
-  const { refetchDb, token, setDatabases } = useRefetch();
+  const { mutate: deleteDatabase } = useDeleteDatabase();
   const [showKey, setShowKey] = useState(false);
 
-  const deleteProject = async () => {
-    try {
-      const response = await fetch(
-        `${url}/api/v1/databases/${database.dbName}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.ok) {
-        setDatabases((prevDb) =>
-          prevDb.filter((db) => db.dbName !== database.dbName)
-        );
-        refetchDb();
-        toast.success(`Project ${database.dbName} successfully deleted`);
-      }
-    } catch (error) {
-      toast.error("Error in deleting database");
-    }
+  const deleteProject = () => {
+    deleteDatabase(database.dbName);
   };
 
   return (

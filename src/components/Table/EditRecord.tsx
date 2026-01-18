@@ -3,7 +3,7 @@ import { Edit2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { url } from "@/App";
-import { useRefetch } from "@/hooks/use-refetch";
+import { useUpdateRecord } from "@/hooks/queries";
 import { RecordSchemaType } from "@/types/allType";
 import {
   Dialog,
@@ -26,13 +26,15 @@ export default function EditRecord({
   db_name: string;
   table_name: string;
 }) {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const form = useForm<Record<string, any>>({
     defaultValues: record,
   });
-  const { token } = useRefetch();
   const [open, setOpen] = useState(false);
 
-  const onSubmit = async (data: Record<string, any>) => {
+  const { mutate: updateRecord, isPending } = useUpdateRecord();
+
+  const onSubmit = (data: Record<string, any>) => {
     const parsedData: Record<string, any> = {};
 
     for (const key in data) {
@@ -47,26 +49,17 @@ export default function EditRecord({
       }
     }
 
-    try {
-      const response = await fetch(
-        `${url}/api/v1/databases/${db_name}/tables/${table_name}/records/${record.id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(parsedData),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+    updateRecord({
+        dbName: db_name,
+        tableName: table_name,
+        recordId: record.id,
+        data: parsedData
+    }, {
+        onSuccess: () => {
+            form.reset();
+            setOpen(false);
         }
-      );
-      if (response.ok) {
-        form.reset();
-        setOpen(false);
-        toast.success(`Record with id ${record.id} edited successfully`);
-      }
-    } catch (error) {
-      toast.error("Cannot edit record, please try again");
-    }
+    });
   };
 
   const getInputType = (columnType: string) => {

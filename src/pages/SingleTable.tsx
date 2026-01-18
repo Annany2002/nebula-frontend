@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useRefetch } from "@/hooks/use-refetch";
+import { useRecords, useDeleteRecord } from "@/hooks/queries";
 import { url } from "../App";
 import CreateRecord from "@/components/Table/CreateRecord";
 import { Input } from "@/components/ui/input";
@@ -23,18 +24,17 @@ import EditRecord from "@/components/Table/EditRecord";
 
 export default function SingleTable() {
   const { pathname } = useLocation();
-  const {
-    token,
-    records,
-    setRecords,
-    tableFields,
-    refetchRecords,
-    recordsLoading,
-  } = useRefetch();
-  const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const db_name = pathname.split("/")[2];
   const table_name = pathname.split("/")[4];
+
+  const { data: records = [], isLoading: recordsLoading, refetch: refetchRecords } = useRecords(db_name, table_name);
+  const { mutate: deleteRecordMutation } = useDeleteRecord();
+  
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Extract fields from the first record if available
+  const tableFields = records.length > 0 ? Object.keys(records[0]) : [];
 
   const filteredRecords = records.filter((record) => {
     if (!searchTerm) return true;
@@ -48,29 +48,9 @@ export default function SingleTable() {
     setSearchTerm(e.target.value);
   };
 
-  const deleteRecord = async (record_id: number) => {
-    try {
-      const response = await fetch(
-        `${url}/api/v1/databases/${db_name}/tables/${table_name}/records/${record_id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 204) {
-        toast.success(`Record with id ${record_id} deleted successfully`);
-        setRecords(records.filter((r) => r.id !== record_id));
-      }
-    } catch (error) {
-      toast.error(`Error in deleting record with id ${record_id}`);
-    }
+  const deleteRecord = (record_id: number) => {
+    deleteRecordMutation({ dbName: db_name, tableName: table_name, recordId: record_id });
   };
-
-  useEffect(() => {
-    refetchRecords(db_name, table_name);
-  }, [open]);
 
   return (
     <div className="min-h-screen space-y-6">
@@ -100,7 +80,7 @@ export default function SingleTable() {
         />
         <div className="flex gap-6 items-center">
           <RefreshCcw
-            onClick={() => refetchRecords(db_name, table_name)}
+            onClick={() => refetchRecords()}
             className={`cursor-pointer ${recordsLoading && "animate-spin"}`}
             size={20}
           />

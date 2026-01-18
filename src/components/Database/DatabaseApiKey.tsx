@@ -11,6 +11,7 @@ import {
 import { Eye, EyeOff, Key, RefreshCw, Copy } from "lucide-react";
 import { url } from "@/App";
 import { useRefetch } from "@/hooks/use-refetch";
+import { useApiKey, useGenerateApiKey, useDeleteApiKey } from "@/hooks/queries";
 import { toast } from "sonner";
 
 interface DatabaseApiKeyProps {
@@ -18,67 +19,15 @@ interface DatabaseApiKeyProps {
 }
 
 export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
-  const { token } = useRefetch();
-  const [apiKey, setApiKey] = useState<string | "">("");
-  const [loading, setLoading] = useState(true);
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  const { data: apiKey = "", isLoading } = useApiKey(databaseName);
+  const { mutate: generateKey, isPending: generating } = useGenerateApiKey();
+  const { mutate: deleteKey } = useDeleteApiKey();
+  
   const [showKey, setShowKey] = useState(false);
-  const [generating, setGenerating] = useState(false);
 
-  useEffect(() => {
-    const fetchApiKey = async () => {
-      try {
-        const response = await fetch(
-          `${url}/api/v1/account/databases/${databaseName}/apikey`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setApiKey(data.key);
-        }
-      } catch (error) {
-        console.error(
-          `Failed to fetch API key for database ${databaseName}:`,
-          error
-        );
-        toast.error(`Failed to fetch API key for database ${databaseName}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchApiKey();
-  }, [databaseName, apiKey]);
-
-  const handleGenerateKey = async () => {
-    setGenerating(true);
-    try {
-      const response = await fetch(
-        `${url}/api/v1/account/databases/${databaseName}/apikey`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setApiKey(data.api_key);
-        setShowKey(true);
-        toast.success(
-          `API key for database ${databaseName} generated successfully`
-        );
-      }
-    } catch (error) {
-      toast.error(`Failed to generate API key for database ${databaseName}`);
-    } finally {
-      setGenerating(false);
-    }
-  };
+  const handleGenerateKey = () => generateKey(databaseName);
+  const deleteAPIKey = () => deleteKey(databaseName);
 
   const toggleShowKey = () => {
     setShowKey(!showKey);
@@ -87,29 +36,6 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
   const copyToClipboard = (text: string) => {
     window.navigator.clipboard.writeText(text);
     toast.success("API key copied successfully");
-  };
-
-  const deleteAPIKey = async () => {
-    try {
-      const response = await fetch(
-        `${url}/api/v1/account/databases/${databaseName}/apikey`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 204) {
-        toast.success(`Api key deleted for project ${databaseName}`);
-        setApiKey("");
-        return;
-      }
-      toast.error(`Error in deleting the api key for project ${databaseName}`);
-    } catch (error) {
-      toast.error(`Error in deleting the api key for project ${databaseName}`);
-      console.log(error);
-    }
   };
 
   return (
@@ -132,7 +58,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
                 <Input
                   value={apiKey}
                   readOnly
-                  disabled={loading || apiKey === ""}
+                  disabled={isLoading || apiKey === ""}
                   type={`${showKey ? "text" : "password"}`}
                   className="pr-10 font-mono text-sm bg-transparent"
                 />
@@ -157,7 +83,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
                   size="icon"
                   className="bg-transparent"
                   onClick={() => copyToClipboard(apiKey)}
-                  disabled={loading}
+                  disabled={isLoading}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>

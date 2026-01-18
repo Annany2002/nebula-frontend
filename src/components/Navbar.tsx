@@ -34,8 +34,8 @@ const Navbar = () => {
     <header
       className={`fixed top-6 z-50 w-5/6 lg:w-3/4 place-self-center transition-all duration-300 rounded-3xl py-3 border ${
         scrolled
-          ? "backdrop-blur-sm shadow-sm border-purple-600/50"
-          : "bg-purple-900/10 border-gray-800"
+          ? "bg-white/40 dark:bg-black/40 backdrop-blur-md shadow-lg border-purple-500/30"
+          : "bg-transparent border-transparent"
       }`}
     >
       <div className="flex items-center justify-between px-1 md:px-6">

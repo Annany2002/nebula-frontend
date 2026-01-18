@@ -1,8 +1,8 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Plus } from "lucide-react";
-import { url } from "@/App";
-import { useRefetch } from "@/hooks/use-refetch";
+
+import { useCreateRecord, useTableSchema } from "@/hooks/queries";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
 import { formatDateForDateTimeLocal } from "@/lib/utils";
 
 export default function CreateRecord({
@@ -36,61 +35,53 @@ export default function CreateRecord({
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { token } = useRefetch();
-  const [recordSchema, setRecordSchema] = useState<Record<string, any>[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutate: createRecord, isPending: isSubmitting } = useCreateRecord();
+  const { data: recordSchema = [] } = useTableSchema(db_name, table_name);
 
   const currDate = formatDateForDateTimeLocal(new Date());
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const form = useForm<Record<string, any>>({
-    defaultValues: recordSchema.reduce((acc, column) => {
-      acc[column.name] = column.type === "BOOLEAN" ? false : "";
-      return acc;
-    }, {} as Record<string, any>),
+    defaultValues: {},
   });
+  
+  // Update form default values when schema loads
+  useEffect(() => {
+    if (recordSchema && recordSchema.length > 0) {
+        const defaults = recordSchema.reduce((acc: any, column: any) => {
+            acc[column.name] = column.type === "BOOLEAN" ? false : "";
+            return acc;
+        }, {});
+        form.reset(defaults);
+    }
+  }, [recordSchema, form]);
 
-  const onSubmit = async (data: Record<string, any>) => {
-    setIsSubmitting(true);
-    try {
-      // Convert values based on column types
-      const formattedData = recordSchema.reduce((acc, column) => {
+  const onSubmit = (data: Record<string, any>) => {
+    // Convert values based on column types
+    const formattedData = recordSchema.reduce((acc: any, column: any) => {
         const value = data[column.name];
 
         if (column.type === "INTEGER" && value) {
           acc[column.name] = parseInt(value, 10);
         } else if (column.type === "DECIMAL" && value) {
           acc[column.name] = parseFloat(value);
-        } else if (column.type === "BOOLEAN" && typeof value === "string") {
-          acc[column.name] = value.toLowerCase() === "true";
+        } else if (column.type === "BOOLEAN") {
+           // Handle boolean properly (sometimes string "true" comes from inputs)
+           if (typeof value === "string") acc[column.name] = value.toLowerCase() === "true";
+           else acc[column.name] = Boolean(value);
         } else {
           acc[column.name] = value;
         }
 
         return acc;
-      }, {} as Record<string, any>);
+    }, {});
 
-      await fetch(
-        `${url}/api/v1/databases/${db_name}/tables/${table_name}/records`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "content-type": "application/json",
-          },
-          body: JSON.stringify(formattedData),
+    createRecord({ dbName: db_name, tableName: table_name, data: formattedData }, {
+        onSuccess: () => {
+            form.reset();
+            setOpen(false);
         }
-      );
-      form.reset();
-      setOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create record. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const getInputType = (columnType: string) => {
@@ -109,28 +100,6 @@ export default function CreateRecord({
         return "text";
     }
   };
-
-  useEffect(() => {
-    const fetchSchema = async () => {
-      try {
-        const response = await fetch(
-          `${url}/api/v1/databases/${db_name}/tables/${table_name}/schema`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setRecordSchema(data.schema);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchSchema();
-  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

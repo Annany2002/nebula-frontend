@@ -9,9 +9,7 @@ import {
 import { Button } from "../ui/button";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Input } from "../ui/input";
-import { url } from "@/App";
-import { toast } from "sonner";
-import { useRefetch } from "@/hooks/use-refetch";
+import { useCreateDatabase } from "@/hooks/queries";
 import { Plus } from "lucide-react";
 
 export default function CreateDatabase({
@@ -21,33 +19,16 @@ export default function CreateDatabase({
   openChange: boolean;
   setOpenChange: Dispatch<SetStateAction<boolean>>;
 }) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { mutate: createDb, isPending } = useCreateDatabase();
   const [projectName, setProjectName] = useState<string>("");
-  const { token } = useRefetch();
 
-  const createDatabase = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${url}/api/v1/databases`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ db_name: projectName }),
-      });
-      if (response.status === 409) {
-        toast.error(`Project with ${projectName} already exists`);
-      } else if (response.status === 201) {
-        await response.json();
-        toast.success("Project Created Successfully");
-        setOpenChange(false);
+  const createDatabase = () => {
+    createDb(projectName, {
+      onSuccess: () => setOpenChange(false),
+      onError: (error) => {
+         // Error handling is mostly done in mutation onError, but we can do extra here if needed
       }
-    } catch (error) {
-      toast.error("Some error occured");
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   return (
@@ -75,7 +56,7 @@ export default function CreateDatabase({
             placeholder="Project Name"
             onChange={(e) => setProjectName(e.target.value)}
           />
-          <Button disabled={isLoading} onClick={createDatabase} type="submit">
+          <Button disabled={isPending} onClick={createDatabase} type="submit">
             Create
           </Button>
         </div>

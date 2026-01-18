@@ -82,7 +82,21 @@
   }
 
   ::selection {
-    @apply bg-purple-300/30 text-purple-900 dark:bg-purple-800/30 dark:text-purple-100;
+    @apply bg-purple-500/30 text-purple-900 dark:bg-purple-500/30 dark:text-purple-100;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-700 rounded-full border-4 border-solid border-transparent bg-clip-content hover:bg-gray-400 dark:hover:bg-gray-600;
   }
 }
 

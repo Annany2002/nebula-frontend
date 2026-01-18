@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRefetch } from "@/hooks/use-refetch";
+import { useTables, useDeleteTable } from "@/hooks/queries";
 import { url } from "@/App";
 import LoginNavBar from "@/components/LoginNavbar";
 import BreadCrumbNav from "@/components/BreadCrumbNav";
@@ -28,36 +29,15 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 export default function AllTables() {
   const { db_name } = useParams();
-  const { token, refetchTables, tables, tableLoading, setTables } =
-    useRefetch();
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: tables = [], isLoading: tableLoading, refetch: refetchTables } = useTables(db_name);
+  const { mutate: deleteTableMutation, isPending: isDeleting } = useDeleteTable();
   const [openChange, setOpenChange] = useState(false);
 
-  useEffect(() => {
-    refetchTables(db_name);
-  }, [openChange]);
+  // useEffect removed
 
-  const deleteTable = async (table_name: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `${url}/api/v1/databases/${db_name}/tables/${table_name}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.ok) {
-        toast.success(`Table ${table_name} deleted successfully`);
-        setTables(tables.filter((table) => table.name !== table_name));
-        await refetchTables(db_name);
-      }
-    } catch (error) {
-      toast.error("Error deleting table");
-    } finally {
-      setIsLoading(false);
+  const deleteTable = (table_name: string) => {
+    if (db_name) {
+      deleteTableMutation({ dbName: db_name, tableName: table_name });
     }
   };
 
@@ -83,7 +63,7 @@ export default function AllTables() {
         <div className="flex gap-6 items-center">
           <RefreshCcw
             size={20}
-            onClick={() => refetchTables(db_name)}
+            onClick={() => refetchTables()}
             className={`cursor-pointer ${tableLoading && "animate-spin"}`}
           />
           <CreateTableSchema
@@ -93,7 +73,7 @@ export default function AllTables() {
           />
         </div>
       </div>
-      {isLoading ? (
+      {tableLoading ? (
         <LoaderCircleIcon className="animate-spin" />
       ) : (
         <div className="space-y-4 px-4">
