@@ -9,8 +9,12 @@ export interface DataBaseType {
 }
 
 export interface TableColumnType {
+  cid: string;
   name: string;
   type: string;
+  notnull: number;
+  dflt_value: unknown;
+  pk: number;
 }
 
 export interface TableType {
