@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { url } from "@/App";
-import { DataBaseType, TableType, RecordSchemaType } from "@/types/allType";
+import { DataBaseType, TableType, RecordSchemaType, RecordsResponse, RecordsQueryParams } from "@/types/allType";
 import { toast } from "sonner";
 
 export const getToken = () => localStorage.getItem("token");
@@ -37,23 +37,64 @@ export const useTables = (dbName: string | undefined) => {
     });
 };
 
-export const useRecords = (dbName: string | undefined, tableName: string | undefined) => {
+export const useRecords = (
+    dbName: string | undefined,
+    tableName: string | undefined,
+    params: RecordsQueryParams = {}
+) => {
+    const { limit = 100, offset = 0, sort = "id", order = "asc", fields, filters } = params;
+
     return useQuery({
-        queryKey: ["records", dbName, tableName],
-        queryFn: async (): Promise<RecordSchemaType[]> => {
-            if (!dbName || !tableName) return [];
+        queryKey: ["records", dbName, tableName, { limit, offset, sort, order, fields, filters }],
+        queryFn: async (): Promise<RecordsResponse> => {
+            if (!dbName || !tableName) {
+                return { records: [], pagination: { total: 0, limit, offset } };
+            }
+
             const token = getToken();
+            const queryParams = new URLSearchParams();
+
+            queryParams.set("limit", String(limit));
+            queryParams.set("offset", String(offset));
+            queryParams.set("sort", sort);
+            queryParams.set("order", order);
+
+            if (fields && fields.length > 0) {
+                queryParams.set("fields", fields.join(","));
+            }
+
+            if (filters) {
+                Object.entries(filters).forEach(([key, value]) => {
+                    queryParams.set(key, value);
+                });
+            }
+
             const response = await fetch(
-                `${url}/api/v1/databases/${dbName}/tables/${tableName}/records`,
+                `${url}/api/v1/databases/${dbName}/tables/${tableName}/records?${queryParams.toString()}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
             if (!response.ok) throw new Error("Failed to fetch records");
+
             const data = await response.json();
-            return data;
+
+            // Handle both old format (array) and new format ({ records, pagination })
+            if (Array.isArray(data)) {
+                return {
+                    records: data,
+                    pagination: { total: data.length, limit, offset }
+                };
+            }
+
+            return {
+                records: data.records || [],
+                pagination: data.pagination || { total: 0, limit, offset }
+            };
         },
         enabled: !!dbName && !!tableName,
     });
 };
+
 
 // Schema Query
 export const useTableSchema = (dbName: string, tableName: string) => {
