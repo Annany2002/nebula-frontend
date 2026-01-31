@@ -365,6 +365,7 @@ export const useGenerateApiKey = () => {
         },
         onSuccess: (_, dbName) => {
             queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+            queryClient.invalidateQueries({ queryKey: ["databases"] });
             toast.success("API key generated successfully");
         },
         onError: () => toast.error("Failed to generate API key"),
@@ -387,6 +388,7 @@ export const useDeleteApiKey = () => {
         },
         onSuccess: (_, dbName) => {
             queryClient.setQueryData(["apikey", dbName], "");
+            queryClient.invalidateQueries({ queryKey: ["databases"] });
             toast.success("API key deleted successfully");
         },
         onError: () => toast.error("Failed to delete API key"),
