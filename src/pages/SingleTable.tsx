@@ -76,7 +76,7 @@ export default function SingleTable() {
   // Get table fields from schema or first record
   const tableFields = useMemo(() => {
     if (schema && Array.isArray(schema)) {
-      return schema.map((col: { Name: string }) => col.Name);
+      return schema.map((col: { name: string }) => col.name);
     }
     if (records.length > 0) {
       return Object.keys(records[0]);
