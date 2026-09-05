@@ -3,9 +3,7 @@ import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import CodeDemo from "@/components/CodeDemo";
 import UseCases from "@/components/UseCases";
-import Pricing from "@/components/Pricing";
 import FAQ from "@/components/FAQ";
-import BottomCTA from "@/components/BottomCTA";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -17,9 +15,7 @@ const Index = () => {
         <Features />
         <CodeDemo />
         <UseCases />
-        <Pricing />
         <FAQ />
-        <BottomCTA />
       </main>
       <Footer />
     </div>

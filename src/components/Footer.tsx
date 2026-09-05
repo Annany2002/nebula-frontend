@@ -12,7 +12,6 @@ const Footer = () => {
         { label: "Features", href: "#features" },
         { label: "Interactive Code", href: "#code-demo" },
         { label: "Architecture", href: "#use-cases" },
-        { label: "Pricing", href: "#pricing" },
         { label: "FAQ", href: "#faq" },
       ],
     },
