@@ -1,418 +1,239 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
-  ChevronRight,
-  Server,
-  Database,
-  Shield,
   ExternalLink,
+  Table as TableIcon,
+  Globe,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 
-// Define proper type for terminal lines
-interface TerminalLine {
-  text: string;
-  prefix: string;
-  className?: string;
-  delay: number;
-}
-
 const Hero = () => {
   const { isAuthenticated, user } = useAuth();
-  const [isVisible, setIsVisible] = useState(false);
-  const [terminalText, setTerminalText] = useState<TerminalLine[]>([]);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(true);
-  const [typedText, setTypedText] = useState("");
-
-  const terminalLines: TerminalLine[] = [
-    { text: "nebula init my-project", prefix: "$", delay: 0 },
-    {
-      text: "Initializing Nebula project",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 1000,
-    },
-    {
-      text: "Creating API endpoints",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 500,
-    },
-    {
-      text: "Setting up database",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 500,
-    },
-    {
-      text: "Configuring authentication",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 500,
-    },
-    { text: "nebula deploy", prefix: "$", delay: 1000 },
-    {
-      text: "Building backend services",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 500,
-    },
-    {
-      text: "Optimizing for production",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 500,
-    },
-    {
-      text: "Deploying to edge network",
-      prefix: "✓",
-      className: "text-green-400",
-      delay: 500,
-    },
-    {
-      text: "🚀 Deployed successfully!",
-      prefix: "",
-      className: "text-gray-300",
-      delay: 800,
-    },
-    {
-      text: "API endpoint: https://api.nebula.app/my-project",
-      prefix: "",
-      className: "text-purple-400",
-      delay: 500,
-    },
-  ];
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  useEffect(() => {
-    // Start typing animation
-    if (currentLineIndex < terminalLines.length) {
-      const timer = setTimeout(() => {
-        setTerminalText((prev) => [...prev, terminalLines[currentLineIndex]]);
-        setTypedText("");
-        setIsTyping(true);
-      }, terminalLines[currentLineIndex].delay);
-      return () => clearTimeout(timer);
-    }
-  }, [currentLineIndex]);
-
-  useEffect(() => {
-    if (isTyping && currentLineIndex < terminalLines.length) {
-      const currentLine = terminalLines[currentLineIndex].text;
-      if (typedText.length < currentLine.length) {
-        const timer = setTimeout(() => {
-          setTypedText(currentLine.substring(0, typedText.length + 1));
-        }, 30); // Typing speed
-        return () => clearTimeout(timer);
-      } else {
-        setIsTyping(false);
-        setCurrentLineIndex((prev) => prev + 1);
-      }
-    }
-  }, [typedText, isTyping, currentLineIndex]);
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
+  const [activeTab, setActiveTab] = useState<"schema" | "rest">("schema");
 
   return (
-    <section className="pt-32 pb-16 relative z-10">
+    <section className="pt-12 pb-20 md:pt-16 md:pb-28 relative z-10 overflow-hidden">
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-500/15 dark:bg-purple-600/20 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/3 right-10 w-[300px] h-[300px] bg-indigo-500/10 dark:bg-indigo-500/15 blur-[100px] rounded-full pointer-events-none" />
+
       <div className="container max-w-7xl mx-auto px-6 relative">
-        <motion.div
-          initial="hidden"
-          animate={isVisible ? "show" : "hidden"}
-          variants={container}
-          className="grid lg:grid-cols-2 gap-12 items-center"
-        >
-          {/* Left column - Text content */}
-          <div className="space-y-6">
-            <motion.div
-              variants={item}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100/50 backdrop-blur-sm text-purple-700 text-sm font-medium dark:bg-purple-900/40 dark:text-purple-300"
-            >
-              <span className="flex h-2 w-2 rounded-full bg-purple-500 mr-2 animate-pulse"></span>
-              Powered by Go
-            </motion.div>
+        <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-14">
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-950 dark:text-white leading-[1.1] mb-6"
+          >
+            The Backend Engine for{" "}
+            <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-400 bg-clip-text text-transparent">
+              High-Velocity Teams
+            </span>
+          </motion.h1>
 
-            <motion.h1
-              variants={item}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance animate-gradient-flow"
-            >
-              <span className="inline-flex animate-text-gradient">
-                Backend as a Service
-              </span>
-              <br />
-              for the Modern Web
-            </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-lg md:text-xl text-gray-600 dark:text-zinc-300 max-w-2xl leading-relaxed mb-8"
+          >
+            Spin up isolated SQLite databases, auto-generate type-safe REST APIs,
+            and authenticate users with dual-tier security. Single Go binary, zero cloud complexity.
+          </motion.p>
 
-            <motion.p
-              variants={item}
-              className="text-lg text-gray-600 max-w-xl dark:text-gray-300 animate-fade-in"
-            >
-              Deploy scalable, secure and high-performance backend services with
-              a streamlined developer experience. Built for modern teams.
-            </motion.p>
-
-            <motion.div variants={item} className="flex flex-wrap gap-4 pt-2">
-              {isAuthenticated ? (
-                <Link
-                  className="flex items-center w-fit"
-                  to={`/dashboard/${user?.userId}`}
-                >
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-6"
+          >
+            {isAuthenticated ? (
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                <Link to={`/dashboard/${user?.userId}`}>
                   <Button
                     size="lg"
-                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md shadow-purple-200 dark:shadow-purple-900/20 animate-slide-in-left"
+                    className="h-12 px-8 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/25 font-semibold text-base transition-all"
                   >
-                    Dashboard
+                    Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-              ) : (
-                <Link to={"/sign-in"} className="flex gap-1 items-center">
+              </motion.div>
+            ) : (
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                <Link to="/sign-in">
                   <Button
                     size="lg"
-                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md shadow-purple-200 dark:shadow-purple-900/20 animate-slide-in-left"
+                    className="h-12 px-8 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/25 font-semibold text-base transition-all"
                   >
-                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    Start Building Free <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-              )}
+              </motion.div>
+            )}
 
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link to="https://nebula-api-docs.vercel.app" target="_blank">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300
-                dark:bg-transparent dark:hover:bg-purple-900/20 backdrop-blur-sm bg-white/10 animate-slide-in-right"
+                  className="h-12 px-7 rounded-xl border-purple-200 dark:border-white/10 text-gray-800 dark:text-zinc-200 bg-white/60 dark:bg-white/[0.03] hover:bg-purple-50 dark:hover:bg-white/[0.08] backdrop-blur-sm font-semibold text-base"
                 >
-                  View Docs <ExternalLink className="ml-2 h-4 w-4" />
+                  Explore Docs <ExternalLink className="ml-2 h-4 w-4 text-gray-500 dark:text-zinc-400" />
                 </Button>
               </Link>
             </motion.div>
+          </motion.div>
+        </div>
 
-            {/* New section to replace the "Ready to Transform Your Backend" */}
-            <motion.div
-              variants={item}
-              className="pt-8 mt-6 border-t border-purple-100/50 dark:border-purple-800/30"
-            >
-              <div className="backdrop-blur-lg bg-white/5 dark:bg-purple-900/10 rounded-xl overflow-hidden shadow-lg border border-purple-100/30 dark:border-purple-800/20">
-                <div className="p-5 bg-gradient-to-br from-purple-50/70 to-transparent dark:from-purple-900/20 dark:to-transparent">
-                  <h3 className="text-xl font-semibold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-indigo-600 dark:from-purple-300 dark:to-indigo-300">
-                    Transform Your Backend Infrastructure
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-5 text-sm">
-                    A complete solution for modern applications with
-                    enterprise-grade features
-                  </p>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      {
-                        icon: <Server className="h-5 w-5" />,
-                        text: "Serverless",
-                        description: "Auto-scaling",
-                      },
-                      {
-                        icon: <Database className="h-5 w-5" />,
-                        text: "Scalable",
-                        description: "Global deployment",
-                      },
-                      {
-                        icon: <Shield className="h-5 w-5" />,
-                        text: "Secure",
-                        description: "SOC 2 compliant",
-                      },
-                    ].map((item, i) => (
-                      <div key={i} className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-200/50 to-indigo-200/30 dark:from-purple-700/30 dark:to-indigo-700/20 rounded-lg transform transition-all duration-300 group-hover:scale-90 opacity-0 group-hover:opacity-100"></div>
-                        <div className="bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm rounded-lg p-3 transform transition-all duration-300 group-hover:translate-y-[-5px] relative z-10">
-                          <div className="bg-gradient-to-br from-purple-500 to-indigo-500 p-2 rounded-lg inline-flex mb-2 text-white">
-                            {item.icon}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800 dark:text-white">
-                              {item.text}
-                            </h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {item.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="relative max-w-5xl mx-auto"
+        >
+          <div className="rounded-2xl overflow-hidden border border-purple-200/60 dark:border-white/10 shadow-2xl bg-white/60 dark:bg-black/40 backdrop-blur-md">
+            <div className="p-3 bg-white/40 dark:bg-white/[0.03] border-b border-purple-100/60 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 backdrop-blur-md">
+              <div className="flex items-center space-x-2">
+                <div className="flex space-x-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
                 </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Right column - Terminal & Features */}
-          <div className="lg:pl-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="relative"
-            >
-              {/* Terminal Window - Updated with a more modern design */}
-              <div className="relative overflow-hidden rounded-xl shadow-2xl border border-gray-700/50">
-                {/* Blurred glow effects behind terminal */}
-                <div className="absolute w-40 h-40 rounded-full bg-purple-500/20 blur-2xl -top-10 -left-10"></div>
-                <div className="absolute w-40 h-40 rounded-full bg-indigo-500/20 blur-2xl -bottom-10 -right-10"></div>
-
-                {/* Terminal header */}
-                <div className="bg-gradient-to-r from-gray-900 to-gray-800 backdrop-blur-sm p-3 flex items-center border-b border-gray-700/50">
-                  <div className="flex space-x-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  </div>
-                  <div className="flex items-center mx-auto pr-6">
-                    <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-xs text-white px-2 py-1 rounded-sm mr-2">
-                      NEBULA
-                    </div>
-                    <div className="text-gray-400 text-xs">
-                      Command Line Interface
-                    </div>
-                  </div>
-                </div>
-
-                {/* Terminal content */}
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-4 font-mono text-sm text-gray-300 space-y-3 h-80 overflow-hidden">
-                  {/* Terminal content with line numbers */}
-                  <div className="flex">
-                    <div className="text-gray-600 w-5 text-right mr-3">1</div>
-                    <div className="flex-1">
-                      <span className="text-purple-400">$</span>
-                      <span className="ml-2 text-white font-medium">
-                        nebula --version
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <div className="text-gray-600 w-5 text-right mr-3">2</div>
-                    <div className="flex-1">
-                      <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                        Nebula CLI v1.2.0
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Dynamic terminal content */}
-                  {terminalText.map((line, idx) => (
-                    <div key={idx} className="flex">
-                      <div className="text-gray-600 w-5 text-right mr-3">
-                        {idx + 3}
-                      </div>
-                      <div className={`flex-1 ${line.className || ""}`}>
-                        {line.prefix && (
-                          <span
-                            className={
-                              line.prefix === "$" ? "text-purple-400" : ""
-                            }
-                          >
-                            {line.prefix}
-                          </span>
-                        )}
-                        <span className="ml-2">
-                          {idx === terminalText.length - 1
-                            ? typedText
-                            : line.text}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-
-                  {currentLineIndex === terminalLines.length && (
-                    <div className="flex">
-                      <div className="text-gray-600 w-5 text-right mr-3">
-                        {terminalLines.length + 3}
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-purple-400">$</span>
-                        <span className="ml-2 relative">
-                          <span className="absolute top-0 left-0 animate-blink">
-                            |
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Code syntax highlights */}
-                  <div className="absolute bottom-3 right-3 text-xs text-gray-500">
-                    Syntax: TypeScript | Go
-                  </div>
-                </div>
+                <span className="font-mono text-xs text-gray-500 dark:text-zinc-400 ml-2">
+                  nebula-workbench://prod-store
+                </span>
               </div>
 
-              {/* Feature callouts */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.5 }}
-                className="absolute -top-6 -right-6 backdrop-blur-xl bg-white/10 dark:bg-gray-900/40 px-3 py-2 rounded-lg shadow-xl border border-white/20 dark:border-gray-700/30 animate-float"
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-1 rounded text-white">
-                    <Server className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                    99.9% Uptime SLA
-                  </span>
-                </div>
-              </motion.div>
+              <div className="flex items-center p-1 rounded-lg bg-gray-200/70 dark:bg-white/5 text-xs font-medium">
+                <button
+                  onClick={() => setActiveTab("schema")}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
+                    activeTab === "schema"
+                      ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white shadow-xs font-semibold"
+                      : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+                  }`}
+                >
+                  <TableIcon className="h-3.5 w-3.5" /> Schema View
+                </button>
+                <button
+                  onClick={() => setActiveTab("rest")}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
+                    activeTab === "rest"
+                      ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white shadow-xs font-semibold"
+                      : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+                  }`}
+                >
+                  <Globe className="h-3.5 w-3.5" /> Auto REST
+                </button>
+              </div>
+            </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.5 }}
-                className="absolute -bottom-4 -left-4 backdrop-blur-xl bg-white/10 dark:bg-gray-900/40 px-3 py-2 rounded-lg shadow-xl border border-white/20 dark:border-gray-700/30 animate-float"
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="bg-gradient-to-br from-blue-500 to-cyan-600 p-1 rounded text-white">
-                    <Database className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                    Managed Storage
-                  </span>
-                </div>
-              </motion.div>
+            <div className="min-h-[300px] p-6 md:p-8 bg-white/40 dark:bg-black/35 backdrop-blur-md text-zinc-800 dark:text-zinc-100 font-mono text-xs md:text-sm">
+              <AnimatePresence mode="wait">
+                {activeTab === "schema" && (
+                  <motion.div
+                    key="schema"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 pb-2 border-b border-purple-100 dark:border-white/10">
+                      <span>TABLE: users (SQLite file: data/users_prod.db)</span>
+                      <span className="text-purple-600 dark:text-purple-400">4 columns • 3 rows indexed</span>
+                    </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1, duration: 0.5 }}
-                className="absolute bottom-1/4 -right-8 backdrop-blur-xl bg-white/10 dark:bg-gray-900/40 px-3 py-2 rounded-lg shadow-xl border border-white/20 dark:border-gray-700/30 animate-float"
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-1 rounded text-white">
-                    <Shield className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                    Enterprise Security
-                  </span>
-                </div>
-              </motion.div>
-            </motion.div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left font-mono">
+                        <thead>
+                          <tr className="border-b border-purple-100 dark:border-white/10 text-gray-500 dark:text-zinc-400 text-xs">
+                            <th className="py-2 px-3">id (TEXT PRIMARY KEY)</th>
+                            <th className="py-2 px-3">email (VARCHAR UNIQUE)</th>
+                            <th className="py-2 px-3">role (TEXT)</th>
+                            <th className="py-2 px-3">created_at (TIMESTAMP)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-purple-100/50 dark:divide-white/5 text-gray-800 dark:text-zinc-300 text-xs">
+                          <tr className="hover:bg-purple-500/10 transition-colors">
+                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">usr_902f</td>
+                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">alex.vance@nebula.sh</td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
+                                admin
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">2026-09-05 09:12:04</td>
+                          </tr>
+                          <tr className="hover:bg-purple-500/10 transition-colors">
+                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">usr_903a</td>
+                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">elena.roche@studio.io</td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
+                                developer
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">2026-09-05 09:14:18</td>
+                          </tr>
+                          <tr className="hover:bg-purple-500/10 transition-colors">
+                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">usr_904k</td>
+                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">marcus@enterprise.ai</td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
+                                member
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">2026-09-05 09:18:22</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="pt-3 text-[11px] text-gray-500 dark:text-zinc-400 flex items-center justify-between">
+                      <span>Indexes: idx_users_email (B-Tree)</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">Status: Read/Write Available</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {activeTab === "rest" && (
+                  <motion.div
+                    key="rest"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-zinc-400 pb-2 border-b border-purple-100 dark:border-white/10">
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold text-[10px]">
+                        GET
+                      </span>
+                      <span className="text-gray-800 dark:text-zinc-200 font-mono">
+                        /api/v1/databases/prod-store/tables/users/records?limit=3
+                      </span>
+                    </div>
+
+                    <pre className="text-xs text-purple-700 dark:text-purple-200/90 leading-relaxed overflow-x-auto whitespace-pre">
+                      {`// Instant REST response generated from SQLite
+{
+  "database": "prod-store",
+  "table": "users",
+  "records": [
+    { "id": "usr_902f", "email": "alex.vance@nebula.sh", "role": "admin" },
+    { "id": "usr_903a", "email": "elena.roche@studio.io", "role": "developer" },
+    { "id": "usr_904k", "email": "marcus@enterprise.ai", "role": "member" }
+  ],
+  "pagination": { "limit": 3, "offset": 0, "total": 3 },
+  "latency": "0.94ms"
+}`}
+                    </pre>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </motion.div>
       </div>

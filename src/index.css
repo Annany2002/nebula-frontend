@@ -39,33 +39,33 @@
   }
 
   .dark {
-    --background: 250 20% 8%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
-    --card: 250 20% 10%;
+    --card: 240 10% 5.5%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 250 20% 10%;
+    --popover: 240 10% 5.5%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 265 83% 60%;
+    --primary: 265 89% 65%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 250 25% 18%;
+    --secondary: 250 20% 12%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 250 25% 18%;
-    --muted-foreground: 250 10% 70%;
+    --muted: 250 15% 12%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 250 25% 18%;
+    --accent: 260 30% 15%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 250 25% 18%;
-    --input: 250 25% 18%;
-    --ring: 265 83% 60%;
+    --border: 240 10% 13%;
+    --input: 240 10% 13%;
+    --ring: 265 89% 65%;
   }
 
   * {
@@ -188,6 +188,14 @@
     height: 4px;
     transition: transform 0.3s ease-out;
   }
+
+  .bento-card {
+    @apply rounded-2xl bg-white/60 border border-purple-100/60 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:border-purple-300/80 dark:bg-white/[0.03] dark:border-white/[0.08] dark:hover:border-purple-500/50 dark:hover:shadow-purple-500/10;
+  }
+
+  .glass-pill {
+    @apply inline-flex items-center px-4 py-1.5 rounded-full bg-purple-50/60 border border-purple-200/50 text-purple-700 text-xs font-semibold backdrop-blur-md dark:bg-purple-950/30 dark:border-purple-700/30 dark:text-purple-300;
+  }
 }
 
 @layer utilities {
@@ -272,6 +280,26 @@
   .dot-hover:hover {
     transform: scale(1.5);
     background-color: rgba(139, 92, 246, 0.4);
+  }
+
+  .card-hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-600;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.06);
+    }
   }
 }
 

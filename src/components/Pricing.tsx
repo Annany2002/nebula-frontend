@@ -1,219 +1,220 @@
-import { useIntersectionObserver } from '@/lib/animations';
-import { Check, AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Check, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Pricing = () => {
-  const titleRef = useIntersectionObserver();
   const [isAnnual, setIsAnnual] = useState(true);
-  
+
   const plans = [
     {
-      name: "Free",
-      description: "For personal projects and experiments",
-      price: isAnnual ? "0" : "0",
+      name: "Hobbyist",
+      badge: "Free Forever",
+      description: "Ideal for prototyping, personal projects, and learning.",
+      price: "0",
       period: "/month",
-      cta: "Start Free",
+      cta: "Get Started Free",
+      ctaLink: "/sign-up",
       highlighted: false,
       features: [
-        "1,000 API requests/day",
-        "512MB database storage",
-        "2 serverless functions",
-        "Shared compute resources",
-        "Community support"
-      ]
+        "Up to 5 isolated SQLite databases",
+        "10,000 API requests/day",
+        "500 MB storage per database",
+        "Full REST API auto-generation",
+        "Dual JWT & API key security",
+        "Community Discord support",
+      ],
     },
     {
-      name: "Pro",
-      description: "For production applications and teams",
-      price: isAnnual ? "49" : "59",
+      name: "Pro Developer",
+      badge: "Most Popular",
+      description: "For active SaaS startups, production apps, and scaling teams.",
+      price: isAnnual ? "29" : "39",
       period: "/month",
-      cta: "Start Pro Trial",
+      cta: "Start 14-Day Pro Trial",
+      ctaLink: "/sign-up",
       highlighted: true,
       features: [
-        "100,000 API requests/day",
-        "10GB database storage",
-        "Unlimited serverless functions",
-        "Dedicated compute resources",
-        "Priority support (24-48h)",
-        "Custom domains",
-        "Monitoring & analytics",
-        "Advanced security features"
-      ]
+        "Unlimited isolated SQLite databases",
+        "500,000 API requests/day",
+        "15 GB high-speed NVMe storage",
+        "Automated continuous WAL backups",
+        "Sub-1.2ms P99 priority routing",
+        "Custom domain mapping",
+        "Priority GitHub & email support",
+      ],
     },
     {
-      name: "Enterprise",
-      description: "For large-scale applications",
+      name: "Team & Enterprise",
+      badge: "Custom Scale",
+      description: "Dedicated infrastructure, custom SLAs, and on-premise support.",
       price: "Custom",
       period: "",
-      cta: "Contact Sales",
+      cta: "Contact Architecture Team",
+      ctaLink: "mailto:support@nebula.dev",
       highlighted: false,
       features: [
-        "Unlimited API requests",
-        "Unlimited database storage",
-        "Dedicated infrastructure",
-        "24/7 priority support",
-        "SLA guarantees",
-        "Advanced security features",
-        "Custom integrations",
-        "On-premise deployment option",
-        "Dedicated account manager"
-      ]
-    }
+        "Unlimited API throughput & databases",
+        "Dedicated Go Gin instances",
+        "Custom volume storage & replication",
+        "99.99% uptime SLA guarantee",
+        "SOC 2 compliance documentation",
+        "Dedicated Slack channel with core engineers",
+      ],
+    },
   ];
 
   return (
     <section id="pricing" className="py-24 relative z-10">
-      <div className="container max-w-7xl mx-auto px-6 relative">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100/50 backdrop-blur-sm text-purple-700 text-sm font-medium mb-6 dark:bg-purple-900/40 dark:text-purple-300"
-          >
-            <span className="mr-2">💎</span>
-            Simple Pricing
-          </motion.div>
-          
-          <motion.h2 
-            ref={titleRef as React.RefObject<HTMLHeadingElement>}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-800 to-purple-600 dark:from-purple-300 dark:to-purple-500 animate-gradient-flow"
-          >
-            Choose the perfect plan for your needs
-          </motion.h2>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-gray-600 text-lg dark:text-gray-300 animate-fade-in"
-          >
-            Start with our generous free tier and scale as your application grows. No surprise fees or hidden costs.
-          </motion.p>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="mt-8 inline-flex p-1 bg-purple-100/50 backdrop-blur-sm rounded-full dark:bg-purple-900/40"
-          >
-            <button 
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                isAnnual 
-                  ? 'bg-white/70 backdrop-blur-sm text-purple-700 shadow-sm dark:bg-purple-700 dark:text-white' 
-                  : 'text-purple-600 dark:text-purple-300'
-              }`}
-              onClick={() => setIsAnnual(true)}
-            >
-              Annual (Save 20%)
-            </button>
-            <button 
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                !isAnnual 
-                  ? 'bg-white/70 backdrop-blur-sm text-purple-700 shadow-sm dark:bg-purple-700 dark:text-white' 
-                  : 'text-purple-600 dark:text-purple-300'
-              }`}
+      <div className="container max-w-7xl mx-auto px-6">
+        <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="glass-pill mb-4">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Transparent Pricing
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
+            Simple, Honest,{" "}
+            <span className="gradient-text">Predictable</span>
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-zinc-300">
+            Start building without a credit card. Upgrade only when your product needs
+            dedicated production resources.
+          </p>
+
+          <div className="mt-8 inline-flex items-center p-1 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-purple-200/50 dark:border-white/10 backdrop-blur-md">
+            <button
               onClick={() => setIsAnnual(false)}
+              className={`px-5 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${
+                !isAnnual
+                  ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white shadow-xs"
+                  : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
             >
-              Monthly
+              Monthly Billing
             </button>
-          </motion.div>
+            <button
+              onClick={() => setIsAnnual(true)}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${
+                isAnnual
+                  ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white shadow-xs"
+                  : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <span>Annual Billing</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 font-bold">
+                Save 25%
+              </span>
+            </button>
+          </div>
         </div>
-        
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+
+        <div className="grid md:grid-cols-3 gap-8 lg:gap-8 items-stretch mb-16">
           {plans.map((plan, index) => (
             <motion.div
-              key={index}
+              key={plan.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
+              transition={{ duration: 0.45, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`rounded-2xl overflow-hidden ${
-                plan.highlighted 
-                  ? 'glass ring-2 ring-purple-500 ring-offset-2 dark:ring-offset-gray-900 dark:ring-purple-600 shadow-xl animate-pulse-subtle' 
-                  : 'glass border border-purple-100/20 dark:border-purple-800/30'
-              }`}
+              whileHover={
+                plan.highlighted ? { y: -8, scale: 1.015 } : { y: -4 }
+              }
+              className={`rounded-2xl flex flex-col justify-between transition-all duration-300 relative ${
+                plan.highlighted
+                  ? "bg-white/75 dark:bg-purple-950/20 backdrop-blur-md border-2 border-purple-500 shadow-2xl shadow-purple-500/15 dark:shadow-purple-900/20"
+                  : "bento-card"
+              } p-8`}
             >
-              <div className="p-8">
-                <div className="min-h-[120px]">
-                  {plan.highlighted && (
-                    <Badge className="bg-purple-100/70 backdrop-blur-sm text-purple-700 hover:bg-purple-200 mb-4 dark:bg-purple-900/70 dark:text-purple-300 dark:hover:bg-purple-800 animate-pulse-subtle">
-                      Most Popular
-                    </Badge>
+              {plan.highlighted && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold shadow-md">
+                  {plan.badge}
+                </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {plan.name}
+                  </h3>
+                  {!plan.highlighted && (
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-400">
+                      {plan.badge}
+                    </span>
                   )}
-                  <h3 className="text-xl font-bold text-gray-800 mb-2 dark:text-white animate-fade-in">{plan.name}</h3>
-                  <p className="text-gray-600 text-sm mb-6 dark:text-gray-300 animate-fade-in" style={{animationDelay: "0.1s"}}>{plan.description}</p>
-                  
-                  <div className="flex items-baseline mb-6 animate-fade-in" style={{animationDelay: "0.2s"}}>
-                    {plan.price === "Custom" ? (
-                      <span className="text-3xl font-bold text-gray-800 dark:text-white">Custom</span>
-                    ) : (
-                      <>
-                        <span className="text-gray-800 mr-1 dark:text-white">$</span>
-                        <span className="text-4xl font-bold text-gray-800 dark:text-white">{plan.price}</span>
-                        <span className="text-gray-600 ml-2 dark:text-gray-300">{plan.period}</span>
-                      </>
-                    )}
-                  </div>
-                  
-                  <button 
-                    className={`w-full py-3 px-6 rounded-lg font-medium transition-all animate-fade-in ${
-                      plan.highlighted 
-                        ? 'bg-purple-600/90 backdrop-blur-sm hover:bg-purple-700 text-white shadow-md shadow-purple-200 dark:shadow-purple-900/20' 
-                        : 'bg-white/30 backdrop-blur-sm border border-purple-300/50 text-purple-700 hover:bg-purple-50/50 dark:bg-transparent dark:border-purple-700/50 dark:text-purple-300 dark:hover:bg-purple-900/20'
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-zinc-300 min-h-[40px] mb-6">
+                  {plan.description}
+                </p>
+
+                <div className="flex items-baseline gap-1 mb-8 pb-6 border-b border-purple-100 dark:border-white/10">
+                  {plan.price === "Custom" ? (
+                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
+                      Custom
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-2xl font-bold text-gray-600 dark:text-zinc-400">
+                        $
+                      </span>
+                      <span className="text-5xl font-extrabold text-gray-900 dark:text-white">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm text-gray-500 dark:text-zinc-400 font-medium">
+                        {plan.period}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                <ul className="space-y-3.5 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                      <span className="text-gray-700 dark:text-zinc-300">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <Link to={plan.ctaLink} className="w-full block">
+                  <Button
+                    size="lg"
+                    className={`w-full font-semibold rounded-xl transition-all h-12 ${
+                      plan.highlighted
+                        ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/25"
+                        : "bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-white/5 dark:hover:bg-white/10 dark:text-white border border-purple-200/50 dark:border-white/10"
                     }`}
-                    style={{animationDelay: "0.3s"}}
                   >
-                    {plan.cta}
-                  </button>
-                </div>
-                
-                <div className="mt-8 pt-8 border-t border-purple-100/30 dark:border-purple-800/30">
-                  <ul className="space-y-4">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start animate-slide-in-left" style={{animationDelay: `${i * 0.05 + 0.4}s`}}>
-                        <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 ml-3 dark:text-gray-300">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                    {plan.cta} <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </motion.div>
           ))}
         </div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="mt-20 glass rounded-xl p-8 flex flex-col md:flex-row items-center justify-between border border-purple-100/20 dark:border-purple-800/30"
-        >
-          <div className="flex items-start md:items-center mb-6 md:mb-0">
-            <div className="bg-amber-100/70 backdrop-blur-sm p-3 rounded-lg text-amber-600 mr-4 dark:bg-amber-900/30 dark:text-amber-300 animate-pulse-subtle">
-              <AlertCircle className="h-6 w-6" />
+
+        <div className="p-6 md:p-8 rounded-2xl bg-purple-50/60 dark:bg-white/[0.02] border border-purple-100/80 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 shrink-0">
+              <ShieldCheck className="h-6 w-6" />
             </div>
-            <div className="animate-fade-in">
-              <h3 className="text-lg font-semibold text-gray-800 mb-1 dark:text-white">Not sure which plan is right?</h3>
-              <p className="text-gray-600 max-w-lg dark:text-gray-300">
-                Our team can help you choose the perfect plan for your specific needs and provide a custom demo.
+            <div>
+              <h4 className="font-semibold text-gray-900 dark:text-white">
+                Zero Lock-In Guarantee
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-zinc-300">
+                You can export your raw `.db` SQLite files at any time with one click. Your data is always yours.
               </p>
             </div>
           </div>
-          <button className="bg-gray-100/70 backdrop-blur-sm hover:bg-gray-200/70 text-gray-800 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap dark:bg-gray-700/70 dark:hover:bg-gray-600/70 dark:text-white animate-fade-in">
-            Contact Sales
-          </button>
-        </motion.div>
+          <Link to="https://github.com/Annany2002/nebula-backend" target="_blank">
+            <Button variant="outline" className="rounded-xl border-purple-200 dark:border-white/10">
+              View Open Source Code
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   );

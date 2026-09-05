@@ -1,18 +1,26 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import Pricing from "@/components/Pricing";
-import Footer from "@/components/Footer";
+import CodeDemo from "@/components/CodeDemo";
 import UseCases from "@/components/UseCases";
+import Pricing from "@/components/Pricing";
+import FAQ from "@/components/FAQ";
+import BottomCTA from "@/components/BottomCTA";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-transparent relative z-10">
+    <div className="min-h-screen bg-transparent relative z-10 selection:bg-purple-500/30">
       <Navbar />
-      <Hero />
-      <UseCases />
-      <Features />
-      <Pricing />
+      <main>
+        <Hero />
+        <Features />
+        <CodeDemo />
+        <UseCases />
+        <Pricing />
+        <FAQ />
+        <BottomCTA />
+      </main>
       <Footer />
     </div>
   );
