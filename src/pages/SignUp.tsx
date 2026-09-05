@@ -112,11 +112,7 @@ const SignUp = () => {
                       className="absolute right-0 top-0 h-full px-3"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                 </FormControl>
@@ -124,11 +120,7 @@ const SignUp = () => {
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            className="w-full rounded-2xl"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full rounded-2xl" disabled={isLoading}>
             {isLoading ? "Signing Up..." : "Sign Up"}
           </Button>
           <div className="w-full flex items-center gap-2">

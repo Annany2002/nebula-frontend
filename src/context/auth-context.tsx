@@ -1,11 +1,5 @@
 import { url } from "@/App";
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -70,9 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           toast.error("Session expired, please log in.");
         } else {
           const errorData = await response.json();
-          toast.error(
-            errorData.error || "Invalid user id or token, please login again."
-          );
+          toast.error(errorData.error || "Invalid user id or token, please login again.");
         }
         navigate(ROUTES.HOME);
         return;

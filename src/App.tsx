@@ -55,14 +55,8 @@ const App = () => {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="*" element={<NotFound />} />
                   <Route path="/dashboard/:userId" element={<Dashboard />} />
-                  <Route
-                    path="/databases/:db_name/tables"
-                    element={<AllTables />}
-                  />
-                  <Route
-                    path="/databases/:db_name/tables/:table_name"
-                    element={<SingleTable />}
-                  />
+                  <Route path="/databases/:db_name/tables" element={<AllTables />} />
+                  <Route path="/databases/:db_name/tables/:table_name" element={<SingleTable />} />
                 </Routes>
               </Suspense>
             </AuthProvider>

@@ -7,13 +7,7 @@ import { Loader2, Pencil, X, Calendar, Mail, User } from "lucide-react";
 import { useCurrentUser, useUpdateProfile } from "@/hooks/queries";
 import LoginNavBar from "@/components/LoginNavbar";
 import BreadCrumbNav from "@/components/BreadCrumbNav";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -62,9 +56,7 @@ const Profile = () => {
     });
   };
 
-  const initials = profile?.username
-    ? profile.username.substring(0, 2).toUpperCase()
-    : "??";
+  const initials = profile?.username ? profile.username.substring(0, 2).toUpperCase() : "??";
 
   if (isLoading) {
     return (
@@ -82,9 +74,7 @@ const Profile = () => {
       <div className="min-h-screen">
         <LoginNavBar />
         <div className="flex h-[60vh] items-center justify-center">
-          <p className="text-muted-foreground">
-            Failed to load profile. Please try again.
-          </p>
+          <p className="text-muted-foreground">Failed to load profile. Please try again.</p>
         </div>
       </div>
     );
@@ -129,12 +119,8 @@ const Profile = () => {
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <CardTitle className="text-xl truncate">
-                  {profile.username}
-                </CardTitle>
-                <CardDescription className="truncate">
-                  {profile.email}
-                </CardDescription>
+                <CardTitle className="text-xl truncate">{profile.username}</CardTitle>
+                <CardDescription className="truncate">{profile.email}</CardDescription>
               </div>
               <Button
                 variant={isEditing ? "ghost" : "outline"}
@@ -147,11 +133,7 @@ const Profile = () => {
                   setIsEditing(!isEditing);
                 }}
               >
-                {isEditing ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <Pencil className="h-4 w-4" />
-                )}
+                {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
               </Button>
             </CardHeader>
 
@@ -160,10 +142,7 @@ const Profile = () => {
             <CardContent className="pt-6">
               {isEditing ? (
                 <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                  >
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
                       control={form.control}
                       name="username"
@@ -205,9 +184,7 @@ const Profile = () => {
                         disabled={updateProfile.isPending}
                         className="rounded-2xl"
                       >
-                        {updateProfile.isPending
-                          ? "Saving..."
-                          : "Save Changes"}
+                        {updateProfile.isPending ? "Saving..." : "Save Changes"}
                       </Button>
                       <Button
                         type="button"
@@ -242,12 +219,8 @@ const Profile = () => {
                   <div className="flex items-center gap-3">
                     <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div>
-                      <p className="text-sm text-muted-foreground">
-                        Member since
-                      </p>
-                      <p className="font-medium">
-                        {formatDateTime(profile.createdAt)}
-                      </p>
+                      <p className="text-sm text-muted-foreground">Member since</p>
+                      <p className="font-medium">{formatDateTime(profile.createdAt)}</p>
                     </div>
                   </div>
                 </div>

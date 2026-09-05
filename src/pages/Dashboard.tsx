@@ -102,11 +102,7 @@ const Dashboard = () => {
             >
               <motion.div
                 animate={dbLoading ? { rotate: 360 } : { rotate: 0 }}
-                transition={
-                  dbLoading
-                    ? { duration: 1, repeat: Infinity, ease: "linear" }
-                    : {}
-                }
+                transition={dbLoading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -127,10 +123,7 @@ const Dashboard = () => {
               </motion.div>
             </Button>
 
-            <CreateDatabase
-              openChange={openChange}
-              setOpenChange={setOpenChange}
-            />
+            <CreateDatabase openChange={openChange} setOpenChange={setOpenChange} />
           </motion.div>
         </div>
 
@@ -147,7 +140,7 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-          <StatsGrid>
+            <StatsGrid>
               <StatsCard
                 icon={Database}
                 label="Total Databases"
@@ -219,11 +212,7 @@ const Dashboard = () => {
             {dbLoading ? (
               <SkeletonGrid count={6} type="card" />
             ) : databases.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <EnhancedEmptyState
                   icon={DatabaseIcon}
                   title="No databases yet"

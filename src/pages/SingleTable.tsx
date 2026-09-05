@@ -1,6 +1,16 @@
 import { Dispatch, SetStateAction, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { ArrowUpDown, ArrowUp, ArrowDown, FileText, LoaderCircle, RefreshCcw, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  FileText,
+  LoaderCircle,
+  RefreshCcw,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { formatDateTime } from "@/lib/formatDate";
 import BreadCrumbNav from "@/components/BreadCrumbNav";
 import LoginNavBar from "@/components/LoginNavbar";
@@ -46,17 +56,20 @@ export default function SingleTable() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Build query params
-  const queryParams: RecordsQueryParams = useMemo(() => ({
-    limit: pageSize,
-    offset: currentPage * pageSize,
-    sort: sortColumn,
-    order: sortOrder,
-  }), [pageSize, currentPage, sortColumn, sortOrder]);
+  const queryParams: RecordsQueryParams = useMemo(
+    () => ({
+      limit: pageSize,
+      offset: currentPage * pageSize,
+      sort: sortColumn,
+      order: sortOrder,
+    }),
+    [pageSize, currentPage, sortColumn, sortOrder]
+  );
 
   const {
     data: recordsData,
     isLoading: recordsLoading,
-    refetch: refetchRecords
+    refetch: refetchRecords,
   } = useRecords(db_name, table_name, queryParams);
 
   const { data: schema } = useTableSchema(db_name, table_name);
@@ -129,25 +142,22 @@ export default function SingleTable() {
     if (sortColumn !== column) {
       return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
     }
-    return sortOrder === "asc" 
-      ? <ArrowUp className="ml-1 h-3 w-3" />
-      : <ArrowDown className="ml-1 h-3 w-3" />;
+    return sortOrder === "asc" ? (
+      <ArrowUp className="ml-1 h-3 w-3" />
+    ) : (
+      <ArrowDown className="ml-1 h-3 w-3" />
+    );
   };
 
   return (
     <div className="min-h-screen space-y-6">
       <LoginNavBar />
       <div className="px-3">
-        <BreadCrumbNav
-          db_name={db_name}
-          table_name={table_name}
-        />
+        <BreadCrumbNav db_name={db_name} table_name={table_name} />
       </div>
 
       <div className="flex flex-col gap-1 px-3">
-        <span className="text-3xl text-primary font-semibold">
-          {table_name}
-        </span>
+        <span className="text-3xl text-primary font-semibold">{table_name}</span>
         <span className="text-muted-foreground text-sm">
           View and manage records in this table.
         </span>
@@ -163,9 +173,7 @@ export default function SingleTable() {
             value={searchTerm}
             onChange={handleSearch}
           />
-          <span className="text-sm text-muted-foreground">
-            {totalRecords} total records
-          </span>
+          <span className="text-sm text-muted-foreground">{totalRecords} total records</span>
         </div>
         <div className="flex gap-4 items-center">
           <div className="flex items-center gap-2">
@@ -188,12 +196,7 @@ export default function SingleTable() {
             className={`cursor-pointer ${recordsLoading && "animate-spin"}`}
             size={20}
           />
-          <CreateRecord
-            db_name={db_name}
-            table_name={table_name}
-            open={open}
-            setOpen={setOpen}
-          />
+          <CreateRecord db_name={db_name} table_name={table_name} open={open} setOpen={setOpen} />
         </div>
       </div>
 
@@ -245,11 +248,7 @@ export default function SingleTable() {
                         ))}
                         <TableCell>
                           <div className="flex items-center space-x-1">
-                            <EditRecord
-                              db_name={db_name}
-                              table_name={table_name}
-                              record={record}
-                            />
+                            <EditRecord db_name={db_name} table_name={table_name} record={record} />
                             <Button
                               variant="ghost"
                               size="icon"
@@ -270,7 +269,8 @@ export default function SingleTable() {
               {/* Pagination controls */}
               <div className="flex items-center justify-between px-4 py-3 border-t">
                 <span className="text-sm text-muted-foreground">
-                  Showing {pagination.offset + 1} to {Math.min(pagination.offset + records.length, totalRecords)} of {totalRecords}
+                  Showing {pagination.offset + 1} to{" "}
+                  {Math.min(pagination.offset + records.length, totalRecords)} of {totalRecords}
                 </span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -304,11 +304,7 @@ export default function SingleTable() {
   );
 }
 
-function EmptyRecord({
-  setOpen,
-}: {
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}) {
+function EmptyRecord({ setOpen }: { setOpen: Dispatch<SetStateAction<boolean>> }) {
   return (
     <div className="pt-16">
       <EmptyState

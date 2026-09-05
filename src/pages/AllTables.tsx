@@ -16,11 +16,7 @@ import { cn } from "@/lib/utils";
 
 export default function AllTables() {
   const { db_name } = useParams();
-  const {
-    data: tables = [],
-    isLoading: tableLoading,
-    refetch: refetchTables,
-  } = useTables(db_name);
+  const { data: tables = [], isLoading: tableLoading, refetch: refetchTables } = useTables(db_name);
   const { mutate: deleteTableMutation, isPending: isDeleting } = useDeleteTable();
   const [openChange, setOpenChange] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -52,10 +48,7 @@ export default function AllTables() {
         <BreadCrumbNav db_name={db_name} />
 
         {/* API Key Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <DatabaseApiKey databaseName={db_name} />
         </motion.div>
 
@@ -121,11 +114,7 @@ export default function AllTables() {
             >
               <motion.div
                 animate={tableLoading ? { rotate: 360 } : { rotate: 0 }}
-                transition={
-                  tableLoading
-                    ? { duration: 1, repeat: Infinity, ease: "linear" }
-                    : {}
-                }
+                transition={tableLoading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -219,11 +208,7 @@ export default function AllTables() {
             {tableLoading ? (
               <SkeletonGrid count={6} type="table" />
             ) : tables.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <EnhancedEmptyState
                   icon={Table}
                   title="No tables yet"
