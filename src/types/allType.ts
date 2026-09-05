@@ -82,3 +82,35 @@ export interface SQLQueryResultType {
   message?: string;
 }
 
+export interface ServiceMetricBucket {
+  timestamp: string;
+  requests: number;
+  warnings: number;
+  errors: number;
+}
+
+export interface ServiceMetricsType {
+  name: string;
+  requests: number;
+  warnings: number;
+  errors: number;
+  history: ServiceMetricBucket[];
+}
+
+export interface AdvisorIssueType {
+  id: string;
+  category: "SECURITY" | "PERFORMANCE" | "SCHEMA";
+  severity: "CRITICAL" | "WARNING" | "INFO";
+  title: string;
+  description: string;
+  tableName?: string;
+  suggestion: string;
+}
+
+export interface DatabaseAnalyticsType {
+  totalRequests: number;
+  successRate: number;
+  timeframe: string;
+  services: ServiceMetricsType[];
+  advisor: AdvisorIssueType[];
+}

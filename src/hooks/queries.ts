@@ -9,6 +9,7 @@ import {
   UserProfileType,
   DatabaseDetailType,
   SQLQueryResultType,
+  DatabaseAnalyticsType,
 } from "@/types/allType";
 import { toast } from "sonner";
 
@@ -485,7 +486,25 @@ export const useExecuteSQL = (dbName: string | undefined) => {
       queryClient.invalidateQueries({ queryKey: ["tables", dbName] });
       queryClient.invalidateQueries({ queryKey: ["records", dbName] });
       queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseAnalytics", dbName] });
     },
   });
 };
 
+// Database Analytics & Schema Advisor Hook
+export const useDatabaseAnalytics = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["databaseAnalytics", dbName],
+    queryFn: async (): Promise<DatabaseAnalyticsType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/analytics`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch database analytics");
+      return response.json();
+    },
+    enabled: !!dbName,
+    refetchInterval: 15000,
+  });
+};
