@@ -7,9 +7,9 @@ const Footer = () => {
     <footer className="border-t border-purple-200/30 dark:border-white/10 bg-white/20 dark:bg-black/40 backdrop-blur-md text-gray-700 dark:text-zinc-300 relative z-10 transition-colors overflow-hidden">
       <div className="container max-w-7xl mx-auto px-6 pt-12 pb-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-purple-200/30 dark:border-white/5">
-          <div className="flex items-center gap-4">
-            <NebulaLogo />
-            <span className="text-xs text-gray-500 dark:text-zinc-500 border-l border-purple-200/40 dark:border-white/10 pl-4">
+          <div className="flex items-center gap-3">
+            <NebulaLogo showText={false} />
+            <span className="text-xs text-gray-500 dark:text-zinc-500 border-l border-purple-200/40 dark:border-white/10 pl-3">
               © {currentYear} Nebula Project. MIT License.
             </span>
           </div>

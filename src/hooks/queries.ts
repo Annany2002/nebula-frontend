@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { url } from "@/App";
+import { url } from "@/lib/config";
 import {
   DataBaseType,
   TableType,

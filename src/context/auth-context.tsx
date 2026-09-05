@@ -1,4 +1,4 @@
-import { url } from "@/App";
+import { url } from "@/lib/config";
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";

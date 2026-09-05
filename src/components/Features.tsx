@@ -42,7 +42,7 @@ const Features = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-12">
           {/* Bento 1: Isolated SQLite (Span 2) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -50,7 +50,7 @@ const Features = () => {
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
             whileHover={{ y: -4 }}
-            className="bento-card md:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden group"
+            className="bento-card md:col-span-2 p-5 md:p-6 flex flex-col justify-between relative overflow-hidden group"
           >
             <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all pointer-events-none" />
 
@@ -111,7 +111,7 @@ const Features = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             viewport={{ once: true }}
             whileHover={{ y: -4 }}
-            className="bento-card p-8 flex flex-col justify-between"
+            className="bento-card p-5 md:p-6 flex flex-col justify-between"
           >
             <div>
               <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 w-fit mb-6">
@@ -145,7 +145,7 @@ const Features = () => {
             transition={{ duration: 0.5, delay: 0.15 }}
             viewport={{ once: true }}
             whileHover={{ y: -4 }}
-            className="bento-card p-8 flex flex-col justify-between"
+            className="bento-card p-5 md:p-6 flex flex-col justify-between"
           >
             <div>
               <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 w-fit mb-6">
@@ -180,7 +180,7 @@ const Features = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             viewport={{ once: true }}
             whileHover={{ y: -4 }}
-            className="bento-card md:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden"
+            className="bento-card md:col-span-2 p-5 md:p-6 flex flex-col justify-between relative overflow-hidden"
           >
             <div>
               <div className="flex items-center justify-between mb-4">

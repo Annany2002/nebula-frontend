@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { NebulaLogo } from "@/assets/nebula-logo";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface AuthLayoutProps {
   title: string;
@@ -29,10 +30,20 @@ const AuthLayout = ({
 }: AuthLayoutProps) => {
   return (
     <div className="flex items-center justify-center min-h-screen p-4 z-10 relative">
-      <Card className="w-full max-w-md bg-transparent backdrop-blur-sm border border-primary/50">
+      <div className="fixed top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
+
+      <Card className="w-full max-w-md bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-purple-200/50 dark:border-white/10 shadow-2xl">
         <CardHeader className="space-y-1 flex flex-col items-center text-center">
           <div className="w-full flex justify-center h-12 mb-2">
-            <NebulaLogo />
+            <Link
+              to="/"
+              className="inline-flex items-center hover:opacity-85 transition-opacity"
+              aria-label="Nebula Home"
+            >
+              <NebulaLogo />
+            </Link>
           </div>
           <CardTitle className="text-2xl font-bold">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>

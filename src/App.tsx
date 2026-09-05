@@ -1,12 +1,13 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
-import { AuthProvider } from "./context/auth-context";
+import { AuthProvider } from "@/context/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Lazy load pages
 const AllTables = lazy(() => import("./pages/AllTables"));
@@ -17,9 +18,8 @@ const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const SingleTable = lazy(() => import("./pages/SingleTable"));
 const Profile = lazy(() => import("./pages/Profile"));
-import ProtectedRoute from "@/components/ProtectedRoute";
 
-export const url = import.meta.env.VITE_BACKEND_URL as string;
+export { url } from "@/lib/config";
 
 // Create a client
 const queryClient = new QueryClient({
