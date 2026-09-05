@@ -21,12 +21,7 @@ export function Skeleton({ className }: SkeletonProps) {
 
 export function CardSkeleton({ className }: SkeletonProps) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-card p-6 space-y-4",
-        className
-      )}
-    >
+    <div className={cn("rounded-xl border bg-card p-6 space-y-4", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-lg" />
@@ -48,12 +43,7 @@ export function CardSkeleton({ className }: SkeletonProps) {
 
 export function TableCardSkeleton({ className }: SkeletonProps) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-card overflow-hidden",
-        className
-      )}
-    >
+    <div className={cn("rounded-xl border bg-card overflow-hidden", className)}>
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -84,12 +74,7 @@ export function TableCardSkeleton({ className }: SkeletonProps) {
 
 export function StatsCardSkeleton({ className }: SkeletonProps) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border p-5 space-y-3",
-        className
-      )}
-    >
+    <div className={cn("rounded-xl border p-5 space-y-3", className)}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <Skeleton className="h-4 w-24" />
@@ -107,11 +92,7 @@ interface SkeletonGridProps {
   className?: string;
 }
 
-export function SkeletonGrid({
-  count = 3,
-  type = "card",
-  className,
-}: SkeletonGridProps) {
+export function SkeletonGrid({ count = 3, type = "card", className }: SkeletonGridProps) {
   const SkeletonComponent = {
     card: CardSkeleton,
     table: TableCardSkeleton,

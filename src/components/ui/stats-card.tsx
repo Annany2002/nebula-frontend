@@ -70,7 +70,7 @@ export function StatsCard({
           "opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         )}
       />
-      
+
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
@@ -83,7 +83,8 @@ export function StatsCard({
                   trend.isPositive ? "text-purple-500" : "text-red-500"
                 )}
               >
-                {trend.isPositive ? "+" : "-"}{Math.abs(trend.value)}%
+                {trend.isPositive ? "+" : "-"}
+                {Math.abs(trend.value)}%
               </span>
               <span className="text-xs text-muted-foreground">vs last week</span>
             </div>
@@ -111,12 +112,7 @@ interface StatsGridProps {
 
 export function StatsGrid({ children, className }: StatsGridProps) {
   return (
-    <div
-      className={cn(
-        "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-        className
-      )}
-    >
+    <div className={cn("grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4", className)}>
       {children}
     </div>
   );

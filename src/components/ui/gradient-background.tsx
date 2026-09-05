@@ -6,10 +6,7 @@ interface GradientBackgroundProps {
   variant?: "default" | "subtle" | "vibrant";
 }
 
-export function GradientBackground({
-  className,
-  variant = "default",
-}: GradientBackgroundProps) {
+export function GradientBackground({ className, variant = "default" }: GradientBackgroundProps) {
   const variants = {
     default: {
       orb1: "bg-purple-500/20 dark:bg-purple-500/10",
@@ -31,12 +28,7 @@ export function GradientBackground({
   const colors = variants[variant];
 
   return (
-    <div
-      className={cn(
-        "fixed inset-0 -z-10 overflow-hidden pointer-events-none",
-        className
-      )}
-    >
+    <div className={cn("fixed inset-0 -z-10 overflow-hidden pointer-events-none", className)}>
       {/* Main gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/30" />
 

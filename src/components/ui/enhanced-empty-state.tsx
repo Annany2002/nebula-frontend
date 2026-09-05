@@ -84,9 +84,7 @@ export function EnhancedEmptyState({
         </motion.div>
 
         <h3 className="mt-6 text-xl font-semibold tracking-tight">{title}</h3>
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground leading-relaxed">
-          {description}
-        </p>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground leading-relaxed">{description}</p>
 
         <div className="mt-6 flex items-center justify-center gap-3">
           {actionLabel && actionOnClick && (
@@ -95,11 +93,7 @@ export function EnhancedEmptyState({
             </Button>
           )}
           {secondaryActionLabel && secondaryActionOnClick && (
-            <Button
-              onClick={secondaryActionOnClick}
-              variant="outline"
-              size="lg"
-            >
+            <Button onClick={secondaryActionOnClick} variant="outline" size="lg">
               {secondaryActionLabel}
             </Button>
           )}

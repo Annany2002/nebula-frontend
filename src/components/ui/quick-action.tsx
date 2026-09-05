@@ -42,12 +42,8 @@ export function QuickAction({
       <div
         className={cn(
           "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
-          variant === "default" && [
-            "bg-primary/10 group-hover:bg-primary/20",
-          ],
-          variant === "outline" && [
-            "bg-muted/50 group-hover:bg-primary/10",
-          ]
+          variant === "default" && ["bg-primary/10 group-hover:bg-primary/20"],
+          variant === "outline" && ["bg-muted/50 group-hover:bg-primary/10"]
         )}
       >
         <Icon
@@ -60,9 +56,7 @@ export function QuickAction({
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-foreground">{label}</p>
-        {description && (
-          <p className="text-sm text-muted-foreground truncate">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground truncate">{description}</p>}
       </div>
       <div
         className={cn(
@@ -97,20 +91,12 @@ interface QuickActionsGridProps {
   columns?: 1 | 2 | 3;
 }
 
-export function QuickActionsGrid({
-  children,
-  className,
-  columns = 2,
-}: QuickActionsGridProps) {
+export function QuickActionsGrid({ children, className, columns = 2 }: QuickActionsGridProps) {
   const gridCols = {
     1: "grid-cols-1",
     2: "grid-cols-1 md:grid-cols-2",
     3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
   };
 
-  return (
-    <div className={cn("grid gap-3", gridCols[columns], className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("grid gap-3", gridCols[columns], className)}>{children}</div>;
 }
