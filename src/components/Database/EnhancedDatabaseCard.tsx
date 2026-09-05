@@ -12,11 +12,7 @@ import {
   Table2,
   Trash2,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,12 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDeleteDatabase } from "@/hooks/queries";
 import { toast } from "sonner";
 import { DataBaseType } from "@/types/allType";
@@ -96,8 +87,7 @@ export function EnhancedDatabaseCard({ database, index = 0 }: EnhancedDatabaseCa
           animate={isHovered ? { opacity: [0.3, 0.5, 0.3] } : { opacity: 0 }}
           transition={{ duration: 2, repeat: Infinity }}
           style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent)",
           }}
         />
 
@@ -131,9 +121,7 @@ export function EnhancedDatabaseCard({ database, index = 0 }: EnhancedDatabaseCa
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => navigate(`/databases/${database.dbName}/tables`)}
-                >
+                <DropdownMenuItem onClick={() => navigate(`/databases/${database.dbName}/tables`)}>
                   View Tables
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -206,9 +194,7 @@ export function EnhancedDatabaseCard({ database, index = 0 }: EnhancedDatabaseCa
                           )}
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        {showKey ? "Hide" : "Show"} API Key
-                      </TooltipContent>
+                      <TooltipContent>{showKey ? "Hide" : "Show"} API Key</TooltipContent>
                     </Tooltip>
 
                     <Tooltip>

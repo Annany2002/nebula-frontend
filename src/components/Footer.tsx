@@ -31,7 +31,10 @@ const Footer = () => {
         { label: "SQLite Isolation", href: "#features" },
         { label: "JWT Security", href: "#features" },
         { label: "Self-Hosting", href: "#faq" },
-        { label: "License (MIT)", href: "https://github.com/Annany2002/nebula-backend/blob/main/LICENSE" },
+        {
+          label: "License (MIT)",
+          href: "https://github.com/Annany2002/nebula-backend/blob/main/LICENSE",
+        },
       ],
     },
   ];
@@ -44,8 +47,8 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <NebulaLogo className="mb-5" />
             <p className="text-sm text-gray-600 dark:text-zinc-400 max-w-sm leading-relaxed mb-6">
-              Nebula is the open-source backend engine pairing isolated per-tenant SQLite
-              storage with high-concurrency Go services. Zero cloud sprawl, instant REST APIs.
+              Nebula is the open-source backend engine pairing isolated per-tenant SQLite storage
+              with high-concurrency Go services. Zero cloud sprawl, instant REST APIs.
             </p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100/80 dark:bg-green-950/40 border border-green-200 dark:border-green-800/40 text-[11px] font-medium text-green-700 dark:text-green-400 mb-6">

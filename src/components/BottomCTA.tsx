@@ -22,13 +22,12 @@ const BottomCTA = () => {
           </div>
 
           <h2 className="text-3xl md:text-5xl font-extrabold text-gray-950 dark:text-white tracking-tight mb-5 max-w-2xl leading-tight">
-            Ready to Build With Pure{" "}
-            <span className="gradient-text">Speed & Isolation?</span>
+            Ready to Build With Pure <span className="gradient-text">Speed & Isolation?</span>
           </h2>
 
           <p className="text-base md:text-lg text-gray-600 dark:text-zinc-300 max-w-xl mb-8 leading-relaxed">
-            Eliminate complex backend devops, connection pool exhaustion, and cloud bill shock.
-            Run production-grade SQLite backends powered by Go.
+            Eliminate complex backend devops, connection pool exhaustion, and cloud bill shock. Run
+            production-grade SQLite backends powered by Go.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">

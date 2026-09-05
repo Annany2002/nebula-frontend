@@ -73,12 +73,11 @@ const Pricing = () => {
             <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Transparent Pricing
           </div>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-            Simple, Honest,{" "}
-            <span className="gradient-text">Predictable</span>
+            Simple, Honest, <span className="gradient-text">Predictable</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-zinc-300">
-            Start building without a credit card. Upgrade only when your product needs
-            dedicated production resources.
+            Start building without a credit card. Upgrade only when your product needs dedicated
+            production resources.
           </p>
 
           <div className="mt-8 inline-flex items-center p-1 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-purple-200/50 dark:border-white/10 backdrop-blur-md">
@@ -116,9 +115,7 @@ const Pricing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: index * 0.1 }}
               viewport={{ once: true }}
-              whileHover={
-                plan.highlighted ? { y: -8, scale: 1.015 } : { y: -4 }
-              }
+              whileHover={plan.highlighted ? { y: -8, scale: 1.015 } : { y: -4 }}
               className={`rounded-2xl flex flex-col justify-between transition-all duration-300 relative ${
                 plan.highlighted
                   ? "bg-white/75 dark:bg-purple-950/20 backdrop-blur-md border-2 border-purple-500 shadow-2xl shadow-purple-500/15 dark:shadow-purple-900/20"
@@ -133,9 +130,7 @@ const Pricing = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{plan.name}</h3>
                   {!plan.highlighted && (
                     <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-zinc-400">
                       {plan.badge}
@@ -154,9 +149,7 @@ const Pricing = () => {
                     </span>
                   ) : (
                     <>
-                      <span className="text-2xl font-bold text-gray-600 dark:text-zinc-400">
-                        $
-                      </span>
+                      <span className="text-2xl font-bold text-gray-600 dark:text-zinc-400">$</span>
                       <span className="text-5xl font-extrabold text-gray-900 dark:text-white">
                         {plan.price}
                       </span>
@@ -205,7 +198,8 @@ const Pricing = () => {
                 Zero Lock-In Guarantee
               </h4>
               <p className="text-sm text-gray-600 dark:text-zinc-300">
-                You can export your raw `.db` SQLite files at any time with one click. Your data is always yours.
+                You can export your raw `.db` SQLite files at any time with one click. Your data is
+                always yours.
               </p>
             </div>
           </div>

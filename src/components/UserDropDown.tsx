@@ -39,9 +39,7 @@ export default function UserDropDown() {
       <DropdownMenuContent className="bg-transparent backdrop-blur-sm">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {user && user.username && (
-          <DropdownMenuItem>{user.username}</DropdownMenuItem>
-        )}
+        {user && user.username && <DropdownMenuItem>{user.username}</DropdownMenuItem>}
         <DropdownMenuItem>
           <Link to="/profile">Profile</Link>
         </DropdownMenuItem>

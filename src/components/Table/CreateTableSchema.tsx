@@ -29,9 +29,7 @@ export default function CreateTableSchema({
 }) {
   const { mutate: createTable, isPending } = useCreateTable();
   const [tableName, setTableName] = useState("");
-  const [columns, setColumns] = useState<TableColumnType[]>([
-    { name: "", type: "TEXT" },
-  ]);
+  const [columns, setColumns] = useState<TableColumnType[]>([{ name: "", type: "TEXT" }]);
 
   const handleAddColumn = () => {
     setColumns([...columns, { name: "", type: "TEXT" }]);
@@ -45,11 +43,7 @@ export default function CreateTableSchema({
     setColumns(newColumns);
   };
 
-  const handleColumnChange = (
-    index: number,
-    field: "name" | "type",
-    value: string
-  ) => {
+  const handleColumnChange = (index: number, field: "name" | "type", value: string) => {
     const newColumns = [...columns];
     newColumns[index][field] = value;
     setColumns(newColumns);
@@ -117,18 +111,14 @@ export default function CreateTableSchema({
                   <div key={index} className="flex items-center gap-2">
                     <Input
                       value={column.name}
-                      onChange={(e) =>
-                        handleColumnChange(index, "name", e.target.value)
-                      }
+                      onChange={(e) => handleColumnChange(index, "name", e.target.value)}
                       placeholder="Column name"
                       className="flex-1"
                       disabled={index === 0 && column.name === "id"}
                     />
                     <select
                       value={column.type}
-                      onChange={(e) =>
-                        handleColumnChange(index, "type", e.target.value)
-                      }
+                      onChange={(e) => handleColumnChange(index, "type", e.target.value)}
                       className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                       disabled={index === 0 && column.name === "id"}
                     >

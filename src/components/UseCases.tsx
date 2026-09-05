@@ -54,11 +54,31 @@ const personas: PersonaCard[] = [
 ];
 
 const comparisonRows = [
-  { feature: "Storage Architecture", nebula: "Isolated SQLite per DB (Zero Contention)", traditional: "Shared Multi-Tenant Cluster" },
-  { feature: "P99 API Latency", nebula: "< 1.5 ms (Local Engine)", traditional: "45 - 120 ms (Network Hops)" },
-  { feature: "Data Portability", nebula: "100% Standard .db file download", traditional: "Complex dump & restore tools" },
-  { feature: "Self-Hosting", nebula: "Single Go binary / Docker Compose", traditional: "15+ containers & microservices" },
-  { feature: "Auth Built-In", nebula: "Dual JWT + Scoped API Keys", traditional: "Often extra add-on / 3rd party" },
+  {
+    feature: "Storage Architecture",
+    nebula: "Isolated SQLite per DB (Zero Contention)",
+    traditional: "Shared Multi-Tenant Cluster",
+  },
+  {
+    feature: "P99 API Latency",
+    nebula: "< 1.5 ms (Local Engine)",
+    traditional: "45 - 120 ms (Network Hops)",
+  },
+  {
+    feature: "Data Portability",
+    nebula: "100% Standard .db file download",
+    traditional: "Complex dump & restore tools",
+  },
+  {
+    feature: "Self-Hosting",
+    nebula: "Single Go binary / Docker Compose",
+    traditional: "15+ containers & microservices",
+  },
+  {
+    feature: "Auth Built-In",
+    nebula: "Dual JWT + Scoped API Keys",
+    traditional: "Often extra add-on / 3rd party",
+  },
 ];
 
 const UseCases = () => {
@@ -71,12 +91,11 @@ const UseCases = () => {
             <Users className="h-3.5 w-3.5 mr-1.5" /> Built For High-Velocity Builders
           </div>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-            Designed for Real-World{" "}
-            <span className="gradient-text">Product Velocity</span>
+            Designed for Real-World <span className="gradient-text">Product Velocity</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-zinc-300">
-            Whether you are testing an idea over the weekend or scaling an active
-            product, Nebula cuts out backend friction so you can focus on user experience.
+            Whether you are testing an idea over the weekend or scaling an active product, Nebula
+            cuts out backend friction so you can focus on user experience.
           </p>
         </div>
 

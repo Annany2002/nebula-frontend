@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  ExternalLink,
-  Table as TableIcon,
-  Globe,
-} from "lucide-react";
+import { ArrowRight, ExternalLink, Table as TableIcon, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -39,8 +34,8 @@ const Hero = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-gray-600 dark:text-zinc-300 max-w-2xl leading-relaxed mb-8"
           >
-            Spin up isolated SQLite databases, auto-generate type-safe REST APIs,
-            and authenticate users with dual-tier security. Single Go binary, zero cloud complexity.
+            Spin up isolated SQLite databases, auto-generate type-safe REST APIs, and authenticate
+            users with dual-tier security. Single Go binary, zero cloud complexity.
           </motion.p>
 
           <motion.div
@@ -80,7 +75,8 @@ const Hero = () => {
                   variant="outline"
                   className="h-12 px-7 rounded-xl border-purple-200 dark:border-white/10 text-gray-800 dark:text-zinc-200 bg-white/60 dark:bg-white/[0.03] hover:bg-purple-50 dark:hover:bg-white/[0.08] backdrop-blur-sm font-semibold text-base"
                 >
-                  Explore Docs <ExternalLink className="ml-2 h-4 w-4 text-gray-500 dark:text-zinc-400" />
+                  Explore Docs{" "}
+                  <ExternalLink className="ml-2 h-4 w-4 text-gray-500 dark:text-zinc-400" />
                 </Button>
               </Link>
             </motion.div>
@@ -143,7 +139,9 @@ const Hero = () => {
                   >
                     <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 pb-2 border-b border-purple-100 dark:border-white/10">
                       <span>TABLE: users (SQLite file: data/users_prod.db)</span>
-                      <span className="text-purple-600 dark:text-purple-400">4 columns • 3 rows indexed</span>
+                      <span className="text-purple-600 dark:text-purple-400">
+                        4 columns • 3 rows indexed
+                      </span>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -158,34 +156,52 @@ const Hero = () => {
                         </thead>
                         <tbody className="divide-y divide-purple-100/50 dark:divide-white/5 text-gray-800 dark:text-zinc-300 text-xs">
                           <tr className="hover:bg-purple-500/10 transition-colors">
-                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">usr_902f</td>
-                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">alex.vance@nebula.sh</td>
+                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">
+                              usr_902f
+                            </td>
+                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">
+                              alex.vance@nebula.sh
+                            </td>
                             <td className="py-2.5 px-3">
                               <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
                                 admin
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">2026-09-05 09:12:04</td>
+                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">
+                              2026-09-05 09:12:04
+                            </td>
                           </tr>
                           <tr className="hover:bg-purple-500/10 transition-colors">
-                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">usr_903a</td>
-                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">elena.roche@studio.io</td>
+                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">
+                              usr_903a
+                            </td>
+                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">
+                              elena.roche@studio.io
+                            </td>
                             <td className="py-2.5 px-3">
                               <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
                                 developer
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">2026-09-05 09:14:18</td>
+                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">
+                              2026-09-05 09:14:18
+                            </td>
                           </tr>
                           <tr className="hover:bg-purple-500/10 transition-colors">
-                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">usr_904k</td>
-                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">marcus@enterprise.ai</td>
+                            <td className="py-2.5 px-3 text-purple-600 dark:text-purple-300">
+                              usr_904k
+                            </td>
+                            <td className="py-2.5 px-3 text-gray-800 dark:text-zinc-200">
+                              marcus@enterprise.ai
+                            </td>
                             <td className="py-2.5 px-3">
                               <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
                                 member
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">2026-09-05 09:18:22</td>
+                            <td className="py-2.5 px-3 text-gray-500 dark:text-zinc-400">
+                              2026-09-05 09:18:22
+                            </td>
                           </tr>
                         </tbody>
                       </table>
@@ -193,7 +209,9 @@ const Hero = () => {
 
                     <div className="pt-3 text-[11px] text-gray-500 dark:text-zinc-400 flex items-center justify-between">
                       <span>Indexes: idx_users_email (B-Tree)</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">Status: Read/Write Available</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        Status: Read/Write Available
+                      </span>
                     </div>
                   </motion.div>
                 )}

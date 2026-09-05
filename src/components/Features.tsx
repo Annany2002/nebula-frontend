@@ -1,17 +1,29 @@
 import { motion } from "framer-motion";
-import {
-  HardDrive,
-  KeyRound,
-  Code2,
-  Cpu,
-  Layers,
-} from "lucide-react";
+import { HardDrive, KeyRound, Code2, Cpu, Layers } from "lucide-react";
 
 const Features = () => {
   const benchmarks = [
-    { label: "P99 Response Time", nebula: "1.2ms", traditional: "85ms", advantage: "70x Faster", percent: 92 },
-    { label: "Memory Footprint", nebula: "32 MB", traditional: "450 MB", advantage: "92% Lighter", percent: 88 },
-    { label: "Throughput (Req/Sec)", nebula: "125,000", traditional: "15,000", advantage: "8.3x Higher", percent: 94 },
+    {
+      label: "P99 Response Time",
+      nebula: "1.2ms",
+      traditional: "85ms",
+      advantage: "70x Faster",
+      percent: 92,
+    },
+    {
+      label: "Memory Footprint",
+      nebula: "32 MB",
+      traditional: "450 MB",
+      advantage: "92% Lighter",
+      percent: 88,
+    },
+    {
+      label: "Throughput (Req/Sec)",
+      nebula: "125,000",
+      traditional: "15,000",
+      advantage: "8.3x Higher",
+      percent: 94,
+    },
   ];
 
   return (
@@ -22,12 +34,11 @@ const Features = () => {
             <Layers className="h-3.5 w-3.5 mr-1.5" /> Architectural Highlights
           </div>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-            Engineered for Speed,{" "}
-            <span className="gradient-text">Isolation & Control</span>
+            Engineered for Speed, <span className="gradient-text">Isolation & Control</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-zinc-300">
-            Built from first principles in Go and SQLite to eliminate the operational
-            tax, noisy neighbors, and monthly bill shock of legacy cloud backends.
+            Built from first principles in Go and SQLite to eliminate the operational tax, noisy
+            neighbors, and monthly bill shock of legacy cloud backends.
           </p>
         </div>
 
@@ -57,9 +68,9 @@ const Features = () => {
                 100% Isolated SQLite Per Database
               </h3>
               <p className="text-gray-600 dark:text-zinc-300 text-base max-w-xl leading-relaxed mb-6">
-                Unlike traditional multi-tenant databases that cram hundreds of users
-                into shared table spaces, Nebula stores each database as an independent,
-                physical SQLite file. True isolation, zero lock contention, and instant file-level backups.
+                Unlike traditional multi-tenant databases that cram hundreds of users into shared
+                table spaces, Nebula stores each database as an independent, physical SQLite file.
+                True isolation, zero lock contention, and instant file-level backups.
               </p>
             </div>
 
@@ -110,7 +121,8 @@ const Features = () => {
                 Dual-Tier Authentication
               </h3>
               <p className="text-gray-600 dark:text-zinc-300 text-sm leading-relaxed mb-4">
-                Secure JWT tokens for user account and dashboard sessions; scoped API keys for programmatic backend-to-backend operations.
+                Secure JWT tokens for user account and dashboard sessions; scoped API keys for
+                programmatic backend-to-backend operations.
               </p>
             </div>
 
@@ -143,7 +155,8 @@ const Features = () => {
                 Instant Auto REST APIs
               </h3>
               <p className="text-gray-600 dark:text-zinc-300 text-sm leading-relaxed mb-4">
-                Create a table through the UI or API, and Nebula immediately mounts full CRUD endpoints with pagination and filter support.
+                Create a table through the UI or API, and Nebula immediately mounts full CRUD
+                endpoints with pagination and filter support.
               </p>
             </div>
 
@@ -187,7 +200,8 @@ const Features = () => {
               </div>
 
               <p className="text-gray-600 dark:text-zinc-300 text-sm max-w-xl leading-relaxed mb-6">
-                Nebula compiles into a single lean binary. No Node.js garbage collection stalls, no Python GIL bottlenecks, and no JVM memory bloat.
+                Nebula compiles into a single lean binary. No Node.js garbage collection stalls, no
+                Python GIL bottlenecks, and no JVM memory bloat.
               </p>
             </div>
 

@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Key, RefreshCw, Copy } from "lucide-react";
 import { url } from "@/App";
 import { useRefetch } from "@/hooks/use-refetch";
@@ -23,7 +17,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
   const { data: apiKey = "", isLoading } = useApiKey(databaseName);
   const { mutate: generateKey, isPending: generating } = useGenerateApiKey();
   const { mutate: deleteKey } = useDeleteApiKey();
-  
+
   const [showKey, setShowKey] = useState(false);
 
   const handleGenerateKey = () => generateKey(databaseName);
@@ -69,11 +63,7 @@ export function DatabaseApiKey({ databaseName }: DatabaseApiKeyProps) {
                     className="absolute right-0 top-0 h-full"
                     onClick={toggleShowKey}
                   >
-                    {showKey ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 )}
               </div>

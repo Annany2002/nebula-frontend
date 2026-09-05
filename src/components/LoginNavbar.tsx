@@ -5,19 +5,8 @@ import NebulaLogo from "@/assets/nebula-logo";
 import UserDropDown from "./UserDropDown";
 import { ThemeToggle } from "./ui/theme-toggle";
 import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Separator } from "./ui/separator";
 
 export default function LoginNavBar() {
@@ -49,10 +38,7 @@ export default function LoginNavBar() {
                       className="h-9 w-9 text-muted-foreground hover:text-foreground"
                       asChild
                     >
-                      <Link
-                        to="https://github.com/Annany2002/nebula-backend"
-                        target="_blank"
-                      >
+                      <Link to="https://github.com/Annany2002/nebula-backend" target="_blank">
                         <Github className="h-4 w-4" />
                         <span className="sr-only">GitHub</span>
                       </Link>
@@ -83,15 +69,8 @@ export default function LoginNavBar() {
                     <SheetTitle>Menu</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 flex flex-col gap-4">
-                    <Button
-                      variant="ghost"
-                      className="justify-start gap-3"
-                      asChild
-                    >
-                      <Link
-                        to="https://github.com/Annany2002/nebula-backend"
-                        target="_blank"
-                      >
+                    <Button variant="ghost" className="justify-start gap-3" asChild>
+                      <Link to="https://github.com/Annany2002/nebula-backend" target="_blank">
                         <Github className="h-4 w-4" />
                         GitHub
                         <ExternalLink className="h-3 w-3 ml-auto opacity-50" />

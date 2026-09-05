@@ -1,18 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Columns,
-  MoreVertical,
-  Table as TableIcon,
-  Trash2,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { ArrowRight, Columns, MoreVertical, Table as TableIcon, Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,12 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TableType } from "@/types/allType";
 import { formatDateTime } from "@/lib/formatDate";
 import { cn } from "@/lib/utils";
@@ -48,18 +33,15 @@ const typeColors: Record<string, string> = {
   BOOLEAN: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
 };
 
-export function EnhancedTableCard({
-  table,
-  dbName,
-  onDelete,
-  index = 0,
-}: EnhancedTableCardProps) {
+export function EnhancedTableCard({ table, dbName, onDelete, index = 0 }: EnhancedTableCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
   const getTypeColor = (type: string) => {
     const upperType = type.toUpperCase();
-    return typeColors[upperType] || "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20";
+    return (
+      typeColors[upperType] || "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20"
+    );
   };
 
   return (
@@ -183,10 +165,7 @@ export function EnhancedTableCard({
                     </div>
                     <Badge
                       variant="secondary"
-                      className={cn(
-                        "font-mono text-xs border",
-                        getTypeColor(column.type)
-                      )}
+                      className={cn("font-mono text-xs border", getTypeColor(column.type))}
                     >
                       {column.type}
                     </Badge>
@@ -197,9 +176,7 @@ export function EnhancedTableCard({
           </div>
 
           {/* Created date */}
-          <p className="text-xs text-muted-foreground">
-            Created {formatDateTime(table.createdAt)}
-          </p>
+          <p className="text-xs text-muted-foreground">Created {formatDateTime(table.createdAt)}</p>
 
           {/* Action button */}
           <Button

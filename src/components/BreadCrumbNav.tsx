@@ -38,9 +38,7 @@ export default function BreadCrumbNav({
           ) : (
             <Link
               to={dashboardLink}
-              className={`${
-                pathSegments[1] === "dashboard" && "text-purple-500"
-              }`}
+              className={`${pathSegments[1] === "dashboard" && "text-purple-500"}`}
             >
               Projects
             </Link>
@@ -63,10 +61,7 @@ export default function BreadCrumbNav({
           <>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <Link
-                to={`/databases/${db_name}/tables/${table_name}`}
-                className="text-purple-500"
-              >
+              <Link to={`/databases/${db_name}/tables/${table_name}`} className="text-purple-500">
                 {table_name}
               </Link>
             </BreadcrumbItem>

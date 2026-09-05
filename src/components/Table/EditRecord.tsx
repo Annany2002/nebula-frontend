@@ -49,17 +49,20 @@ export default function EditRecord({
       }
     }
 
-    updateRecord({
+    updateRecord(
+      {
         dbName: db_name,
         tableName: table_name,
         recordId: record.id,
-        data: parsedData
-    }, {
+        data: parsedData,
+      },
+      {
         onSuccess: () => {
-            form.reset();
-            setOpen(false);
-        }
-    });
+          form.reset();
+          setOpen(false);
+        },
+      }
+    );
   };
 
   const getInputType = (columnType: string) => {
@@ -90,9 +93,7 @@ export default function EditRecord({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editing record with ID: {record.id}</DialogTitle>
-          <DialogDescription>
-            Edit the values you want to change.
-          </DialogDescription>
+          <DialogDescription>Edit the values you want to change.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -113,11 +114,7 @@ export default function EditRecord({
                             placeholder={`Enter ${key}`}
                             defaultValue={value}
                             {...field}
-                            checked={
-                              record.type === "BOOLEAN"
-                                ? field.value === true
-                                : undefined
-                            }
+                            checked={record.type === "BOOLEAN" ? field.value === true : undefined}
                             onChange={(e) => {
                               if (record.type === "BOOLEAN") {
                                 field.onChange(e.target.checked);

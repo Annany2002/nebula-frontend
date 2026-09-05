@@ -44,44 +44,47 @@ export default function CreateRecord({
   const form = useForm<Record<string, any>>({
     defaultValues: {},
   });
-  
+
   // Update form default values when schema loads
   useEffect(() => {
     if (recordSchema && recordSchema.length > 0) {
-        const defaults = recordSchema.reduce((acc: any, column: any) => {
-            acc[column.name] = column.type === "BOOLEAN" ? false : "";
-            return acc;
-        }, {});
-        form.reset(defaults);
+      const defaults = recordSchema.reduce((acc: any, column: any) => {
+        acc[column.name] = column.type === "BOOLEAN" ? false : "";
+        return acc;
+      }, {});
+      form.reset(defaults);
     }
   }, [recordSchema, form]);
 
   const onSubmit = (data: Record<string, any>) => {
     // Convert values based on column types
     const formattedData = recordSchema.reduce((acc: any, column: any) => {
-        const value = data[column.name];
+      const value = data[column.name];
 
-        if (column.type === "INTEGER" && value) {
-          acc[column.name] = parseInt(value, 10);
-        } else if (column.type === "DECIMAL" && value) {
-          acc[column.name] = parseFloat(value);
-        } else if (column.type === "BOOLEAN") {
-           // Handle boolean properly (sometimes string "true" comes from inputs)
-           if (typeof value === "string") acc[column.name] = value.toLowerCase() === "true";
-           else acc[column.name] = Boolean(value);
-        } else {
-          acc[column.name] = value;
-        }
+      if (column.type === "INTEGER" && value) {
+        acc[column.name] = parseInt(value, 10);
+      } else if (column.type === "DECIMAL" && value) {
+        acc[column.name] = parseFloat(value);
+      } else if (column.type === "BOOLEAN") {
+        // Handle boolean properly (sometimes string "true" comes from inputs)
+        if (typeof value === "string") acc[column.name] = value.toLowerCase() === "true";
+        else acc[column.name] = Boolean(value);
+      } else {
+        acc[column.name] = value;
+      }
 
-        return acc;
+      return acc;
     }, {});
 
-    createRecord({ dbName: db_name, tableName: table_name, data: formattedData }, {
+    createRecord(
+      { dbName: db_name, tableName: table_name, data: formattedData },
+      {
         onSuccess: () => {
-            form.reset();
-            setOpen(false);
-        }
-    });
+          form.reset();
+          setOpen(false);
+        },
+      }
+    );
   };
 
   const getInputType = (columnType: string) => {
@@ -112,9 +115,7 @@ export default function CreateRecord({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Record</DialogTitle>
-          <DialogDescription>
-            Create a new record in the {table_name} table.
-          </DialogDescription>
+          <DialogDescription>Create a new record in the {table_name} table.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -133,22 +134,12 @@ export default function CreateRecord({
                           <Input
                             type={getInputType(record.type)}
                             placeholder={
-                              record.name === "created_at"
-                                ? currDate
-                                : `Enter ${record.name}`
+                              record.name === "created_at" ? currDate : `Enter ${record.name}`
                             }
                             {...field}
                             disabled={record.name === "created_at"}
-                            value={
-                              record.name === "created_at"
-                                ? currDate
-                                : field.value
-                            }
-                            checked={
-                              record.type === "BOOLEAN"
-                                ? field.value
-                                : undefined
-                            }
+                            value={record.name === "created_at" ? currDate : field.value}
+                            checked={record.type === "BOOLEAN" ? field.value : undefined}
                             onChange={(e) => {
                               if (record.type === "BOOLEAN") {
                                 field.onChange(e.target.checked);
@@ -165,11 +156,7 @@ export default function CreateRecord({
                 ))}
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>

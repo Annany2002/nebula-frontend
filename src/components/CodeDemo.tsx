@@ -124,13 +124,11 @@ const CodeDemo = () => {
             <span className="mr-2">⚡</span> Developer-First Experience
           </div>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-            Intuitive APIs.{" "}
-            <span className="gradient-text">Zero Complexity.</span>
+            Intuitive APIs. <span className="gradient-text">Zero Complexity.</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-zinc-300">
-            Write clean code without fighting ORMs, managing connection pools, or
-            configuring cloud VPCs. Use your favorite language or call the REST API
-            directly.
+            Write clean code without fighting ORMs, managing connection pools, or configuring cloud
+            VPCs. Use your favorite language or call the REST API directly.
           </p>
         </div>
 
@@ -186,10 +184,13 @@ const CodeDemo = () => {
                   <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
                   <div className="h-3 w-3 rounded-full bg-green-500/80" />
                   <span className="ml-2 font-mono text-[11px] text-gray-500 dark:text-zinc-400">
-                    nebula-client.{current.lang === "go" ? "go" : current.lang === "bash" ? "sh" : "ts"}
+                    nebula-client.
+                    {current.lang === "go" ? "go" : current.lang === "bash" ? "sh" : "ts"}
                   </span>
                 </div>
-                <span className="text-purple-600 dark:text-purple-400 font-mono text-[11px]">SDK v2.4</span>
+                <span className="text-purple-600 dark:text-purple-400 font-mono text-[11px]">
+                  SDK v2.4
+                </span>
               </div>
 
               <AnimatePresence mode="wait">
@@ -218,7 +219,9 @@ const CodeDemo = () => {
           <div className="lg:col-span-5 p-6 md:p-8 bg-purple-50/30 dark:bg-black/30 backdrop-blur-md flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-purple-100/60 dark:border-white/10 text-xs">
-                <span className="font-mono text-[11px] text-gray-500 dark:text-zinc-400">HTTP Response</span>
+                <span className="font-mono text-[11px] text-gray-500 dark:text-zinc-400">
+                  HTTP Response
+                </span>
                 <span className="px-2 py-0.5 rounded bg-green-500/15 text-green-600 dark:text-green-400 font-mono text-[10px] font-semibold">
                   200 OK • 0.8ms
                 </span>

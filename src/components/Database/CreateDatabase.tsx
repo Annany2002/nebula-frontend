@@ -26,8 +26,8 @@ export default function CreateDatabase({
     createDb(projectName, {
       onSuccess: () => setOpenChange(false),
       onError: (error) => {
-         // Error handling is mostly done in mutation onError, but we can do extra here if needed
-      }
+        // Error handling is mostly done in mutation onError, but we can do extra here if needed
+      },
     });
   };
 
@@ -43,11 +43,8 @@ export default function CreateDatabase({
         <DialogHeader>
           <DialogTitle>Create your new project</DialogTitle>
           <DialogDescription>
-            <span className="text-red-500 font-medium">
-              Use a unique name for your project
-            </span>
-            , so choose your project name wisely. The project name is same as
-            the underlying database
+            <span className="text-red-500 font-medium">Use a unique name for your project</span>, so
+            choose your project name wisely. The project name is same as the underlying database
           </DialogDescription>
         </DialogHeader>
         <div className="flex gap-2 w-full justify-between items-center space-x-2">
