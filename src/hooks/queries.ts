@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { url } from "@/App";
-import { DataBaseType, TableType, RecordSchemaType, RecordsResponse, RecordsQueryParams } from "@/types/allType";
+import { DataBaseType, TableType, RecordSchemaType, RecordsResponse, RecordsQueryParams, UserProfileType } from "@/types/allType";
 import { toast } from "sonner";
 
 export const getToken = () => localStorage.getItem("token");
@@ -392,5 +392,48 @@ export const useDeleteApiKey = () => {
             toast.success("API key deleted successfully");
         },
         onError: () => toast.error("Failed to delete API key"),
+    });
+};
+
+// User Profile Hooks
+export const useCurrentUser = () => {
+    return useQuery({
+        queryKey: ["currentUser"],
+        queryFn: async (): Promise<UserProfileType> => {
+            const token = getToken();
+            const response = await fetch(`${url}/api/v1/account/user/me`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!response.ok) throw new Error("Failed to fetch user profile");
+            return response.json();
+        },
+        enabled: !!getToken(),
+    });
+};
+
+export const useUpdateProfile = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: { username?: string; email?: string }) => {
+            const token = getToken();
+            const response = await fetch(`${url}/api/v1/account/user/me`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to update profile");
+            }
+            return response.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+            toast.success("Profile updated successfully");
+        },
+        onError: (error: Error) => toast.error(error.message),
     });
 };

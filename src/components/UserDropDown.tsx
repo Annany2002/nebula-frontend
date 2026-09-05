@@ -43,6 +43,9 @@ export default function UserDropDown() {
           <DropdownMenuItem>{user.username}</DropdownMenuItem>
         )}
         <DropdownMenuItem>
+          <Link to="/profile">Profile</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
           {isLoading ? (
             <Loader className="animate-spin" />
           ) : user && user.userId ? (

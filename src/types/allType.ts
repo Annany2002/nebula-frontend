@@ -51,3 +51,10 @@ export interface RecordsQueryParams {
   fields?: string[];
   filters?: Record<string, string>;
 }
+
+export interface UserProfileType {
+  userId: string;
+  username: string;
+  email: string;
+  createdAt: string;
+}

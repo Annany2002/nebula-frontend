@@ -16,6 +16,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const SingleTable = lazy(() => import("./pages/SingleTable"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 export const url = import.meta.env.VITE_BACKEND_URL as string;
 
@@ -51,6 +52,7 @@ const App = () => {
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="/sign-in" element={<SignIn />} />
                   <Route path="/sign-up" element={<SignUp />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="*" element={<NotFound />} />
                   <Route path="/dashboard/:userId" element={<Dashboard />} />
                   <Route
