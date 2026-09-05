@@ -12,6 +12,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 // Lazy load pages
 const AllTables = lazy(() => import("./pages/AllTables"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DatabaseStudio = lazy(() => import("./pages/DatabaseStudio"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const SignIn = lazy(() => import("./pages/SignIn"));
@@ -56,11 +57,16 @@ const App = () => {
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard/:userId" element={<Dashboard />} />
-                    <Route path="/databases/:db_name/tables" element={<AllTables />} />
+                    <Route path="/databases/:db_name" element={<DatabaseStudio />} />
+                    <Route path="/databases/:db_name/overview" element={<DatabaseStudio />} />
+                    <Route path="/databases/:db_name/tables" element={<DatabaseStudio />} />
                     <Route
                       path="/databases/:db_name/tables/:table_name"
-                      element={<SingleTable />}
+                      element={<DatabaseStudio />}
                     />
+                    <Route path="/databases/:db_name/sql" element={<DatabaseStudio />} />
+                    <Route path="/databases/:db_name/apikeys" element={<DatabaseStudio />} />
+                    <Route path="/databases/:db_name/settings" element={<DatabaseStudio />} />
                     <Route path="/profile" element={<Profile />} />
                   </Route>
 

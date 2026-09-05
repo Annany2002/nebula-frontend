@@ -25,6 +25,7 @@ export interface TableType {
   sql: string;
   tbl_name: string;
   type: string;
+  rowCount?: number;
 }
 
 export interface RecordSchemaType {
@@ -58,3 +59,26 @@ export interface UserProfileType {
   email: string;
   createdAt: string;
 }
+
+export interface DatabaseDetailType {
+  databaseId: number;
+  userId: string;
+  dbName: string;
+  filePath: string;
+  createdAt: string;
+  tables: number;
+  totalRecords: number;
+  sizeBytes: number;
+  sizeDisplay: string;
+  apiKey: string;
+}
+
+export interface SQLQueryResultType {
+  columns?: string[];
+  rows?: unknown[][];
+  rowCount: number;
+  rowsAffected: number;
+  executionMs: number;
+  message?: string;
+}
+

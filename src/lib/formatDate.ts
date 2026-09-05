@@ -1,7 +1,11 @@
-export function formatDateTime(dateString: string) {
+export function formatDateTime(dateString?: string | null) {
+  if (!dateString) {
+    return "";
+  }
+
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    return "Invalid Date";
+  if (isNaN(date.getTime()) || date.getFullYear() <= 1970) {
+    return "";
   }
 
   const day = ("0" + date.getDate()).slice(-2);
