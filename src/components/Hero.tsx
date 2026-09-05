@@ -10,7 +10,7 @@ const Hero = () => {
   const [activeTab, setActiveTab] = useState<"schema" | "rest">("schema");
 
   return (
-    <section className="pt-12 pb-20 md:pt-16 md:pb-28 relative z-10 overflow-hidden">
+    <section className="pt-28 pb-20 md:pt-36 md:pb-28 relative z-10 overflow-hidden">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-500/15 dark:bg-purple-600/20 blur-[130px] rounded-full pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[300px] h-[300px] bg-indigo-500/10 dark:bg-indigo-500/15 blur-[100px] rounded-full pointer-events-none" />
 

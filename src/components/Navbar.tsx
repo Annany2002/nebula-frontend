@@ -34,18 +34,24 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-purple-200/30 dark:border-white/10 bg-white/20 dark:bg-[#09090b]/50 backdrop-blur-md transition-colors">
-      <div className="w-full max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <header
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "top-3 md:top-4 mx-auto w-[94%] max-w-5xl rounded-full border border-purple-300/40 dark:border-white/10 bg-white/40 dark:bg-[#09090b]/70 backdrop-blur-xl shadow-xl shadow-purple-500/5 px-2"
+          : "top-0 w-full border-b border-purple-200/30 dark:border-white/10 bg-white/20 dark:bg-[#09090b]/50 backdrop-blur-md px-4"
+      }`}
+    >
+      <div className="w-full max-w-7xl mx-auto px-2 md:px-4 h-14 md:h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <NebulaLogo />
         </div>
 
-        <nav className="hidden md:flex items-center space-x-6 text-xs font-medium">
+        <nav className="hidden md:flex items-center space-x-1 text-xs font-medium">
           {navLinks.map((item) => (
             <a
               key={item.label}
               href={item.href}
-              className="text-gray-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              className="px-3 py-1.5 rounded-full text-gray-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-white/5 transition-all"
             >
               {item.label}
             </a>
@@ -54,19 +60,19 @@ const Navbar = () => {
             href="https://nebula-api-docs.vercel.app/"
             target="_blank"
             rel="noreferrer"
-            className="text-gray-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-400 flex items-center gap-1 transition-colors"
+            className="px-3 py-1.5 rounded-full text-gray-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-white/5 transition-all flex items-center gap-1"
           >
-            Docs <ExternalLink className="h-3 w-3" />
+            Docs <ExternalLink className="h-3 w-3 opacity-60" />
           </a>
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
           <Link
             to="https://github.com/Annany2002/nebula-backend"
             target="_blank"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-purple-200/50 dark:hover:border-white/10 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-gray-700 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-white/5 border border-purple-200/30 dark:border-white/10 transition-all"
           >
-            <Github size={15} />
+            <Github size={14} />
             <span>GitHub</span>
           </Link>
 
@@ -79,12 +85,12 @@ const Navbar = () => {
               <UserDropDown />
             )
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 pl-1">
               <Link to="/sign-in">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs font-semibold hover:text-purple-600 dark:hover:text-purple-400"
+                  className="text-xs font-semibold rounded-full hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-500/10 dark:hover:bg-white/5"
                 >
                   Sign In
                 </Button>
@@ -92,7 +98,7 @@ const Navbar = () => {
               <Link to="/sign-up">
                 <Button
                   size="sm"
-                  className="text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-sm shadow-purple-500/20"
+                  className="text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-full px-4 shadow-sm shadow-purple-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Get Started
                 </Button>
@@ -106,7 +112,7 @@ const Navbar = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 text-gray-700 dark:text-zinc-300"
+            className="p-2 text-gray-700 dark:text-zinc-300 rounded-full"
             onClick={toggleMobileMenu}
             aria-label="Toggle menu"
           >
@@ -118,11 +124,11 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden absolute top-16 left-4 right-4 rounded-2xl bg-white/95 dark:bg-[#0e0d16]/95 backdrop-blur-xl border border-purple-200 dark:border-white/10 shadow-2xl p-6 z-50"
+            className="md:hidden absolute top-16 left-3 right-3 rounded-2xl bg-white/90 dark:bg-[#0e0d16]/95 backdrop-blur-2xl border border-purple-200/60 dark:border-white/10 shadow-2xl p-6 z-50"
           >
             <div className="flex flex-col space-y-4">
               {navLinks.map((item) => (
@@ -149,12 +155,12 @@ const Navbar = () => {
                 ) : (
                   <>
                     <Link to="/sign-in" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full text-xs">
+                      <Button variant="outline" className="w-full text-xs rounded-xl">
                         Sign In
                       </Button>
                     </Link>
                     <Link to="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full text-xs bg-purple-600 hover:bg-purple-700 text-white">
+                      <Button className="w-full text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-xl">
                         Get Started Free
                       </Button>
                     </Link>
