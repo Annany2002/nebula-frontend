@@ -7,19 +7,23 @@ import ProjectOverview from "@/components/Studio/ProjectOverview";
 import TableEditor from "@/components/Studio/TableEditor";
 import SqlEditor from "@/components/Studio/SqlEditor";
 import ProjectSettings from "@/components/Studio/ProjectSettings";
+import DatabaseSubSidebar, { DatabaseSubTab } from "@/components/Studio/DatabaseSubSidebar";
+import SchemaVisualizer from "@/components/Studio/SchemaVisualizer";
+import DatabaseObjectsView from "@/components/Studio/DatabaseObjectsView";
 import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
 import CreateTableSchema from "@/components/Table/CreateTableSchema";
 import { useTables, useDatabaseDetails } from "@/hooks/queries";
 import { useAuth } from "@/context/auth-context";
 
 export default function DatabaseStudio() {
-  const { db_name = "", table_name = "" } = useParams();
+  const { db_name = "", table_name = "", sub_tab = "" } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
 
   const getInitialTab = (): StudioTab => {
     const path = location.pathname;
+    if (path.includes("/visualizer") || path.includes("/database")) return "database";
     if (path.includes("/tables")) return "editor";
     if (path.includes("/sql")) return "sql";
     if (path.includes("/apikeys")) return "apikeys";
@@ -27,7 +31,18 @@ export default function DatabaseStudio() {
     return "overview";
   };
 
+  const getInitialSubTab = (): DatabaseSubTab => {
+    const path = location.pathname;
+    if (path.includes("/database/indexes")) return "indexes";
+    if (path.includes("/database/triggers")) return "triggers";
+    if (path.includes("/database/backups")) return "backups";
+    if (path.includes("/database/tables")) return "tables";
+    return "visualizer";
+  };
+
   const [currentTab, setCurrentTab] = useState<StudioTab>(getInitialTab);
+  const [databaseSubTab, setDatabaseSubTab] = useState<DatabaseSubTab>(getInitialSubTab);
+  const [subSidebarCollapsed, setSubSidebarCollapsed] = useState(false);
   const [activeTable, setActiveTable] = useState<string>(table_name);
   const [createTableOpen, setCreateTableOpen] = useState(false);
 
@@ -43,11 +58,24 @@ export default function DatabaseStudio() {
   // Keep tab in sync with location
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes("/tables")) setCurrentTab("editor");
-    else if (path.includes("/sql")) setCurrentTab("sql");
-    else if (path.includes("/apikeys")) setCurrentTab("apikeys");
-    else if (path.includes("/settings")) setCurrentTab("settings");
-    else setCurrentTab("overview");
+    if (path.includes("/visualizer") || path.includes("/database")) {
+      setCurrentTab("database");
+      if (path.includes("/database/indexes")) setDatabaseSubTab("indexes");
+      else if (path.includes("/database/triggers")) setDatabaseSubTab("triggers");
+      else if (path.includes("/database/backups")) setDatabaseSubTab("backups");
+      else if (path.includes("/database/tables")) setDatabaseSubTab("tables");
+      else setDatabaseSubTab("visualizer");
+    } else if (path.includes("/tables")) {
+      setCurrentTab("editor");
+    } else if (path.includes("/sql")) {
+      setCurrentTab("sql");
+    } else if (path.includes("/apikeys")) {
+      setCurrentTab("apikeys");
+    } else if (path.includes("/settings")) {
+      setCurrentTab("settings");
+    } else {
+      setCurrentTab("overview");
+    }
   }, [location.pathname]);
 
   // Keep URL and active table in sync
@@ -60,11 +88,13 @@ export default function DatabaseStudio() {
     }
   }, [table_name, tables, activeTable]);
 
-  // Handle rail tab change
+  // Handle primary rail tab change
   const handleTabChange = (tab: StudioTab) => {
     setCurrentTab(tab);
     if (tab === "overview") {
       navigate(`/databases/${db_name}/overview`);
+    } else if (tab === "database") {
+      navigate(`/databases/${db_name}/visualizer`);
     } else if (tab === "sql") {
       navigate(`/databases/${db_name}/sql`);
     } else if (tab === "apikeys") {
@@ -78,6 +108,16 @@ export default function DatabaseStudio() {
       } else {
         navigate(`/databases/${db_name}/tables`);
       }
+    }
+  };
+
+  // Handle secondary database sub-sidebar navigation
+  const handleSubTabChange = (subTab: DatabaseSubTab) => {
+    setDatabaseSubTab(subTab);
+    if (subTab === "visualizer") {
+      navigate(`/databases/${db_name}/visualizer`);
+    } else {
+      navigate(`/databases/${db_name}/database/${subTab}`);
     }
   };
 
@@ -106,13 +146,23 @@ export default function DatabaseStudio() {
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[250px] bg-indigo-600/10 dark:bg-indigo-600/10 rounded-full blur-[130px]" />
       </div>
 
-      {/* Supabase-inspired Vertical Icon Rail with Nebula Branding */}
+      {/* Primary Sidebar Rail (Leftmost) */}
       <StudioRail
         currentTab={currentTab}
         onTabChange={handleTabChange}
         dbName={db_name}
         userId={currentUserId}
       />
+
+      {/* Secondary Sub-Sidebar (Active when Database tab is selected) */}
+      {currentTab === "database" && (
+        <DatabaseSubSidebar
+          currentSubTab={databaseSubTab}
+          onSubTabChange={handleSubTabChange}
+          collapsed={subSidebarCollapsed}
+          onToggleCollapse={() => setSubSidebarCollapsed((prev) => !prev)}
+        />
+      )}
 
       {/* Main Studio Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
@@ -147,6 +197,21 @@ export default function DatabaseStudio() {
                     if (topConnectBtn) (topConnectBtn as HTMLButtonElement).click();
                   }}
                 />
+              )}
+
+              {/* Database Tab: Either Schema Visualizer or Database Objects View */}
+              {currentTab === "database" && (
+                <>
+                  {databaseSubTab === "visualizer" ? (
+                    <SchemaVisualizer dbName={db_name} onSelectTable={handleSelectTable} />
+                  ) : (
+                    <DatabaseObjectsView
+                      dbName={db_name}
+                      subView={databaseSubTab}
+                      onSelectTable={handleSelectTable}
+                    />
+                  )}
+                </>
               )}
 
               {currentTab === "editor" && (

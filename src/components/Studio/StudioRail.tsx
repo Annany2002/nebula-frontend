@@ -10,13 +10,14 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ArrowLeft,
+  Database,
 } from "lucide-react";
 import NebulaLogo from "@/assets/nebula-logo";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 
-export type StudioTab = "overview" | "editor" | "sql" | "apikeys" | "settings";
+export type StudioTab = "overview" | "editor" | "sql" | "database" | "apikeys" | "settings";
 
 interface StudioRailProps {
   currentTab: StudioTab;
@@ -54,6 +55,11 @@ export default function StudioRail({ currentTab, onTabChange, dbName, userId }: 
       label: "SQL Editor",
       icon: Terminal,
     },
+    {
+      id: "database" as StudioTab,
+      label: "Database",
+      icon: Database,
+    },
   ];
 
   const configNavItems = [
@@ -89,7 +95,7 @@ export default function StudioRail({ currentTab, onTabChange, dbName, userId }: 
                   to={dashboardLink}
                   className="w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 transition-transform"
                 >
-                  <NebulaLogo showText={false} className="w-7 h-7" />
+                  <NebulaLogo showText={false} imgClassName="w-8 h-8" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right" className="bg-popover text-popover-foreground">
@@ -104,7 +110,7 @@ export default function StudioRail({ currentTab, onTabChange, dbName, userId }: 
                 to={dashboardLink}
                 className="flex items-center gap-2 hover:opacity-85 transition-opacity"
               >
-                <NebulaLogo showText={false} className="w-7 h-7" />
+                <NebulaLogo showText={false} imgClassName="w-7 h-7" />
                 <span className="font-bold text-sm tracking-tight text-foreground font-sans">
                   Nebula
                 </span>

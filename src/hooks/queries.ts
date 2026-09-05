@@ -10,6 +10,8 @@ import {
   DatabaseDetailType,
   SQLQueryResultType,
   DatabaseAnalyticsType,
+  SchemaDiagramType,
+  DatabaseObjectsType,
 } from "@/types/allType";
 import { toast } from "sonner";
 
@@ -506,5 +508,54 @@ export const useDatabaseAnalytics = (dbName: string | undefined) => {
     },
     enabled: !!dbName,
     refetchInterval: 15000,
+  });
+};
+
+// Schema Visualizer Diagram Hook
+export const useSchemaDiagram = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["schemaDiagram", dbName],
+    queryFn: async (): Promise<SchemaDiagramType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/diagram`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch schema diagram");
+      return response.json();
+    },
+    enabled: !!dbName,
+  });
+};
+
+// Database Objects (Indexes & Triggers) Hook
+export const useDatabaseObjects = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["databaseObjects", dbName],
+    queryFn: async (): Promise<DatabaseObjectsType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/objects`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch database objects");
+      return response.json();
+    },
+    enabled: !!dbName,
+  });
+};
+
+// Database SQL Export Hook
+export const useExportDatabaseSQL = (dbName: string | undefined) => {
+  return useMutation({
+    mutationFn: async (): Promise<{ sql: string; filename: string }> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/export/sql`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to export database SQL");
+      return response.json();
+    },
   });
 };

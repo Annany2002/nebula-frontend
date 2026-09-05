@@ -114,3 +114,45 @@ export interface DatabaseAnalyticsType {
   services: ServiceMetricsType[];
   advisor: AdvisorIssueType[];
 }
+
+export interface ForeignKeyInfo {
+  id: number;
+  seq: number;
+  table: string;
+  from: string;
+  to: string;
+  onUpdate: string;
+  onDelete: string;
+}
+
+export interface TableDiagramInfo {
+  name: string;
+  columns: TableColumnType[];
+  foreignKeys: ForeignKeyInfo[];
+  rowCount: number;
+  sql: string;
+}
+
+export interface SchemaDiagramType {
+  tables: TableDiagramInfo[];
+  totalTables: number;
+  totalForeignKeys: number;
+}
+
+export interface IndexInfo {
+  name: string;
+  tableName: string;
+  unique: boolean;
+  sql: string;
+}
+
+export interface TriggerInfo {
+  name: string;
+  tableName: string;
+  sql: string;
+}
+
+export interface DatabaseObjectsType {
+  indexes: IndexInfo[];
+  triggers: TriggerInfo[];
+}
