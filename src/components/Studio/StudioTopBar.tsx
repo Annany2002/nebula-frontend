@@ -1,15 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  ChevronDown,
-  Database,
-  Globe,
-  Plus,
-  Check,
-  Search,
-  ExternalLink,
-  BookOpen,
-} from "lucide-react";
+import { ChevronDown, Database, Globe, Plus, Check, Github } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,17 +109,16 @@ export default function StudioTopBar({ dbName, apiKey, userId }: StudioTopBarPro
           </Button>
         </div>
 
-        {/* Right Section: Docs + User Profile */}
+        {/* Right Section: GitHub + User Profile */}
         <div className="flex items-center space-x-2.5">
           <a
-            href="https://github.com/Annany2002/nebula"
+            href="https://github.com/Annany2002/nebula-frontend"
             target="_blank"
             rel="noreferrer"
-            className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-purple-500/10"
+            className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-md hover:bg-purple-500/10"
           >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Docs</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+            <Github className="w-3.5 h-3.5" />
+            <span>GitHub</span>
           </a>
 
           <div className="pl-1 border-l border-purple-200/40 dark:border-white/10">

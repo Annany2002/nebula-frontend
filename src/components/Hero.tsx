@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ExternalLink, Table as TableIcon, Globe } from "lucide-react";
+import { ArrowRight, ExternalLink, Table as TableIcon, Globe, Github } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -69,16 +69,19 @@ const Hero = () => {
             )}
 
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link to="https://nebula-api-docs.vercel.app" target="_blank">
+              <a
+                href="https://github.com/Annany2002/nebula-frontend"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <Button
                   size="lg"
                   variant="outline"
                   className="h-12 px-7 rounded-xl border-purple-300/40 dark:border-white/10 text-gray-800 dark:text-zinc-200 bg-white/15 dark:bg-white/[0.03] hover:bg-purple-50/50 dark:hover:bg-white/[0.08] backdrop-blur-md font-semibold text-base"
                 >
-                  Explore Docs{" "}
-                  <ExternalLink className="ml-2 h-4 w-4 text-gray-500 dark:text-zinc-400" />
+                  <Github className="mr-2 h-4 w-4" /> GitHub
                 </Button>
-              </Link>
+              </a>
             </motion.div>
           </motion.div>
         </div>

@@ -60,7 +60,7 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-2">
           <a
-            href="https://github.com/Annany2002/nebula-backend"
+            href="https://github.com/Annany2002/nebula-frontend"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub repository"
@@ -138,7 +138,7 @@ const Navbar = () => {
                 ))}
 
                 <a
-                  href="https://github.com/Annany2002/nebula-backend"
+                  href="https://github.com/Annany2002/nebula-frontend"
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setMobileMenuOpen(false)}

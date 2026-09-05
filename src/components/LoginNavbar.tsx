@@ -40,7 +40,7 @@ export default function LoginNavBar() {
                     asChild
                   >
                     <a
-                      href="https://github.com/Annany2002/nebula-backend"
+                      href="https://github.com/Annany2002/nebula-frontend"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -85,7 +85,7 @@ export default function LoginNavBar() {
                 <div className="mt-6 flex flex-col gap-4">
                   <Button variant="ghost" className="justify-start gap-3 rounded-xl" asChild>
                     <a
-                      href="https://github.com/Annany2002/nebula-backend"
+                      href="https://github.com/Annany2002/nebula-frontend"
                       target="_blank"
                       rel="noreferrer"
                     >

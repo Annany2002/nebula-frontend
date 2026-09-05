@@ -295,7 +295,7 @@ export default function StudioRail({ currentTab, onTabChange, dbName, userId }: 
             <Tooltip>
               <TooltipTrigger asChild>
                 <a
-                  href="https://github.com/Annany2002/nebula-backend"
+                  href="https://github.com/Annany2002/nebula-frontend"
                   target="_blank"
                   rel="noreferrer"
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-purple-500/10 transition-colors"
