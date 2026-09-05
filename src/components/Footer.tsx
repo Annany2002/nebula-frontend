@@ -1,5 +1,4 @@
 import NebulaLogo from "@/assets/nebula-logo";
-import { ExternalLink } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -32,17 +31,17 @@ const Footer = () => {
               href="https://nebula-api-docs.vercel.app/"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors inline-flex items-center gap-1"
+              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
             >
-              Docs <ExternalLink className="h-3 w-3 opacity-60" />
+              Docs
             </a>
             <a
               href="https://github.com/Annany2002/nebula-backend"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors inline-flex items-center gap-1"
+              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
             >
-              GitHub <ExternalLink className="h-3 w-3 opacity-60" />
+              GitHub
             </a>
             <a
               href="https://x.com/annanyvishwaka1"
