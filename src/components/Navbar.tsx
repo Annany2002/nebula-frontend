@@ -34,7 +34,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-purple-100/60 dark:border-white/10 bg-white/70 dark:bg-[#09090b]/75 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-purple-200/30 dark:border-white/10 bg-white/20 dark:bg-[#09090b]/50 backdrop-blur-md transition-colors">
       <div className="w-full max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <NebulaLogo />

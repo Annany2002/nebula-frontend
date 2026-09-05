@@ -114,7 +114,7 @@ const UseCases = () => {
                 className="bento-card p-6 flex flex-col justify-between"
               >
                 <div>
-                  <div className="p-3 rounded-xl bg-purple-100/80 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 w-fit mb-5">
+                  <div className="p-3 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 w-fit mb-5">
                     <Icon className="h-6 w-6" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
@@ -128,7 +128,7 @@ const UseCases = () => {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-purple-100 dark:border-white/5 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <div className="pt-4 border-t border-purple-200/30 dark:border-white/10 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                   <CheckCircle className="h-3.5 w-3.5 shrink-0" />
                   <span>{p.highlight}</span>
                 </div>
@@ -143,9 +143,9 @@ const UseCases = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="rounded-2xl border border-purple-200/80 dark:border-white/10 bg-white/70 dark:bg-[#111116]/80 backdrop-blur-md overflow-hidden shadow-xl"
+          className="rounded-2xl border border-purple-300/40 dark:border-white/10 bg-white/15 dark:bg-white/[0.03] backdrop-blur-md overflow-hidden shadow-xl"
         >
-          <div className="p-6 md:p-8 border-b border-purple-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-6 md:p-8 border-b border-purple-200/30 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 Nebula vs. Traditional Cloud Backends
@@ -154,7 +154,7 @@ const UseCases = () => {
                 How our isolated Go + SQLite architecture compares to legacy multi-tenant platforms.
               </p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300 text-xs font-semibold w-fit">
+            <span className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-200/40 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-semibold w-fit">
               Architecture Matrix
             </span>
           </div>
@@ -162,7 +162,7 @@ const UseCases = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-purple-100 dark:border-white/10 text-xs uppercase tracking-wider text-gray-500 dark:text-zinc-400 bg-purple-50/40 dark:bg-black/30">
+                <tr className="border-b border-purple-200/30 dark:border-white/10 text-xs uppercase tracking-wider text-gray-500 dark:text-zinc-400 bg-purple-500/5 dark:bg-white/[0.02]">
                   <th className="py-4 px-6 font-semibold">Capability</th>
                   <th className="py-4 px-6 font-semibold text-purple-600 dark:text-purple-400">
                     Nebula BaaS
@@ -172,11 +172,11 @@ const UseCases = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-purple-100/60 dark:divide-white/5">
+              <tbody className="divide-y divide-purple-200/30 dark:divide-white/10">
                 {comparisonRows.map((row, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-purple-50/30 dark:hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-purple-500/5 dark:hover:bg-white/[0.02] transition-colors"
                   >
                     <td className="py-4 px-6 font-medium text-gray-900 dark:text-white">
                       {row.feature}

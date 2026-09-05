@@ -134,7 +134,7 @@ const CodeDemo = () => {
 
         {/* Tab selector bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-          <div className="flex items-center p-1 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-purple-200/50 dark:border-white/10 backdrop-blur-md">
+          <div className="flex items-center p-1 rounded-xl bg-white/15 dark:bg-white/[0.03] border border-purple-300/40 dark:border-white/10 backdrop-blur-md">
             {snippets.map((s) => {
               const Icon = s.icon;
               const isActive = s.id === activeTab;
@@ -157,7 +157,7 @@ const CodeDemo = () => {
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/60 dark:bg-white/[0.04] border border-purple-200/60 dark:border-white/10 text-gray-700 dark:text-zinc-300 hover:border-purple-400 dark:hover:border-purple-500/40 backdrop-blur-md transition-all shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/15 dark:bg-white/[0.03] border border-purple-300/40 dark:border-white/10 text-gray-700 dark:text-zinc-300 hover:border-purple-400 dark:hover:border-purple-500/40 backdrop-blur-md transition-all shadow-xs"
           >
             {copied ? (
               <>
@@ -174,9 +174,9 @@ const CodeDemo = () => {
         </div>
 
         {/* Code + Response Dual Box */}
-        <div className="grid lg:grid-cols-12 gap-4 rounded-2xl overflow-hidden border border-purple-200/60 dark:border-white/10 shadow-2xl bg-white/60 dark:bg-black/40 backdrop-blur-md text-gray-900 dark:text-zinc-100">
+        <div className="grid lg:grid-cols-12 gap-4 rounded-2xl overflow-hidden border border-purple-300/40 dark:border-white/10 shadow-2xl bg-white/15 dark:bg-white/[0.03] backdrop-blur-md text-gray-900 dark:text-zinc-100">
           {/* Left: Code Input */}
-          <div className="lg:col-span-7 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-purple-100/60 dark:border-white/10 backdrop-blur-md">
+          <div className="lg:col-span-7 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-purple-200/30 dark:border-white/10 backdrop-blur-md">
             <div>
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-purple-100/60 dark:border-white/10 text-xs text-gray-500 dark:text-zinc-400">
                 <div className="flex items-center space-x-2">
@@ -216,7 +216,7 @@ const CodeDemo = () => {
           </div>
 
           {/* Right: Real-time Response Output */}
-          <div className="lg:col-span-5 p-6 md:p-8 bg-purple-50/30 dark:bg-black/30 backdrop-blur-md flex flex-col justify-between">
+          <div className="lg:col-span-5 p-6 md:p-8 bg-purple-500/5 dark:bg-white/[0.02] backdrop-blur-md flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-purple-100/60 dark:border-white/10 text-xs">
                 <span className="font-mono text-[11px] text-gray-500 dark:text-zinc-400">

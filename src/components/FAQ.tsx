@@ -74,8 +74,8 @@ const FAQ = () => {
                 viewport={{ once: true }}
                 className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
                   isOpen
-                    ? "bg-white/70 dark:bg-purple-950/20 border-purple-300 dark:border-purple-600/60 shadow-lg shadow-purple-500/5"
-                    : "bg-white/50 dark:bg-white/[0.03] border-purple-100/60 dark:border-white/[0.06] hover:border-purple-200 dark:hover:border-white/10"
+                    ? "bg-white/25 dark:bg-purple-950/20 border-purple-300 dark:border-purple-600/60 shadow-lg shadow-purple-500/5"
+                    : "bg-white/15 dark:bg-white/[0.03] border-purple-200/40 dark:border-white/[0.06] hover:border-purple-300 dark:hover:border-white/10"
                 } backdrop-blur-md`}
               >
                 <button
@@ -88,7 +88,7 @@ const FAQ = () => {
                   <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.25 }}
-                    className="shrink-0 p-1.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400"
+                    className="shrink-0 p-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/30 dark:border-purple-500/20 text-purple-600 dark:text-purple-400"
                   >
                     <ChevronDown className="h-4 w-4" />
                   </motion.div>

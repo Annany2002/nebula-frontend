@@ -56,7 +56,7 @@ const Features = () => {
 
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300">
+                <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300">
                   <HardDrive className="h-6 w-6" />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
@@ -74,8 +74,8 @@ const Features = () => {
               </p>
             </div>
 
-            <div className="mt-4 p-4 rounded-xl bg-purple-50/20 dark:bg-white/[0.02] backdrop-blur-md border border-purple-100/60 dark:border-white/5 grid sm:grid-cols-3 gap-3 font-mono text-xs">
-              <div className="p-3 rounded-lg bg-white/60 dark:bg-black/40 backdrop-blur-md border border-purple-200/60 dark:border-white/10 shadow-xs flex flex-col gap-1">
+            <div className="mt-4 p-4 rounded-xl bg-white/10 dark:bg-white/[0.02] backdrop-blur-md border border-purple-200/30 dark:border-white/10 grid sm:grid-cols-3 gap-3 font-mono text-xs">
+              <div className="p-3 rounded-lg bg-white/15 dark:bg-white/[0.03] border border-purple-200/30 dark:border-white/10 shadow-xs flex flex-col gap-1">
                 <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 font-semibold">
                   <span>auth_user.db</span>
                   <span className="text-[10px] text-green-500">Active</span>
@@ -84,7 +84,7 @@ const Features = () => {
                 <span className="text-[10px] text-zinc-400">WAL mode enabled</span>
               </div>
 
-              <div className="p-3 rounded-lg bg-white/60 dark:bg-black/40 backdrop-blur-md border border-purple-200/60 dark:border-white/10 shadow-xs flex flex-col gap-1">
+              <div className="p-3 rounded-lg bg-white/15 dark:bg-white/[0.03] border border-purple-200/30 dark:border-white/10 shadow-xs flex flex-col gap-1">
                 <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 font-semibold">
                   <span>shop_store.db</span>
                   <span className="text-[10px] text-green-500">Active</span>
@@ -93,7 +93,7 @@ const Features = () => {
                 <span className="text-[10px] text-zinc-400">Isolated 0.8ms P99</span>
               </div>
 
-              <div className="p-3 rounded-lg bg-white/60 dark:bg-black/40 backdrop-blur-md border border-purple-200/60 dark:border-white/10 shadow-xs flex flex-col gap-1">
+              <div className="p-3 rounded-lg bg-white/15 dark:bg-white/[0.03] border border-purple-200/30 dark:border-white/10 shadow-xs flex flex-col gap-1">
                 <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 font-semibold">
                   <span>telemetry.db</span>
                   <span className="text-[10px] text-green-500">Active</span>
@@ -114,7 +114,7 @@ const Features = () => {
             className="bento-card p-8 flex flex-col justify-between"
           >
             <div>
-              <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 w-fit mb-6">
+              <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 w-fit mb-6">
                 <KeyRound className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -126,7 +126,7 @@ const Features = () => {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-white/60 dark:bg-black/40 backdrop-blur-md border border-purple-100/60 dark:border-white/5 text-xs font-mono space-y-1.5">
+            <div className="p-3 rounded-lg bg-white/15 dark:bg-white/[0.03] border border-purple-200/30 dark:border-white/10 text-xs font-mono space-y-1.5">
               <div className="text-purple-600 dark:text-purple-300 flex items-center justify-between">
                 <span>Bearer &lt;JWT&gt;</span>
                 <span className="text-[10px] text-zinc-400">Account API</span>
@@ -148,7 +148,7 @@ const Features = () => {
             className="bento-card p-8 flex flex-col justify-between"
           >
             <div>
-              <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 w-fit mb-6">
+              <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 w-fit mb-6">
                 <Code2 className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -185,7 +185,7 @@ const Features = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300">
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300">
                     <Cpu className="h-6 w-6" />
                   </div>
                   <div>
@@ -205,7 +205,7 @@ const Features = () => {
               </p>
             </div>
 
-            <div className="space-y-4 pt-2 border-t border-purple-100 dark:border-white/5">
+            <div className="space-y-4 pt-2 border-t border-purple-200/30 dark:border-white/10">
               {benchmarks.map((b, i) => (
                 <div key={i} className="text-xs">
                   <div className="flex justify-between font-medium mb-1.5">
@@ -214,7 +214,7 @@ const Features = () => {
                       {b.nebula} vs {b.traditional} ({b.advantage})
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-purple-100 dark:bg-white/10 overflow-hidden">
+                  <div className="h-2 rounded-full bg-purple-500/10 dark:bg-white/10 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${b.percent}%` }}

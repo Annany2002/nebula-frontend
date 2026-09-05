@@ -39,7 +39,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="border-t border-purple-100/60 dark:border-white/10 bg-white/70 dark:bg-black/40 backdrop-blur-md text-gray-700 dark:text-zinc-300 relative z-10 transition-colors">
+    <footer className="border-t border-purple-200/30 dark:border-white/10 bg-white/20 dark:bg-black/40 backdrop-blur-md text-gray-700 dark:text-zinc-300 relative z-10 transition-colors">
       <div className="container max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Brand info */}
@@ -50,7 +50,7 @@ const Footer = () => {
               with high-concurrency Go services. Zero cloud sprawl, instant REST APIs.
             </p>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100/80 dark:bg-green-950/40 border border-green-200 dark:border-green-800/40 text-[11px] font-medium text-green-700 dark:text-green-400 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 dark:bg-green-950/40 border border-green-500/30 dark:border-green-800/40 text-[11px] font-medium text-green-700 dark:text-green-400 mb-6">
               <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               <span>All Systems Operational</span>
             </div>
@@ -61,7 +61,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="GitHub"
-                className="p-2 rounded-lg bg-gray-100 hover:bg-purple-100 dark:bg-white/5 dark:hover:bg-purple-900/40 text-gray-700 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 transition-colors"
+                className="p-2 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 border border-purple-200/30 dark:border-white/10 dark:bg-white/5 dark:hover:bg-purple-900/40 text-gray-700 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 transition-colors"
               >
                 <Github size={16} />
               </a>
@@ -70,7 +70,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Twitter"
-                className="p-2 rounded-lg bg-gray-100 hover:bg-purple-100 dark:bg-white/5 dark:hover:bg-purple-900/40 text-gray-700 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 transition-colors"
+                className="p-2 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 border border-purple-200/30 dark:border-white/10 dark:bg-white/5 dark:hover:bg-purple-900/40 text-gray-700 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 transition-colors"
               >
                 <Twitter size={16} />
               </a>
@@ -79,7 +79,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="LinkedIn"
-                className="p-2 rounded-lg bg-gray-100 hover:bg-purple-100 dark:bg-white/5 dark:hover:bg-purple-900/40 text-gray-700 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 transition-colors"
+                className="p-2 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 border border-purple-200/30 dark:border-white/10 dark:bg-white/5 dark:hover:bg-purple-900/40 text-gray-700 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 transition-colors"
               >
                 <Linkedin size={16} />
               </a>

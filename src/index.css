@@ -190,11 +190,11 @@
   }
 
   .bento-card {
-    @apply rounded-2xl bg-white/60 border border-purple-100/60 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:border-purple-300/80 dark:bg-white/[0.03] dark:border-white/[0.08] dark:hover:border-purple-500/50 dark:hover:shadow-purple-500/10;
+    @apply rounded-2xl bg-white/15 border border-purple-300/40 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:border-purple-400/60 dark:bg-white/[0.03] dark:border-white/[0.08] dark:hover:border-purple-500/50 dark:hover:shadow-purple-500/10;
   }
 
   .glass-pill {
-    @apply inline-flex items-center px-4 py-1.5 rounded-full bg-purple-50/60 border border-purple-200/50 text-purple-700 text-xs font-semibold backdrop-blur-md dark:bg-purple-950/30 dark:border-purple-700/30 dark:text-purple-300;
+    @apply inline-flex items-center px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-200/40 text-purple-700 text-xs font-semibold backdrop-blur-md dark:bg-purple-950/30 dark:border-purple-700/30 dark:text-purple-300;
   }
 }
 

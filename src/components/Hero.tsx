@@ -73,7 +73,7 @@ const Hero = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-12 px-7 rounded-xl border-purple-200 dark:border-white/10 text-gray-800 dark:text-zinc-200 bg-white/60 dark:bg-white/[0.03] hover:bg-purple-50 dark:hover:bg-white/[0.08] backdrop-blur-sm font-semibold text-base"
+                  className="h-12 px-7 rounded-xl border-purple-300/40 dark:border-white/10 text-gray-800 dark:text-zinc-200 bg-white/15 dark:bg-white/[0.03] hover:bg-purple-50/50 dark:hover:bg-white/[0.08] backdrop-blur-md font-semibold text-base"
                 >
                   Explore Docs{" "}
                   <ExternalLink className="ml-2 h-4 w-4 text-gray-500 dark:text-zinc-400" />
@@ -89,8 +89,8 @@ const Hero = () => {
           transition={{ duration: 0.7, delay: 0.4 }}
           className="relative max-w-5xl mx-auto"
         >
-          <div className="rounded-2xl overflow-hidden border border-purple-200/60 dark:border-white/10 shadow-2xl bg-white/60 dark:bg-black/40 backdrop-blur-md">
-            <div className="p-3 bg-white/40 dark:bg-white/[0.03] border-b border-purple-100/60 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 backdrop-blur-md">
+          <div className="rounded-2xl overflow-hidden border border-purple-300/40 dark:border-white/10 shadow-2xl bg-white/15 dark:bg-white/[0.03] backdrop-blur-md">
+            <div className="p-3 bg-white/20 dark:bg-white/[0.02] border-b border-purple-200/30 dark:border-white/10 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/80" />
@@ -102,12 +102,12 @@ const Hero = () => {
                 </span>
               </div>
 
-              <div className="flex items-center p-1 rounded-lg bg-gray-200/70 dark:bg-white/5 text-xs font-medium">
+              <div className="flex items-center p-1 rounded-lg bg-purple-500/10 dark:bg-white/5 border border-purple-200/30 dark:border-white/10 text-xs font-medium">
                 <button
                   onClick={() => setActiveTab("schema")}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
                     activeTab === "schema"
-                      ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white shadow-xs font-semibold"
+                      ? "bg-purple-600 text-white shadow-xs font-semibold"
                       : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
@@ -117,7 +117,7 @@ const Hero = () => {
                   onClick={() => setActiveTab("rest")}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
                     activeTab === "rest"
-                      ? "bg-white dark:bg-purple-600 text-purple-700 dark:text-white shadow-xs font-semibold"
+                      ? "bg-purple-600 text-white shadow-xs font-semibold"
                       : "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
@@ -126,7 +126,7 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="min-h-[300px] p-6 md:p-8 bg-white/40 dark:bg-black/35 backdrop-blur-md text-zinc-800 dark:text-zinc-100 font-mono text-xs md:text-sm">
+            <div className="min-h-[300px] p-6 md:p-8 bg-transparent text-zinc-800 dark:text-zinc-100 font-mono text-xs md:text-sm">
               <AnimatePresence mode="wait">
                 {activeTab === "schema" && (
                   <motion.div
@@ -163,7 +163,7 @@ const Hero = () => {
                               alex.vance@nebula.sh
                             </td>
                             <td className="py-2.5 px-3">
-                              <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
+                              <span className="px-2 py-0.5 rounded bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/30 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
                                 admin
                               </span>
                             </td>
@@ -179,7 +179,7 @@ const Hero = () => {
                               elena.roche@studio.io
                             </td>
                             <td className="py-2.5 px-3">
-                              <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
+                              <span className="px-2 py-0.5 rounded bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/30 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
                                 developer
                               </span>
                             </td>
@@ -195,7 +195,7 @@ const Hero = () => {
                               marcus@enterprise.ai
                             </td>
                             <td className="py-2.5 px-3">
-                              <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
+                              <span className="px-2 py-0.5 rounded bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/30 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold">
                                 member
                               </span>
                             </td>
