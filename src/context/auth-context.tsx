@@ -41,7 +41,9 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(
+    () => !!localStorage.getItem("token") && !!localStorage.getItem("user_id")
+  );
 
   const refreshUser = async () => {
     const token = localStorage.getItem("token");

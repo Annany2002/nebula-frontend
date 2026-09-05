@@ -20,10 +20,10 @@ const Hero = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-950 dark:text-white leading-[1.1] mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-950 dark:text-white leading-[1.15] mb-6"
           >
             The Backend Engine for{" "}
-            <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-400 bg-clip-text text-transparent">
+            <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-400 bg-clip-text text-transparent pb-3 -mb-3">
               High-Velocity Teams
             </span>
           </motion.h1>

@@ -17,6 +17,7 @@ const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const SingleTable = lazy(() => import("./pages/SingleTable"));
 const Profile = lazy(() => import("./pages/Profile"));
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export const url = import.meta.env.VITE_BACKEND_URL as string;
 
@@ -49,14 +50,22 @@ const App = () => {
               >
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="/sign-in" element={<SignIn />} />
                   <Route path="/sign-up" element={<SignUp />} />
-                  <Route path="/profile" element={<Profile />} />
+
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/dashboard/:userId" element={<Dashboard />} />
+                    <Route path="/databases/:db_name/tables" element={<AllTables />} />
+                    <Route
+                      path="/databases/:db_name/tables/:table_name"
+                      element={<SingleTable />}
+                    />
+                    <Route path="/profile" element={<Profile />} />
+                  </Route>
+
+                  {/* Catch-all 404 */}
                   <Route path="*" element={<NotFound />} />
-                  <Route path="/dashboard/:userId" element={<Dashboard />} />
-                  <Route path="/databases/:db_name/tables" element={<AllTables />} />
-                  <Route path="/databases/:db_name/tables/:table_name" element={<SingleTable />} />
                 </Routes>
               </Suspense>
             </AuthProvider>
