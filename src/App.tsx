@@ -57,22 +57,8 @@ const App = () => {
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard/:userId" element={<Dashboard />} />
+                    <Route path="/databases/:db_name/*" element={<DatabaseStudio />} />
                     <Route path="/databases/:db_name" element={<DatabaseStudio />} />
-                    <Route path="/databases/:db_name/overview" element={<DatabaseStudio />} />
-                    <Route path="/databases/:db_name/tables" element={<DatabaseStudio />} />
-                    <Route
-                      path="/databases/:db_name/tables/:table_name"
-                      element={<DatabaseStudio />}
-                    />
-                    <Route path="/databases/:db_name/sql" element={<DatabaseStudio />} />
-                    <Route path="/databases/:db_name/visualizer" element={<DatabaseStudio />} />
-                    <Route path="/databases/:db_name/database" element={<DatabaseStudio />} />
-                    <Route
-                      path="/databases/:db_name/database/:sub_tab"
-                      element={<DatabaseStudio />}
-                    />
-                    <Route path="/databases/:db_name/apikeys" element={<DatabaseStudio />} />
-                    <Route path="/databases/:db_name/settings" element={<DatabaseStudio />} />
                     <Route path="/profile" element={<Profile />} />
                   </Route>
 

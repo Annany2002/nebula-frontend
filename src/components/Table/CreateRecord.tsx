@@ -47,8 +47,9 @@ export default function CreateRecord({
 
   // Update form default values when schema loads
   useEffect(() => {
-    if (recordSchema && recordSchema.length > 0) {
-      const defaults = recordSchema.reduce((acc: any, column: any) => {
+    const schemaList: any[] = Array.isArray(recordSchema) ? recordSchema : [];
+    if (schemaList.length > 0) {
+      const defaults = schemaList.reduce((acc: any, column: any) => {
         acc[column.name] = column.type === "BOOLEAN" ? false : "";
         return acc;
       }, {});
@@ -58,7 +59,8 @@ export default function CreateRecord({
 
   const onSubmit = (data: Record<string, any>) => {
     // Convert values based on column types
-    const formattedData = recordSchema.reduce((acc: any, column: any) => {
+    const schemaList: any[] = Array.isArray(recordSchema) ? recordSchema : [];
+    const formattedData = schemaList.reduce((acc: any, column: any) => {
       const value = data[column.name];
 
       if (column.type === "INTEGER" && value) {
@@ -120,40 +122,41 @@ export default function CreateRecord({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="max-h-[40vh] overflow-y-auto space-y-4 px-1">
-              {recordSchema
-                .filter((record) => record.name !== "id")
-                .map((record, _) => (
-                  <FormField
-                    key={_}
-                    control={form.control}
-                    name={record.name}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{record.name}</FormLabel>
-                        <FormControl>
-                          <Input
-                            type={getInputType(record.type)}
-                            placeholder={
-                              record.name === "created_at" ? currDate : `Enter ${record.name}`
-                            }
-                            {...field}
-                            disabled={record.name === "created_at"}
-                            value={record.name === "created_at" ? currDate : field.value}
-                            checked={record.type === "BOOLEAN" ? field.value : undefined}
-                            onChange={(e) => {
-                              if (record.type === "BOOLEAN") {
-                                field.onChange(e.target.checked);
-                              } else {
-                                field.onChange(e.target.value);
+              {Array.isArray(recordSchema) &&
+                recordSchema
+                  .filter((record: any) => record.name !== "id")
+                  .map((record: any, _: number) => (
+                    <FormField
+                      key={_}
+                      control={form.control}
+                      name={record.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{record.name}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type={getInputType(record.type)}
+                              placeholder={
+                                record.name === "created_at" ? currDate : `Enter ${record.name}`
                               }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
+                              {...field}
+                              disabled={record.name === "created_at"}
+                              value={record.name === "created_at" ? currDate : field.value}
+                              checked={record.type === "BOOLEAN" ? field.value : undefined}
+                              onChange={(e) => {
+                                if (record.type === "BOOLEAN") {
+                                  field.onChange(e.target.checked);
+                                } else {
+                                  field.onChange(e.target.value);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -122,7 +122,7 @@ export default function DatabaseSubSidebar({
                 key={item.id}
                 onClick={() => onSubTabChange(item.id)}
                 className={cn(
-                  "flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-xs transition-all text-left group",
+                  "flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-xs transition-colors duration-150 text-left group",
                   isActive
                     ? "bg-purple-600/15 text-purple-700 dark:text-purple-300 dark:bg-purple-500/20 font-semibold shadow-xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-purple-500/10 dark:hover:bg-white/5"
@@ -165,7 +165,7 @@ export default function DatabaseSubSidebar({
                 key={item.id}
                 onClick={() => onSubTabChange(item.id)}
                 className={cn(
-                  "flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-xs transition-all text-left group",
+                  "flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-xs transition-colors duration-150 text-left group",
                   isActive
                     ? "bg-purple-600/15 text-purple-700 dark:text-purple-300 dark:bg-purple-500/20 font-semibold shadow-xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-purple-500/10 dark:hover:bg-white/5"

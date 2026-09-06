@@ -5,10 +5,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  Code2,
   Copy,
   Check,
-  ChevronDown,
   ChevronRight,
   Search,
   Table2,
@@ -20,14 +18,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table as TableUI,
   TableBody,
@@ -95,10 +85,6 @@ export default function SqlEditor({ dbName, tables }: SqlEditorProps) {
 
   const handleSelectTemplate = (sqlText: string) => {
     setQuery(sqlText);
-  };
-
-  const handleInsertColumn = (columnName: string) => {
-    setQuery((prev) => `${prev} ${columnName}`);
   };
 
   const handleCopyResult = () => {
@@ -203,9 +189,7 @@ export default function SqlEditor({ dbName, tables }: SqlEditorProps) {
                     {t.columns.map((col) => (
                       <div
                         key={col.name}
-                        onClick={() => handleInsertColumn(col.name)}
-                        className="flex items-center justify-between py-0.5 px-1.5 rounded text-[11px] font-mono text-muted-foreground hover:text-foreground hover:bg-purple-500/10 cursor-pointer group/col"
-                        title={`Click to insert column "${col.name}" into query`}
+                        className="flex items-center justify-between py-0.5 px-1.5 rounded text-[11px] font-mono text-muted-foreground select-none"
                       >
                         <div className="flex items-center space-x-1.5 truncate">
                           {col.pk === 1 ? (
@@ -213,9 +197,7 @@ export default function SqlEditor({ dbName, tables }: SqlEditorProps) {
                           ) : (
                             <Columns className="w-2.5 h-2.5 opacity-40 shrink-0" />
                           )}
-                          <span className="truncate group-hover/col:text-purple-600 dark:group-hover/col:text-purple-300">
-                            {col.name}
-                          </span>
+                          <span className="truncate text-foreground/80">{col.name}</span>
                         </div>
                         <span className="text-[9px] uppercase opacity-50 shrink-0">{col.type}</span>
                       </div>
@@ -255,69 +237,6 @@ export default function SqlEditor({ dbName, tables }: SqlEditorProps) {
               <Terminal className="w-4 h-4" />
             </div>
             <span className="text-xs font-semibold text-foreground">SQL Runner</span>
-
-            {/* Quick Query Templates Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1 border border-purple-200/40 dark:border-white/10 bg-muted/30 px-2.5 rounded-lg"
-                >
-                  <Code2 className="w-3.5 h-3.5" />
-                  <span>Templates</span>
-                  <ChevronDown className="w-3 h-3 ml-0.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-60 bg-popover border-purple-200/50 dark:border-white/10 text-popover-foreground p-1"
-              >
-                <DropdownMenuLabel className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground px-2 py-1">
-                  Query Tables
-                </DropdownMenuLabel>
-                {tables.map((t) => (
-                  <DropdownMenuItem
-                    key={t.name}
-                    onClick={() => handleSelectTemplate(`SELECT * FROM ${t.name} LIMIT 25;`)}
-                    className="flex items-center justify-between text-xs cursor-pointer hover:bg-purple-500/10 font-mono px-2 py-1.5 rounded"
-                  >
-                    <div className="flex items-center space-x-2 truncate">
-                      <Table2 className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                      <span className="truncate">{t.name}</span>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
-                      {t.rowCount ?? 0} rows
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-
-                <DropdownMenuSeparator className="bg-border" />
-                <DropdownMenuLabel className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground px-2 py-1">
-                  System Queries
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() =>
-                    handleSelectTemplate("SELECT name, sql FROM sqlite_master WHERE type='table';")
-                  }
-                  className="text-xs cursor-pointer hover:bg-purple-500/10 font-mono px-2 py-1.5 rounded"
-                >
-                  List all tables schema
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleSelectTemplate("SELECT sqlite_version();")}
-                  className="text-xs cursor-pointer hover:bg-purple-500/10 font-mono px-2 py-1.5 rounded"
-                >
-                  SQLite version
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleSelectTemplate("PRAGMA integrity_check;")}
-                  className="text-xs cursor-pointer hover:bg-purple-500/10 font-mono px-2 py-1.5 rounded"
-                >
-                  Check integrity
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           <div className="flex items-center space-x-2.5">

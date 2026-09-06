@@ -16,21 +16,25 @@ import { useTables, useDatabaseDetails } from "@/hooks/queries";
 import { useAuth } from "@/context/auth-context";
 
 export default function DatabaseStudio() {
-  const { db_name = "", table_name = "", sub_tab = "" } = useParams();
-  const navigate = useNavigate();
+  const params = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
+
+  const db_name = params.db_name || "";
+  const matchTable = location.pathname.match(/\/tables\/([^/]+)/);
+  const table_name = params.table_name || (matchTable ? matchTable[1] : "");
 
   const getInitialTab = (): StudioTab => {
     const path = location.pathname;
     if (path.includes("/overview")) return "overview";
+    if (path.includes("/visualizer") || path.includes("/database")) {
+      return "database";
+    }
     if (path.includes("/tables")) return "editor";
     if (path.includes("/sql")) return "sql";
     if (path.includes("/apikeys")) return "apikeys";
     if (path.includes("/settings")) return "settings";
-    if (path.includes("/visualizer") || path.includes("/database/") || path.endsWith("/database")) {
-      return "database";
-    }
     return "overview";
   };
 
@@ -39,8 +43,9 @@ export default function DatabaseStudio() {
     if (path.includes("/database/indexes")) return "indexes";
     if (path.includes("/database/triggers")) return "triggers";
     if (path.includes("/database/backups")) return "backups";
+    if (path.includes("/visualizer")) return "visualizer";
     if (path.includes("/database/tables")) return "tables";
-    return "visualizer";
+    return "tables";
   };
 
   const [currentTab, setCurrentTab] = useState<StudioTab>(getInitialTab);
@@ -63,6 +68,14 @@ export default function DatabaseStudio() {
     const path = location.pathname;
     if (path.includes("/overview")) {
       setCurrentTab("overview");
+    } else if (path.includes("/visualizer") || path.includes("/database")) {
+      setCurrentTab("database");
+      if (path.includes("/database/indexes")) setDatabaseSubTab("indexes");
+      else if (path.includes("/database/triggers")) setDatabaseSubTab("triggers");
+      else if (path.includes("/database/backups")) setDatabaseSubTab("backups");
+      else if (path.includes("/visualizer")) setDatabaseSubTab("visualizer");
+      else if (path.includes("/database/tables")) setDatabaseSubTab("tables");
+      else setDatabaseSubTab("tables");
     } else if (path.includes("/tables")) {
       setCurrentTab("editor");
     } else if (path.includes("/sql")) {
@@ -71,17 +84,6 @@ export default function DatabaseStudio() {
       setCurrentTab("apikeys");
     } else if (path.includes("/settings")) {
       setCurrentTab("settings");
-    } else if (
-      path.includes("/visualizer") ||
-      path.includes("/database/") ||
-      path.endsWith("/database")
-    ) {
-      setCurrentTab("database");
-      if (path.includes("/database/indexes")) setDatabaseSubTab("indexes");
-      else if (path.includes("/database/triggers")) setDatabaseSubTab("triggers");
-      else if (path.includes("/database/backups")) setDatabaseSubTab("backups");
-      else if (path.includes("/database/tables")) setDatabaseSubTab("tables");
-      else setDatabaseSubTab("visualizer");
     } else {
       setCurrentTab("overview");
     }
@@ -101,21 +103,25 @@ export default function DatabaseStudio() {
   const handleTabChange = (tab: StudioTab) => {
     setCurrentTab(tab);
     if (tab === "overview") {
-      navigate(`/databases/${db_name}/overview`);
+      navigate(`/databases/${db_name}/overview`, { replace: true });
     } else if (tab === "database") {
-      navigate(`/databases/${db_name}/visualizer`);
+      if (databaseSubTab === "visualizer") {
+        navigate(`/databases/${db_name}/visualizer`, { replace: true });
+      } else {
+        navigate(`/databases/${db_name}/database/${databaseSubTab || "tables"}`, { replace: true });
+      }
     } else if (tab === "sql") {
-      navigate(`/databases/${db_name}/sql`);
+      navigate(`/databases/${db_name}/sql`, { replace: true });
     } else if (tab === "apikeys") {
-      navigate(`/databases/${db_name}/apikeys`);
+      navigate(`/databases/${db_name}/apikeys`, { replace: true });
     } else if (tab === "settings") {
-      navigate(`/databases/${db_name}/settings`);
+      navigate(`/databases/${db_name}/settings`, { replace: true });
     } else if (tab === "editor") {
       const targetTable = activeTable || (tables[0]?.name ?? "");
       if (targetTable) {
-        navigate(`/databases/${db_name}/tables/${targetTable}`);
+        navigate(`/databases/${db_name}/tables/${targetTable}`, { replace: true });
       } else {
-        navigate(`/databases/${db_name}/tables`);
+        navigate(`/databases/${db_name}/tables`, { replace: true });
       }
     }
   };
@@ -124,9 +130,9 @@ export default function DatabaseStudio() {
   const handleSubTabChange = (subTab: DatabaseSubTab) => {
     setDatabaseSubTab(subTab);
     if (subTab === "visualizer") {
-      navigate(`/databases/${db_name}/visualizer`);
+      navigate(`/databases/${db_name}/visualizer`, { replace: true });
     } else {
-      navigate(`/databases/${db_name}/database/${subTab}`);
+      navigate(`/databases/${db_name}/database/${subTab}`, { replace: true });
     }
   };
 
@@ -218,6 +224,7 @@ export default function DatabaseStudio() {
                       dbName={db_name}
                       subView={databaseSubTab}
                       onSelectTable={handleSelectTable}
+                      onOpenCreateTable={() => setCreateTableOpen(true)}
                     />
                   )}
                 </>

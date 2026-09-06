@@ -56,7 +56,28 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
   const [pan, setPan] = useState({ x: 60, y: 60 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
-  const [positions, setPositions] = useState<Record<string, TablePosition>>({});
+  // Compute auto-layout positions for tables
+  const computeInitialPositions = useCallback((tablesList?: TableDiagramInfo[]) => {
+    if (!tablesList || tablesList.length === 0) return {};
+    const initial: Record<string, TablePosition> = {};
+    const cols = Math.max(1, Math.ceil(Math.sqrt(tablesList.length)));
+    const xSpacing = 360;
+    const ySpacing = 320;
+
+    tablesList.forEach((t, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      initial[t.name] = {
+        x: 80 + col * xSpacing,
+        y: 60 + row * ySpacing,
+      };
+    });
+    return initial;
+  }, []);
+
+  const [positions, setPositions] = useState<Record<string, TablePosition>>(() =>
+    computeInitialPositions(diagram?.tables)
+  );
   const [draggingTable, setDraggingTable] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [hoveredTable, setHoveredTable] = useState<string | null>(null);
@@ -64,45 +85,22 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
   const [copiedSql, setCopiedSql] = useState(false);
 
   // Initialize auto-layout positions for tables
-  const autoLayout = useCallback((tables: TableDiagramInfo[]) => {
-    const newPos: Record<string, TablePosition> = {};
-    const cols = Math.max(1, Math.ceil(Math.sqrt(tables.length)));
-    const xSpacing = 360;
-    const ySpacing = 320;
-
-    tables.forEach((t, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      newPos[t.name] = {
-        x: 80 + col * xSpacing,
-        y: 60 + row * ySpacing,
-      };
-    });
-    setPositions(newPos);
-  }, []);
+  const autoLayout = useCallback(
+    (tables: TableDiagramInfo[]) => {
+      setPositions(computeInitialPositions(tables));
+    },
+    [computeInitialPositions]
+  );
 
   useEffect(() => {
     if (diagram?.tables && diagram.tables.length > 0) {
       setPositions((prev) => {
         const hasAll = diagram.tables.every((t) => prev[t.name]);
         if (hasAll && Object.keys(prev).length > 0) return prev;
-        const initial: Record<string, TablePosition> = {};
-        const cols = Math.max(1, Math.ceil(Math.sqrt(diagram.tables.length)));
-        const xSpacing = 360;
-        const ySpacing = 320;
-
-        diagram.tables.forEach((t, i) => {
-          const col = i % cols;
-          const row = Math.floor(i / cols);
-          initial[t.name] = {
-            x: 80 + col * xSpacing,
-            y: 60 + row * ySpacing,
-          };
-        });
-        return initial;
+        return computeInitialPositions(diagram.tables);
       });
     }
-  }, [diagram]);
+  }, [diagram, computeInitialPositions]);
 
   // Pan interaction
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -436,8 +434,13 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
             </svg>
 
             {/* Draggable Table Cards */}
-            {filteredTables.map((table) => {
-              const pos = positions[table.name] || { x: 100, y: 100 };
+            {filteredTables.map((table, idx) => {
+              const pos = positions[table.name] || {
+                x: 80 + (idx % Math.max(1, Math.ceil(Math.sqrt(filteredTables.length)))) * 360,
+                y:
+                  60 +
+                  Math.floor(idx / Math.max(1, Math.ceil(Math.sqrt(filteredTables.length)))) * 320,
+              };
               const isSelected = selectedTable === table.name;
               const isHovered = hoveredTable === table.name;
 

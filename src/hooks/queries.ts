@@ -111,7 +111,8 @@ export const useRecords = (
 export const useTableSchema = (dbName: string, tableName: string) => {
   return useQuery({
     queryKey: ["schema", dbName, tableName],
-    queryFn: async (): Promise<Record<string, unknown>> => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    queryFn: async (): Promise<any> => {
       const token = getToken();
       const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}/schema`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -177,7 +178,8 @@ export const useCreateTable = () => {
     }: {
       dbName: string;
       tableName: string;
-      schema: Record<string, unknown>;
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      schema: Record<string, unknown> | Array<{ name: string; type: string }> | any;
     }) => {
       const token = getToken();
       const response = await fetch(`${url}/api/v1/databases/${dbName}/tables`, {
