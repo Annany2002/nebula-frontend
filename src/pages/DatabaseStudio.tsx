@@ -28,11 +28,7 @@ export default function DatabaseStudio() {
     if (path.includes("/sql")) return "sql";
     if (path.includes("/apikeys")) return "apikeys";
     if (path.includes("/settings")) return "settings";
-    if (
-      path.includes("/visualizer") ||
-      path.includes("/database/") ||
-      path.endsWith("/database")
-    ) {
+    if (path.includes("/visualizer") || path.includes("/database/") || path.endsWith("/database")) {
       return "database";
     }
     return "overview";
@@ -138,7 +134,7 @@ export default function DatabaseStudio() {
   const handleSelectTable = (tblName: string) => {
     setActiveTable(tblName);
     setCurrentTab("editor");
-    navigate(`/databases/${db_name}/tables/${tblName}`);
+    navigate(`/databases/${db_name}/tables/${tblName}`, { replace: true });
   };
 
   if (!db_name) {

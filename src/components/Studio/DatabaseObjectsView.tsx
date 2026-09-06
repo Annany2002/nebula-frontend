@@ -85,8 +85,9 @@ export default function DatabaseObjectsView({
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
       toast.success("SQL dump downloaded successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to generate SQL dump");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate SQL dump";
+      toast.error(msg);
     }
   };
 
@@ -95,8 +96,9 @@ export default function DatabaseObjectsView({
       const res = await exportSql();
       setSqlPreview(res.sql);
       toast.success("Generated SQL preview");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to generate SQL preview");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate SQL preview";
+      toast.error(msg);
     }
   };
 

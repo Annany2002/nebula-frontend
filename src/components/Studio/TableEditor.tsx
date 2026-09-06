@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table2,
   Plus,
@@ -102,6 +102,15 @@ export default function TableEditor({
     [tables, currentTableName]
   );
 
+  // Reset pagination and row search when active table changes
+  useEffect(() => {
+    setCurrentPage(0);
+    setRowSearch("");
+    if (currentTable && !currentTable.columns.some((c) => c.name === sortColumn)) {
+      setSortColumn(currentTable.columns[0]?.name || "id");
+    }
+  }, [currentTableName, currentTable, sortColumn]);
+
   const filteredTables = useMemo(() => {
     if (!tableSearch.trim()) return tables;
     const q = tableSearch.toLowerCase().trim();
@@ -169,7 +178,7 @@ export default function TableEditor({
       {/* Secondary Left Sidebar: Table Switcher Pane */}
       <div
         className={cn(
-          "flex-shrink-0 bg-card/60 dark:bg-[#0c0b16]/75 backdrop-blur-xl border-r border-purple-200/50 dark:border-purple-500/15 flex flex-col h-full transition-all duration-200",
+          "flex-shrink-0 bg-card/60 dark:bg-[#0c0b16]/75 backdrop-blur-xl border-r border-purple-200/50 dark:border-purple-500/15 flex flex-col h-full transition-[width] duration-200",
           sidebarOpen ? "w-64" : "w-0 border-r-0 overflow-hidden"
         )}
       >
@@ -222,10 +231,10 @@ export default function TableEditor({
                 key={table.name}
                 onClick={() => onSelectTable(table.name)}
                 className={cn(
-                  "group flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all relative",
+                  "group flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium cursor-pointer border transition-colors duration-150 relative",
                   isActive
-                    ? "bg-purple-500/15 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold border border-purple-500/30 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-purple-500/5 dark:hover:bg-purple-500/10"
+                    ? "bg-purple-500/15 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30 dark:border-purple-500/40 shadow-xs"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-purple-500/5 dark:hover:bg-purple-500/10"
                 )}
               >
                 <div className="flex items-center space-x-2 truncate">
@@ -259,9 +268,12 @@ export default function TableEditor({
                   </button>
                 </div>
 
-                {isActive && (
-                  <span className="absolute left-0 top-2 bottom-2 w-1 bg-purple-600 dark:bg-purple-400 rounded-r shadow-sm" />
-                )}
+                <span
+                  className={cn(
+                    "absolute left-0 top-2 bottom-2 w-1 bg-purple-600 dark:bg-purple-400 rounded-r shadow-xs transition-opacity duration-150 pointer-events-none",
+                    isActive ? "opacity-100" : "opacity-0"
+                  )}
+                />
               </div>
             );
           })}
@@ -366,8 +378,8 @@ export default function TableEditor({
             </div>
 
             {/* Spreadsheet Table View */}
-            <div className="flex-1 overflow-auto">
-              <TableUI>
+            <div className="flex-1 overflow-auto [scrollbar-gutter:stable]">
+              <TableUI className="table-fixed min-w-full">
                 <TableHeader className="bg-card/90 dark:bg-[#0f0e20]/90 backdrop-blur-md sticky top-0 z-10 border-b border-purple-200/50 dark:border-purple-500/20">
                   <TableRow className="border-purple-200/40 dark:border-white/10 hover:bg-transparent">
                     <TableHead className="w-12 text-center text-muted-foreground font-mono text-[11px] select-none">
@@ -376,7 +388,7 @@ export default function TableEditor({
                     {currentTable.columns.map((col) => (
                       <TableHead
                         key={col.name}
-                        className="text-foreground font-mono text-xs font-medium border-l border-purple-200/30 dark:border-white/10 px-3 py-2 min-w-[140px]"
+                        className="text-foreground font-mono text-xs font-medium border-l border-purple-200/30 dark:border-white/10 px-3 py-2 w-48 min-w-[150px]"
                       >
                         <div className="flex items-center justify-between space-x-1.5">
                           <span className="truncate font-semibold">{col.name}</span>
@@ -401,17 +413,30 @@ export default function TableEditor({
 
                 <TableBody>
                   {recordsLoading ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={currentTable.columns.length + 2}
-                        className="text-center py-16 text-muted-foreground"
+                    Array.from({ length: 12 }).map((_, rIdx) => (
+                      <TableRow
+                        key={`loading-row-${rIdx}`}
+                        className="border-purple-200/20 dark:border-white/5 h-10 animate-pulse hover:bg-transparent"
                       >
-                        <div className="flex flex-col items-center justify-center space-y-2">
-                          <Loader2 className="w-6 h-6 animate-spin text-purple-600 dark:text-purple-400" />
-                          <span className="text-xs">Loading table records...</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                        <TableCell className="w-12 text-center py-2.5 text-muted-foreground font-mono text-[11px]">
+                          {currentPage * pageSize + rIdx + 1}
+                        </TableCell>
+                        {currentTable.columns.map((col) => (
+                          <TableCell
+                            key={col.name}
+                            className="border-l border-purple-200/20 dark:border-white/5 px-3 py-2.5"
+                          >
+                            <div
+                              className="h-3.5 bg-purple-500/10 dark:bg-white/5 rounded"
+                              style={{
+                                width: `${Math.min(90, Math.max(30, 40 + ((rIdx * 19 + col.name.length * 13) % 50)))}%`,
+                              }}
+                            />
+                          </TableCell>
+                        ))}
+                        <TableCell className="w-20 border-l border-purple-200/20 dark:border-white/5 py-2.5" />
+                      </TableRow>
+                    ))
                   ) : displayedRecords.length > 0 ? (
                     displayedRecords.map((record, rIdx) => {
                       const recordId = (record.id ??
