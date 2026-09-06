@@ -23,11 +23,18 @@ export default function DatabaseStudio() {
 
   const getInitialTab = (): StudioTab => {
     const path = location.pathname;
-    if (path.includes("/visualizer") || path.includes("/database")) return "database";
+    if (path.includes("/overview")) return "overview";
     if (path.includes("/tables")) return "editor";
     if (path.includes("/sql")) return "sql";
     if (path.includes("/apikeys")) return "apikeys";
     if (path.includes("/settings")) return "settings";
+    if (
+      path.includes("/visualizer") ||
+      path.includes("/database/") ||
+      path.endsWith("/database")
+    ) {
+      return "database";
+    }
     return "overview";
   };
 
@@ -58,13 +65,8 @@ export default function DatabaseStudio() {
   // Keep tab in sync with location
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes("/visualizer") || path.includes("/database")) {
-      setCurrentTab("database");
-      if (path.includes("/database/indexes")) setDatabaseSubTab("indexes");
-      else if (path.includes("/database/triggers")) setDatabaseSubTab("triggers");
-      else if (path.includes("/database/backups")) setDatabaseSubTab("backups");
-      else if (path.includes("/database/tables")) setDatabaseSubTab("tables");
-      else setDatabaseSubTab("visualizer");
+    if (path.includes("/overview")) {
+      setCurrentTab("overview");
     } else if (path.includes("/tables")) {
       setCurrentTab("editor");
     } else if (path.includes("/sql")) {
@@ -73,6 +75,17 @@ export default function DatabaseStudio() {
       setCurrentTab("apikeys");
     } else if (path.includes("/settings")) {
       setCurrentTab("settings");
+    } else if (
+      path.includes("/visualizer") ||
+      path.includes("/database/") ||
+      path.endsWith("/database")
+    ) {
+      setCurrentTab("database");
+      if (path.includes("/database/indexes")) setDatabaseSubTab("indexes");
+      else if (path.includes("/database/triggers")) setDatabaseSubTab("triggers");
+      else if (path.includes("/database/backups")) setDatabaseSubTab("backups");
+      else if (path.includes("/database/tables")) setDatabaseSubTab("tables");
+      else setDatabaseSubTab("visualizer");
     } else {
       setCurrentTab("overview");
     }

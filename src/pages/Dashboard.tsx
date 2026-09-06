@@ -1,24 +1,19 @@
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Database,
   DatabaseIcon,
   LayoutGrid,
   List,
-  Table2,
   Search,
   RotateCw,
   X,
   ArrowUpDown,
-  Key,
-  Cpu,
   Copy,
   Check,
   Code2,
   Terminal,
   ArrowRight,
   ShieldCheck,
-  Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDatabases } from "@/hooks/queries";
@@ -53,18 +48,6 @@ const Dashboard = () => {
   const [copiedSnippet, setCopiedSnippet] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
-
-  // Real aggregate statistics from backend state
-  const stats = useMemo(() => {
-    const totalTables = databases.reduce((acc, db) => acc + (db.tables || 0), 0);
-    const activeApiKeys = databases.filter((db) => db.apiKey && db.apiKey !== "").length;
-
-    return {
-      totalDatabases: databases.length,
-      totalTables,
-      activeApiKeys,
-    };
-  }, [databases]);
 
   // Filter and sort databases
   const filteredDatabases = useMemo(() => {
@@ -220,75 +203,6 @@ const records = await res.json();`;
           </div>
         </div>
 
-        {/* Global Statistics Ribbon (Real Data Only) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
-                Databases
-              </p>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground mt-0.5 font-sans">
-                {stats.totalDatabases}
-              </h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Isolated SQLite stores</p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
-              <Database className="h-5 w-5" />
-            </div>
-          </Card>
-
-          <Card className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
-                Total Tables
-              </p>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground mt-0.5 font-sans">
-                {stats.totalTables}
-              </h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Active schema definitions</p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-              <Table2 className="h-5 w-5" />
-            </div>
-          </Card>
-
-          <Card className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
-                Protected Stores
-              </p>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground mt-0.5 font-sans">
-                {stats.activeApiKeys}
-                <span className="text-xs font-normal text-muted-foreground ml-1">
-                  / {stats.totalDatabases}
-                </span>
-              </h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">API key enabled access</p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-200/50 dark:border-pink-500/20 flex items-center justify-center text-pink-600 dark:text-pink-400">
-              <Key className="h-5 w-5" />
-            </div>
-          </Card>
-
-          <Card className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
-                Storage Engine
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                <h3 className="text-base sm:text-lg font-bold text-foreground font-mono">
-                  SQLite 3
-                </h3>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">WAL Mode • Zero Latency</p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <Cpu className="h-5 w-5" />
-            </div>
-          </Card>
-        </div>
-
         {/* Projects Section (Full Width Responsive Grid) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -435,7 +349,7 @@ const records = await res.json();`;
                   </CardHeader>
 
                   <CardContent className="p-4">
-                    <div className="rounded-xl bg-black/40 border border-purple-500/10 p-3.5 font-mono text-xs text-foreground/90 overflow-x-auto leading-relaxed">
+                    <div className="rounded-xl bg-muted/50 dark:bg-black/40 border border-purple-200/50 dark:border-purple-500/10 p-3.5 font-mono text-xs text-foreground/90 overflow-x-auto leading-relaxed">
                       <pre className="whitespace-pre">
                         <code>{activeSnippet}</code>
                       </pre>
