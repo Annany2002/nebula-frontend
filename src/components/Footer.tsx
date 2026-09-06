@@ -28,15 +28,7 @@ const Footer = () => {
               Code
             </a>
             <a
-              href="https://nebula-api-docs.vercel.app/"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-            >
-              Docs
-            </a>
-            <a
-              href="https://github.com/Annany2002/nebula-backend"
+              href="https://github.com/Annany2002/nebula-frontend"
               target="_blank"
               rel="noreferrer"
               className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"

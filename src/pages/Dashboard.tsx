@@ -1,251 +1,423 @@
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Database, DatabaseIcon, LayoutGrid, List, Table2 } from "lucide-react";
+import {
+  DatabaseIcon,
+  LayoutGrid,
+  List,
+  Search,
+  RotateCw,
+  X,
+  ArrowUpDown,
+  Copy,
+  Check,
+  Code2,
+  Terminal,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useDatabases } from "@/hooks/queries";
 import LoginNavBar from "@/components/LoginNavbar";
-import BreadCrumbNav from "@/components/BreadCrumbNav";
 import CreateDatabase from "@/components/Database/CreateDatabase";
 import { EnhancedDatabaseCard } from "@/components/Database/EnhancedDatabaseCard";
 import { EnhancedEmptyState } from "@/components/ui/enhanced-empty-state";
-import { StatsCard, StatsGrid } from "@/components/ui/stats-card";
-import { SkeletonGrid, StatsCardSkeleton } from "@/components/ui/enhanced-skeleton";
+import { SkeletonGrid } from "@/components/ui/enhanced-skeleton";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+type SortOption = "date" | "name" | "tables";
 
 const Dashboard = () => {
   const { data: databases = [], isLoading: dbLoading, refetch } = useDatabases();
+  const navigate = useNavigate();
   const [openChange, setOpenChange] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("date");
+  const [quickstartTab, setQuickstartTab] = useState<"curl" | "fetch">("curl");
+  const [copiedSnippet, setCopiedSnippet] = useState(false);
 
-  // Calculate stats
-  const stats = useMemo(() => {
-    const totalTables = databases.reduce(
-      (acc, db) => acc + (db.tables === 0 ? 0 : db.tables - 1),
-      0
-    );
-    const activeApiKeys = databases.filter((db) => db.apiKey !== "").length;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
-    return {
-      totalDatabases: databases.length,
-      totalTables,
-      activeApiKeys,
-      storageUsed: databases.length > 0 ? `${databases.length * 2.5}MB` : "0MB",
-    };
-  }, [databases]);
+  // Filter and sort databases
+  const filteredDatabases = useMemo(() => {
+    let list = [...databases];
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter((db) => db.dbName.toLowerCase().includes(q));
+    }
+
+    if (sortBy === "name") {
+      list.sort((a, b) => a.dbName.localeCompare(b.dbName));
+    } else if (sortBy === "tables") {
+      list.sort((a, b) => (b.tables || 0) - (a.tables || 0));
+    } else {
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    return list;
+  }, [databases, searchQuery, sortBy]);
+
+  const activeProject = filteredDatabases[0] || databases[0];
+  const targetDbName = activeProject?.dbName || "mydb";
+  const targetApiKey = activeProject?.apiKey || "YOUR_API_KEY";
+
+  const curlSnippet = `curl -X GET "${backendUrl}/api/v1/${targetDbName}/<table_name>" \\
+  -H "Authorization: ApiKey ${targetApiKey}"`;
+
+  const fetchSnippet = `const res = await fetch("${backendUrl}/api/v1/${targetDbName}/<table_name>", {
+  headers: {
+    "Authorization": "ApiKey ${targetApiKey}"
+  }
+});
+const records = await res.json();`;
+
+  const activeSnippet = quickstartTab === "curl" ? curlSnippet : fetchSnippet;
+
+  const copySnippet = () => {
+    window.navigator.clipboard.writeText(activeSnippet);
+    setCopiedSnippet(true);
+    toast.success("Code snippet copied to clipboard");
+    setTimeout(() => setCopiedSnippet(false), 2000);
+  };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative bg-background text-foreground">
+      {/* Background subtle grid and ambient lighting */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[340px] bg-purple-600/10 dark:bg-purple-600/15 rounded-full blur-[140px]" />
+      </div>
+
       <LoginNavBar />
 
-      <div className="px-4 md:px-6 lg:px-8 py-6 space-y-8">
-        {/* Breadcrumb */}
-        <BreadCrumbNav />
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <motion.h1
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-2xl md:text-3xl font-bold tracking-tight"
-            >
-              Your Projects
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-muted-foreground mt-1"
-            >
-              View and manage all your databases in one place.
-            </motion.p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground font-sans">
+              Projects
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1">
+              Manage your isolated SQLite database projects, view schemas, and query data.
+            </p>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            {/* View toggle */}
-            <div className="flex items-center rounded-lg border bg-muted/30 p-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8 rounded-md",
-                  viewMode === "grid" && "bg-background shadow-sm"
-                )}
-                onClick={() => setViewMode("grid")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8 rounded-md",
-                  viewMode === "list" && "bg-background shadow-sm"
-                )}
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
+          {/* Action Toolbar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-56">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground z-10" />
+              <Input
+                type="text"
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-8 h-9 text-xs rounded-xl border-purple-200/50 dark:border-purple-500/20 bg-card/60 dark:bg-card/40 backdrop-blur-md focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/30 w-full"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Refresh button */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch()}
-              disabled={dbLoading}
-              className="h-9 w-9"
-            >
-              <motion.div
-                animate={dbLoading ? { rotate: 360 } : { rotate: 0 }}
-                transition={dbLoading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                  <path d="M16 16h5v5" />
-                </svg>
-              </motion.div>
-            </Button>
+            {/* Sort Dropdown */}
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <SelectTrigger className="h-9 text-xs rounded-xl border-purple-200/50 dark:border-purple-500/20 bg-card/60 dark:bg-card/40 backdrop-blur-md w-32 text-foreground">
+                <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-purple-200/50 dark:border-white/10 text-popover-foreground">
+                <SelectItem value="date" className="text-xs">
+                  Recently Added
+                </SelectItem>
+                <SelectItem value="name" className="text-xs">
+                  Name (A-Z)
+                </SelectItem>
+                <SelectItem value="tables" className="text-xs">
+                  Most Tables
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
-            <CreateDatabase openChange={openChange} setOpenChange={setOpenChange} />
-          </motion.div>
+            {/* View Mode Toggle & Refresh & Create CTA */}
+            <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0">
+              <div className="flex items-center rounded-xl border border-purple-200/50 dark:border-purple-500/20 bg-card/60 dark:bg-card/40 backdrop-blur-md p-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 rounded-lg transition-all",
+                    viewMode === "grid"
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  onClick={() => setViewMode("grid")}
+                  aria-label="Grid view"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 rounded-lg transition-all",
+                    viewMode === "list"
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  onClick={() => setViewMode("list")}
+                  aria-label="List view"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => refetch()}
+                disabled={dbLoading}
+                className="h-9 w-9 rounded-xl border-purple-200/50 dark:border-purple-500/20 bg-card/60 dark:bg-card/40 hover:bg-purple-500/10 shrink-0"
+                aria-label="Refresh databases"
+              >
+                <RotateCw className={cn("h-4 w-4 text-purple-500", dbLoading && "animate-spin")} />
+              </Button>
+
+              <CreateDatabase openChange={openChange} setOpenChange={setOpenChange} />
+            </div>
+          </div>
         </div>
 
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {dbLoading ? (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              {[1, 2, 3, 4].map((i) => (
-                <StatsCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : (
-            <StatsGrid>
-              <StatsCard
-                icon={Database}
-                label="Total Databases"
-                value={stats.totalDatabases}
-                accentColor="purple"
-              />
-              <StatsCard
-                icon={Table2}
-                label="Total Tables"
-                value={stats.totalTables}
-                accentColor="violet"
-              />
-              <StatsCard
-                icon={() => (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-                  </svg>
-                )}
-                label="Active API Keys"
-                value={stats.activeApiKeys}
-                accentColor="indigo"
-              />
-              <StatsCard
-                icon={() => (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                    <line x1="12" y1="22.08" x2="12" y2="12" />
-                  </svg>
-                )}
-                label="Storage Used"
-                value={stats.storageUsed}
-                accentColor="fuchsia"
-              />
-            </StatsGrid>
-          )}
-        </motion.div>
-
-        {/* Database Cards Section */}
+        {/* Projects Section (Full Width Responsive Grid) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">All Databases</h2>
-            <span className="text-sm text-muted-foreground">
-              {databases.length} {databases.length === 1 ? "project" : "projects"}
-            </span>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-foreground">All Databases</h2>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-300 font-mono font-medium border border-purple-500/20">
+                {filteredDatabases.length} {filteredDatabases.length === 1 ? "project" : "projects"}
+              </span>
+            </div>
           </div>
 
           <AnimatePresence mode="wait">
             {dbLoading ? (
               <SkeletonGrid count={6} type="card" />
             ) : databases.length === 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="py-16"
+              >
                 <EnhancedEmptyState
                   icon={DatabaseIcon}
                   title="No databases yet"
-                  description="Create your first database to start building your application. Your databases will appear here once created."
+                  description="Create your first database to start storing tables and auto-generating REST APIs."
                   actionLabel="Create Database"
                   actionOnClick={() => setOpenChange(true)}
                   className="max-w-lg mx-auto"
                 />
               </motion.div>
-            ) : (
+            ) : filteredDatabases.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className={cn(
-                  "grid gap-4",
-                  viewMode === "grid"
-                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1 max-w-3xl"
-                )}
+                className="text-center py-16 rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-md p-8"
               >
-                {databases.map((database, index) => (
+                <div className="mx-auto w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center mb-3">
+                  <Search className="h-5 w-5 text-purple-500" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  No databases match "{searchQuery}"
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1 mb-4">
+                  Check your search term or clear the filter to view all projects.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="rounded-xl border-purple-200/50 dark:border-white/10 text-xs"
+                >
+                  Clear Search
+                </Button>
+              </motion.div>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredDatabases.map((db, index) => (
                   <EnhancedDatabaseCard
-                    key={database.databaseId}
-                    database={database}
+                    key={db.databaseId}
+                    database={db}
                     index={index}
+                    viewMode="grid"
                   />
                 ))}
-              </motion.div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredDatabases.map((db, index) => (
+                  <EnhancedDatabaseCard
+                    key={db.databaseId}
+                    database={db}
+                    index={index}
+                    viewMode="list"
+                  />
+                ))}
+              </div>
             )}
           </AnimatePresence>
         </div>
-      </div>
+
+        {/* Developer Quickstart & Integration Section (Eliminates Empty Void) */}
+        {databases.length > 0 && (
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-foreground">Developer Quickstart</h2>
+              <span className="text-xs text-muted-foreground">
+                Interact with your SQLite databases via auto-generated REST endpoints
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              {/* Code Snippet Box (7 cols) */}
+              <Card className="lg:col-span-7 rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/75 backdrop-blur-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                <div>
+                  <CardHeader className="p-4 pb-3 border-b border-purple-200/30 dark:border-white/5 flex flex-row items-center justify-between space-y-0">
+                    <div className="flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-purple-500" />
+                      <CardTitle className="text-xs font-bold text-foreground uppercase tracking-wider font-mono">
+                        Instant API Access ({targetDbName})
+                      </CardTitle>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center rounded-lg border border-purple-200/50 dark:border-white/10 p-0.5 bg-muted/40 text-xs">
+                        <button
+                          onClick={() => setQuickstartTab("curl")}
+                          className={cn(
+                            "px-2 py-1 rounded text-[11px] font-mono transition-colors",
+                            quickstartTab === "curl"
+                              ? "bg-purple-600 text-white font-semibold"
+                              : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          cURL
+                        </button>
+                        <button
+                          onClick={() => setQuickstartTab("fetch")}
+                          className={cn(
+                            "px-2 py-1 rounded text-[11px] font-mono transition-colors",
+                            quickstartTab === "fetch"
+                              ? "bg-purple-600 text-white font-semibold"
+                              : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          Fetch
+                        </button>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={copySnippet}
+                        className="h-7 px-2 text-xs rounded-lg border-purple-200/50 dark:border-white/10 hover:border-purple-500/40"
+                      >
+                        {copiedSnippet ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                        <span className="ml-1.5 text-[11px]">Copy</span>
+                      </Button>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="p-4">
+                    <div className="rounded-xl bg-muted/50 dark:bg-black/40 border border-purple-200/50 dark:border-purple-500/10 p-3.5 font-mono text-xs text-foreground/90 overflow-x-auto leading-relaxed">
+                      <pre className="whitespace-pre">
+                        <code>{activeSnippet}</code>
+                      </pre>
+                    </div>
+                  </CardContent>
+                </div>
+
+                <div className="p-4 pt-0 flex items-center justify-between text-xs text-muted-foreground border-t border-purple-200/20 dark:border-white/5 mt-auto">
+                  <span className="font-mono text-[11px]">
+                    Base: {backendUrl}/api/v1/{targetDbName}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700"
+                    onClick={() => navigate(`/databases/${targetDbName}/tables`)}
+                  >
+                    Explore Tables <ArrowRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Architecture & Capabilities Cards (5 cols) */}
+              <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                <Card
+                  onClick={() => navigate(`/databases/${targetDbName}/sql`)}
+                  className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-xl p-4 hover:border-purple-500/40 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                      <Terminal className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground">Interactive SQL Studio</h4>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                        Execute ad-hoc SQL, explore table columns, and view formatted query results
+                        directly in your browser.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end text-[11px] text-purple-600 dark:text-purple-400 font-medium mt-2">
+                    Open SQL Runner <ArrowRight className="h-3 w-3 ml-1" />
+                  </div>
+                </Card>
+
+                <Card className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/60 backdrop-blur-xl p-4 flex flex-col justify-between">
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground">Local SQLite Isolation</h4>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                        Every project lives in an isolated SQLite database file with WAL concurrency
+                        and zero multi-tenant leakage.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono mt-2 pt-2 border-t border-purple-200/20 dark:border-white/5">
+                    <span>Engine: Local SQLite</span>
+                    <span className="text-emerald-500 font-semibold">Active & Healthy</span>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 };

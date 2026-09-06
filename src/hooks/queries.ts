@@ -7,6 +7,11 @@ import {
   RecordsResponse,
   RecordsQueryParams,
   UserProfileType,
+  DatabaseDetailType,
+  SQLQueryResultType,
+  DatabaseAnalyticsType,
+  SchemaDiagramType,
+  DatabaseObjectsType,
 } from "@/types/allType";
 import { toast } from "sonner";
 
@@ -106,7 +111,8 @@ export const useRecords = (
 export const useTableSchema = (dbName: string, tableName: string) => {
   return useQuery({
     queryKey: ["schema", dbName, tableName],
-    queryFn: async (): Promise<Record<string, unknown>> => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    queryFn: async (): Promise<any> => {
       const token = getToken();
       const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}/schema`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -172,7 +178,8 @@ export const useCreateTable = () => {
     }: {
       dbName: string;
       tableName: string;
-      schema: Record<string, unknown>;
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      schema: Record<string, unknown> | Array<{ name: string; type: string }> | any;
     }) => {
       const token = getToken();
       const response = await fetch(`${url}/api/v1/databases/${dbName}/tables`, {
@@ -261,7 +268,7 @@ export const useDeleteRecord = () => {
     }: {
       dbName: string;
       tableName: string;
-      recordId: number;
+      recordId: number | string;
     }) => {
       const token = getToken();
       const response = await fetch(
@@ -294,7 +301,7 @@ export const useUpdateRecord = () => {
     }: {
       dbName: string;
       tableName: string;
-      recordId: number;
+      recordId: number | string;
       data: Record<string, unknown>;
     }) => {
       const token = getToken();
@@ -331,9 +338,12 @@ export const useApiKey = (dbName: string) => {
       const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch API key");
+      if (!response.ok) {
+        if (response.status === 404) return "";
+        throw new Error("Failed to fetch API key");
+      }
       const data = await response.json();
-      return data.key;
+      return data.key || "";
     },
     enabled: !!dbName,
     retry: false, // Don't retry if 404 (no key)
@@ -352,7 +362,15 @@ export const useGenerateApiKey = () => {
       if (!response.ok) throw new Error("Failed to generate API key");
       return response.json();
     },
-    onSuccess: (_, dbName) => {
+    onSuccess: (data: { api_key?: string }, dbName: string) => {
+      const newKey = data?.api_key || "";
+      if (newKey) {
+        queryClient.setQueryData(["apikey", dbName], newKey);
+        queryClient.setQueryData<DataBaseType[]>(["databases"], (old) => {
+          if (!old) return old;
+          return old.map((db) => (db.dbName === dbName ? { ...db, apiKey: newKey } : db));
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
       queryClient.invalidateQueries({ queryKey: ["databases"] });
       toast.success("API key generated successfully");
@@ -372,8 +390,13 @@ export const useDeleteApiKey = () => {
       });
       if (!response.ok) throw new Error("Failed to delete API key");
     },
-    onSuccess: (_, dbName) => {
+    onSuccess: (_, dbName: string) => {
       queryClient.setQueryData(["apikey", dbName], "");
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) => {
+        if (!old) return old;
+        return old.map((db) => (db.dbName === dbName ? { ...db, apiKey: "" } : db));
+      });
+      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
       queryClient.invalidateQueries({ queryKey: ["databases"] });
       toast.success("API key deleted successfully");
     },
@@ -421,5 +444,120 @@ export const useUpdateProfile = () => {
       toast.success("Profile updated successfully");
     },
     onError: (error: Error) => toast.error(error.message),
+  });
+};
+
+// Database Details Hook
+export const useDatabaseDetails = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["databaseDetails", dbName],
+    queryFn: async (): Promise<DatabaseDetailType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch database details");
+      const data = await response.json();
+      return data.database;
+    },
+    enabled: !!dbName,
+  });
+};
+
+// SQL Execution Hook
+export const useExecuteSQL = (dbName: string | undefined) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (query: string): Promise<SQLQueryResultType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/sql`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to execute SQL");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tables", dbName] });
+      queryClient.invalidateQueries({ queryKey: ["records", dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseAnalytics", dbName] });
+    },
+  });
+};
+
+// Database Analytics & Schema Advisor Hook
+export const useDatabaseAnalytics = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["databaseAnalytics", dbName],
+    queryFn: async (): Promise<DatabaseAnalyticsType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/analytics`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch database analytics");
+      return response.json();
+    },
+    enabled: !!dbName,
+    refetchInterval: 15000,
+  });
+};
+
+// Schema Visualizer Diagram Hook
+export const useSchemaDiagram = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["schemaDiagram", dbName],
+    queryFn: async (): Promise<SchemaDiagramType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/diagram`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch schema diagram");
+      return response.json();
+    },
+    enabled: !!dbName,
+  });
+};
+
+// Database Objects (Indexes & Triggers) Hook
+export const useDatabaseObjects = (dbName: string | undefined) => {
+  return useQuery({
+    queryKey: ["databaseObjects", dbName],
+    queryFn: async (): Promise<DatabaseObjectsType> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/objects`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to fetch database objects");
+      return response.json();
+    },
+    enabled: !!dbName,
+  });
+};
+
+// Database SQL Export Hook
+export const useExportDatabaseSQL = (dbName: string | undefined) => {
+  return useMutation({
+    mutationFn: async (): Promise<{ sql: string; filename: string }> => {
+      if (!dbName) throw new Error("Database name required");
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/export/sql`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Failed to export database SQL");
+      return response.json();
+    },
   });
 };
