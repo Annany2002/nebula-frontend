@@ -187,12 +187,6 @@ export default function DatabaseSubSidebar({
           })}
         </div>
       </nav>
-
-      {/* Engine Footer */}
-      <div className="p-3 border-t border-purple-200/50 dark:border-white/10 text-[11px] font-mono text-muted-foreground flex items-center justify-between">
-        <span>SQLite 3 (WAL)</span>
-        <span className="text-emerald-600 dark:text-emerald-400 font-medium">Synced</span>
-      </div>
     </aside>
   );
 }
