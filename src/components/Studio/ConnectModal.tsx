@@ -97,7 +97,7 @@ print(sql_resp.json())`;
             Connect to {dbName}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs">
-            Connect to your isolated SQLite backend database using REST or SQL endpoints.
+            Connect to your database backend using REST or SQL endpoints.
           </DialogDescription>
         </DialogHeader>
 
@@ -179,17 +179,17 @@ print(sql_resp.json())`;
 
           <TabsContent value="curl" className="mt-0 relative w-full min-w-0">
             <div className="relative group w-full min-w-0">
-              <pre className="w-full max-w-full bg-[#0c0b16] text-zinc-200 border border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
+              <pre className="w-full max-w-full bg-muted/70 dark:bg-[#0c0b16] text-foreground dark:text-zinc-200 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
                 {curlSnippet}
               </pre>
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-white/10 border-white/15 hover:bg-white/20 text-white shadow-xs"
+                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-background/80 dark:bg-white/10 border-border dark:border-white/15 hover:bg-background dark:hover:bg-white/20 text-foreground dark:text-white shadow-xs"
                 onClick={() => copyToClipboard(curlSnippet, "cURL snippet")}
               >
                 {copiedKey === "cURL snippet" ? (
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-400" />
+                  <Check className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
                 ) : (
                   <Copy className="w-3.5 h-3.5 mr-1" />
                 )}
@@ -200,17 +200,17 @@ print(sql_resp.json())`;
 
           <TabsContent value="js" className="mt-0 relative w-full min-w-0">
             <div className="relative group w-full min-w-0">
-              <pre className="w-full max-w-full bg-[#0c0b16] text-zinc-200 border border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
+              <pre className="w-full max-w-full bg-muted/70 dark:bg-[#0c0b16] text-foreground dark:text-zinc-200 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
                 {jsSnippet}
               </pre>
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-white/10 border-white/15 hover:bg-white/20 text-white shadow-xs"
+                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-background/80 dark:bg-white/10 border-border dark:border-white/15 hover:bg-background dark:hover:bg-white/20 text-foreground dark:text-white shadow-xs"
                 onClick={() => copyToClipboard(jsSnippet, "JavaScript snippet")}
               >
                 {copiedKey === "JavaScript snippet" ? (
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-400" />
+                  <Check className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
                 ) : (
                   <Copy className="w-3.5 h-3.5 mr-1" />
                 )}
@@ -221,17 +221,17 @@ print(sql_resp.json())`;
 
           <TabsContent value="python" className="mt-0 relative w-full min-w-0">
             <div className="relative group w-full min-w-0">
-              <pre className="w-full max-w-full bg-[#0c0b16] text-zinc-200 border border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
+              <pre className="w-full max-w-full bg-muted/70 dark:bg-[#0c0b16] text-foreground dark:text-zinc-200 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
                 {pythonSnippet}
               </pre>
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-white/10 border-white/15 hover:bg-white/20 text-white shadow-xs"
+                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-background/80 dark:bg-white/10 border-border dark:border-white/15 hover:bg-background dark:hover:bg-white/20 text-foreground dark:text-white shadow-xs"
                 onClick={() => copyToClipboard(pythonSnippet, "Python snippet")}
               >
                 {copiedKey === "Python snippet" ? (
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-400" />
+                  <Check className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
                 ) : (
                   <Copy className="w-3.5 h-3.5 mr-1" />
                 )}
