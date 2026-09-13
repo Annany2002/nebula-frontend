@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import StudioRail, { StudioTab } from "@/components/Studio/StudioRail";
@@ -12,6 +12,7 @@ import SchemaVisualizer from "@/components/Studio/SchemaVisualizer";
 import DatabaseObjectsView from "@/components/Studio/DatabaseObjectsView";
 import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
 import CreateTableSchema from "@/components/Table/CreateTableSchema";
+import ConnectModal from "@/components/Studio/ConnectModal";
 import { useTables, useDatabaseDetails } from "@/hooks/queries";
 import { useAuth } from "@/context/auth-context";
 
@@ -25,34 +26,36 @@ export default function DatabaseStudio() {
   const matchTable = location.pathname.match(/\/tables\/([^/]+)/);
   const table_name = params.table_name || (matchTable ? matchTable[1] : "");
 
-  const getInitialTab = (): StudioTab => {
-    const path = location.pathname;
-    if (path.includes("/overview")) return "overview";
-    if (path.includes("/visualizer") || path.includes("/database")) {
-      return "database";
-    }
-    if (path.includes("/tables")) return "editor";
-    if (path.includes("/sql")) return "sql";
-    if (path.includes("/apikeys")) return "apikeys";
-    if (path.includes("/settings")) return "settings";
+  const currentTab = useMemo<StudioTab>(() => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    const section = segments[2] || "overview";
+    if (section === "overview") return "overview";
+    if (section === "visualizer" || section === "database") return "database";
+    if (section === "tables") return "editor";
+    if (section === "sql") return "sql";
+    if (section === "apikeys") return "apikeys";
+    if (section === "settings") return "settings";
     return "overview";
-  };
+  }, [location.pathname]);
 
-  const getInitialSubTab = (): DatabaseSubTab => {
-    const path = location.pathname;
-    if (path.includes("/database/indexes")) return "indexes";
-    if (path.includes("/database/triggers")) return "triggers";
-    if (path.includes("/database/backups")) return "backups";
-    if (path.includes("/visualizer")) return "visualizer";
-    if (path.includes("/database/tables")) return "tables";
-    return "tables";
-  };
+  const databaseSubTab = useMemo<DatabaseSubTab>(() => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    const section = segments[2];
+    if (section === "visualizer") return "visualizer";
+    if (section === "database") {
+      const sub = segments[3];
+      if (sub === "indexes" || sub === "triggers" || sub === "backups" || sub === "tables") {
+        return sub;
+      }
+      return "visualizer";
+    }
+    return "visualizer";
+  }, [location.pathname]);
 
-  const [currentTab, setCurrentTab] = useState<StudioTab>(getInitialTab);
-  const [databaseSubTab, setDatabaseSubTab] = useState<DatabaseSubTab>(getInitialSubTab);
   const [subSidebarCollapsed, setSubSidebarCollapsed] = useState(false);
-  const [activeTable, setActiveTable] = useState<string>(table_name);
+  const [activeTableState, setActiveTableState] = useState<string>("");
   const [createTableOpen, setCreateTableOpen] = useState(false);
+  const [connectOpen, setConnectOpen] = useState(false);
 
   // Queries
   const {
@@ -61,86 +64,44 @@ export default function DatabaseStudio() {
     refetch: refetchTables,
   } = useTables(db_name);
 
+  const activeTable = table_name || activeTableState || tables[0]?.name || "";
   const { data: dbDetails } = useDatabaseDetails(db_name);
-
-  // Keep tab in sync with location
-  useEffect(() => {
-    const path = location.pathname;
-    if (path.includes("/overview")) {
-      setCurrentTab("overview");
-    } else if (path.includes("/visualizer") || path.includes("/database")) {
-      setCurrentTab("database");
-      if (path.includes("/database/indexes")) setDatabaseSubTab("indexes");
-      else if (path.includes("/database/triggers")) setDatabaseSubTab("triggers");
-      else if (path.includes("/database/backups")) setDatabaseSubTab("backups");
-      else if (path.includes("/visualizer")) setDatabaseSubTab("visualizer");
-      else if (path.includes("/database/tables")) setDatabaseSubTab("tables");
-      else setDatabaseSubTab("tables");
-    } else if (path.includes("/tables")) {
-      setCurrentTab("editor");
-    } else if (path.includes("/sql")) {
-      setCurrentTab("sql");
-    } else if (path.includes("/apikeys")) {
-      setCurrentTab("apikeys");
-    } else if (path.includes("/settings")) {
-      setCurrentTab("settings");
-    } else {
-      setCurrentTab("overview");
-    }
-  }, [location.pathname]);
-
-  // Keep URL and active table in sync
-  useEffect(() => {
-    if (table_name) {
-      setActiveTable(table_name);
-      setCurrentTab("editor");
-    } else if (tables.length > 0 && !activeTable) {
-      setActiveTable(tables[0].name);
-    }
-  }, [table_name, tables, activeTable]);
 
   // Handle primary rail tab change
   const handleTabChange = (tab: StudioTab) => {
-    setCurrentTab(tab);
     if (tab === "overview") {
-      navigate(`/databases/${db_name}/overview`, { replace: true });
+      navigate(`/databases/${db_name}/overview`);
     } else if (tab === "database") {
-      if (databaseSubTab === "visualizer") {
-        navigate(`/databases/${db_name}/visualizer`, { replace: true });
-      } else {
-        navigate(`/databases/${db_name}/database/${databaseSubTab || "tables"}`, { replace: true });
-      }
+      navigate(`/databases/${db_name}/visualizer`);
     } else if (tab === "sql") {
-      navigate(`/databases/${db_name}/sql`, { replace: true });
+      navigate(`/databases/${db_name}/sql`);
     } else if (tab === "apikeys") {
-      navigate(`/databases/${db_name}/apikeys`, { replace: true });
+      navigate(`/databases/${db_name}/apikeys`);
     } else if (tab === "settings") {
-      navigate(`/databases/${db_name}/settings`, { replace: true });
+      navigate(`/databases/${db_name}/settings`);
     } else if (tab === "editor") {
       const targetTable = activeTable || (tables[0]?.name ?? "");
       if (targetTable) {
-        navigate(`/databases/${db_name}/tables/${targetTable}`, { replace: true });
+        navigate(`/databases/${db_name}/tables/${targetTable}`);
       } else {
-        navigate(`/databases/${db_name}/tables`, { replace: true });
+        navigate(`/databases/${db_name}/tables`);
       }
     }
   };
 
   // Handle secondary database sub-sidebar navigation
   const handleSubTabChange = (subTab: DatabaseSubTab) => {
-    setDatabaseSubTab(subTab);
     if (subTab === "visualizer") {
-      navigate(`/databases/${db_name}/visualizer`, { replace: true });
+      navigate(`/databases/${db_name}/visualizer`);
     } else {
-      navigate(`/databases/${db_name}/database/${subTab}`, { replace: true });
+      navigate(`/databases/${db_name}/database/${subTab}`);
     }
   };
 
   // Handle table switch in editor
   const handleSelectTable = (tblName: string) => {
-    setActiveTable(tblName);
-    setCurrentTab("editor");
-    navigate(`/databases/${db_name}/tables/${tblName}`, { replace: true });
+    setActiveTableState(tblName);
+    navigate(`/databases/${db_name}/tables/${tblName}`);
   };
 
   if (!db_name) {
@@ -205,12 +166,7 @@ export default function DatabaseStudio() {
                   onNavigateTab={handleTabChange}
                   onSelectTable={handleSelectTable}
                   onOpenCreateTable={() => setCreateTableOpen(true)}
-                  onOpenConnect={() => {
-                    const topConnectBtn = document.querySelector(
-                      'button[data-connect-trigger="true"]'
-                    );
-                    if (topConnectBtn) (topConnectBtn as HTMLButtonElement).click();
-                  }}
+                  onOpenConnect={() => setConnectOpen(true)}
                 />
               )}
 
@@ -267,6 +223,14 @@ export default function DatabaseStudio() {
           setOpenChange={setCreateTableOpen}
         />
       )}
+
+      {/* Connect Modal */}
+      <ConnectModal
+        open={connectOpen}
+        onOpenChange={setConnectOpen}
+        dbName={db_name}
+        apiKey={dbDetails?.apiKey || ""}
+      />
     </div>
   );
 }

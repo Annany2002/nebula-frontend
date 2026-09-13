@@ -195,6 +195,9 @@ export const useCreateTable = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
+      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseDetail", variables.dbName] });
       toast.success("Table created successfully");
     },
     onError: () => toast.error("Failed to create table"),

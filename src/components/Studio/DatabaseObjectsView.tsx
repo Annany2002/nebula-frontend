@@ -256,44 +256,6 @@ export default function DatabaseObjectsView({
           {/* VIEW 1: TABLES */}
           {subView === "tables" && (
             <div className="space-y-4">
-              {/* Info Notification Banner */}
-              {!dismissBanner && (
-                <div className="rounded-xl bg-card/75 dark:bg-[#11101d]/90 border border-purple-200/40 dark:border-white/10 p-4 flex items-center justify-between shadow-xs">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 dark:bg-white/5 border border-purple-200/30 dark:border-white/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
-                      <Info className="w-4 h-4 text-foreground/80" />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-semibold text-foreground">
-                        SQLite Storage Engine • WAL Mode Active
-                      </h4>
-                      <p className="text-xs text-muted-foreground">
-                        All database tables and schemas are isolated in an ACID-compliant SQLite
-                        store on disk. High-concurrency reads with WAL journaling.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/databases/${dbName}/sql`)}
-                      className="h-8 text-xs rounded-lg border-purple-200/40 dark:border-white/10 hover:bg-purple-500/10 text-foreground font-medium"
-                    >
-                      <Terminal className="w-3.5 h-3.5 mr-1.5 text-purple-500" />
-                      SQL Runner
-                    </Button>
-                    <button
-                      onClick={() => setDismissBanner(true)}
-                      className="text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
-                      title="Dismiss notice"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* Filter and Action Toolbar */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 flex-1 min-w-[280px]">
@@ -532,9 +494,9 @@ export default function DatabaseObjectsView({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-foreground">SQLite Indexes</h3>
+                  <h3 className="text-base font-bold text-foreground">Indexes</h3>
                   <p className="text-xs text-muted-foreground">
-                    Indexes defined in sqlite_master for optimizing query lookups
+                    Indexes defined for optimizing query lookups
                   </p>
                 </div>
                 <Badge variant="outline" className="font-mono text-xs">
@@ -596,7 +558,7 @@ export default function DatabaseObjectsView({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-foreground">SQLite Triggers</h3>
+                  <h3 className="text-base font-bold text-foreground">Triggers</h3>
                   <p className="text-xs text-muted-foreground">
                     Automated event-driven statements executed on INSERT, UPDATE, or DELETE
                   </p>
@@ -652,21 +614,21 @@ export default function DatabaseObjectsView({
               <div>
                 <h3 className="text-base font-bold text-foreground">Backups & Database Export</h3>
                 <p className="text-xs text-muted-foreground">
-                  Export your isolated SQLite storage file or full transactional SQL dump
+                  Export your database storage file or full transactional SQL dump
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Option A: Raw SQLite Database File */}
+                {/* Option A: Database File */}
                 <Card className="rounded-2xl border border-purple-200/40 dark:border-white/10 bg-card/60 backdrop-blur-xl p-5 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                       <Database className="w-5 h-5" />
                     </div>
-                    <h4 className="text-sm font-bold text-foreground">SQLite Database (.db)</h4>
+                    <h4 className="text-sm font-bold text-foreground">Database File (.db)</h4>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Download the exact isolated SQLite database file stored on disk. Can be opened
-                      directly in DB Browser for SQLite or any local SQLite client.
+                      Download the database file stored on disk. Can be opened directly in any local
+                      database viewer.
                     </p>
                   </div>
 
@@ -860,7 +822,7 @@ export default function DatabaseObjectsView({
             <AlertDialogDescription className="text-xs text-muted-foreground">
               This action cannot be undone. All data and records inside{" "}
               <span className="font-mono font-semibold text-foreground">{tableToDelete}</span> will
-              be permanently deleted from SQLite storage.
+              be permanently deleted from database storage.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
