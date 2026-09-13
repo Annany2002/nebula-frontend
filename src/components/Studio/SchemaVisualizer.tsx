@@ -9,8 +9,6 @@ import {
   RotateCcw,
   Key,
   Database,
-  Hash,
-  Sparkles,
   MoreVertical,
   ExternalLink,
   Code2,
@@ -42,9 +40,25 @@ interface TablePosition {
   y: number;
 }
 
+interface RelationshipLine {
+  id: string;
+  fromTable: string;
+  toTable: string;
+  fromCol: string;
+  toCol: string;
+  onDelete: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  pathData: string;
+  isHighlighted: boolean;
+}
+
 const CARD_WIDTH = 260;
 const HEADER_HEIGHT = 44;
 const ROW_HEIGHT = 28;
+const ROW_OFFSET_TOP = 4;
 
 export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisualizerProps) {
   const navigate = useNavigate();
@@ -56,17 +70,22 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
   const [pan, setPan] = useState({ x: 60, y: 60 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+
+  // Interactive relationship highlighting
+  const [hoveredTable, setHoveredTable] = useState<string | null>(null);
+  const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [copiedSql, setCopiedSql] = useState(false);
+
   // Compute auto-layout positions for tables
   const computeInitialPositions = useCallback((tablesList?: TableDiagramInfo[]) => {
     if (!tablesList || tablesList.length === 0) return {};
-    const initial: Record<string, TablePosition> = {};
     const cols = Math.max(1, Math.ceil(Math.sqrt(tablesList.length)));
     const xSpacing = 360;
-    const ySpacing = 320;
-
-    tablesList.forEach((t, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
+    const ySpacing = 340;
+    const initial: Record<string, TablePosition> = {};
+    tablesList.forEach((t, idx) => {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
       initial[t.name] = {
         x: 80 + col * xSpacing,
         y: 60 + row * ySpacing,
@@ -80,11 +99,7 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
   );
   const [draggingTable, setDraggingTable] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [hoveredTable, setHoveredTable] = useState<string | null>(null);
-  const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [copiedSql, setCopiedSql] = useState(false);
 
-  // Initialize auto-layout positions for tables
   const autoLayout = useCallback(
     (tables: TableDiagramInfo[]) => {
       setPositions(computeInitialPositions(tables));
@@ -138,7 +153,6 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
     setZoom((prev) => Math.min(2, Math.max(0.3, prev * zoomFactor)));
   };
 
-  // Zoom controls
   const handleZoomIn = () => setZoom((z) => Math.min(2, z + 0.15));
   const handleZoomOut = () => setZoom((z) => Math.max(0.3, z - 0.15));
   const handleResetZoom = () => {
@@ -176,18 +190,7 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
   // Compute foreign key relationship lines between tables
   const relationshipLines = useMemo(() => {
     if (!diagram?.tables) return [];
-    const lines: Array<{
-      id: string;
-      fromTable: string;
-      toTable: string;
-      fromCol: string;
-      toCol: string;
-      x1: number;
-      y1: number;
-      x2: number;
-      y2: number;
-      isHighlighted: boolean;
-    }> = [];
+    const lines: RelationshipLine[] = [];
 
     diagram.tables.forEach((t) => {
       const fromPos = positions[t.name];
@@ -203,20 +206,37 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
           (c) => c.name === fk.to || (fk.to === "" && c.pk > 0)
         );
 
+        const safeFromColIdx = fromColIdx >= 0 ? fromColIdx : 0;
+        const safeToColIdx = toColIdx >= 0 ? toColIdx : 0;
+
         const y1 =
-          fromPos.y +
-          HEADER_HEIGHT +
-          (fromColIdx >= 0 ? fromColIdx : 0) * ROW_HEIGHT +
-          ROW_HEIGHT / 2;
+          fromPos.y + HEADER_HEIGHT + ROW_OFFSET_TOP + safeFromColIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
         const y2 =
-          toPos.y + HEADER_HEIGHT + (toColIdx >= 0 ? toColIdx : 0) * ROW_HEIGHT + ROW_HEIGHT / 2;
+          toPos.y + HEADER_HEIGHT + ROW_OFFSET_TOP + safeToColIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
 
-        let x1 = fromPos.x + CARD_WIDTH;
-        let x2 = toPos.x;
+        let x1: number;
+        let x2: number;
+        let pathData: string;
 
-        if (fromPos.x > toPos.x + CARD_WIDTH) {
+        const dxBetweenCards = toPos.x - (fromPos.x + CARD_WIDTH);
+        const isTargetToTheRight = dxBetweenCards > 10;
+        const isTargetToTheLeft = fromPos.x - (toPos.x + CARD_WIDTH) > 10;
+
+        if (isTargetToTheRight) {
+          x1 = fromPos.x + CARD_WIDTH;
+          x2 = toPos.x;
+          const curvature = Math.max(30, Math.min(160, Math.abs(x2 - x1) * 0.45));
+          pathData = `M ${x1} ${y1} C ${x1 + curvature} ${y1}, ${x2 - curvature} ${y2}, ${x2} ${y2}`;
+        } else if (isTargetToTheLeft) {
           x1 = fromPos.x;
           x2 = toPos.x + CARD_WIDTH;
+          const curvature = Math.max(30, Math.min(160, Math.abs(x1 - x2) * 0.45));
+          pathData = `M ${x1} ${y1} C ${x1 - curvature} ${y1}, ${x2 + curvature} ${y2}, ${x2} ${y2}`;
+        } else {
+          x1 = fromPos.x + CARD_WIDTH;
+          x2 = toPos.x + CARD_WIDTH;
+          const loopOffset = Math.max(50, Math.min(120, Math.abs(y2 - y1) * 0.35));
+          pathData = `M ${x1} ${y1} C ${x1 + loopOffset} ${y1}, ${x2 + loopOffset} ${y2}, ${x2} ${y2}`;
         }
 
         const isHighlighted =
@@ -226,15 +246,17 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
           selectedTable === fk.table;
 
         lines.push({
-          id: `${t.name}-${fk.table}-${fkIdx}`,
+          id: `${t.name}-${fk.from}-${fk.table}-${fk.to || "id"}-${fkIdx}`,
           fromTable: t.name,
           toTable: fk.table,
           fromCol: fk.from,
-          toCol: fk.to,
+          toCol: fk.to || "id",
+          onDelete: fk.onDelete || "CASCADE",
           x1,
           y1,
           x2,
           y2,
+          pathData,
           isHighlighted,
         });
       });
@@ -245,31 +267,24 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden select-none bg-[#fbfafd] dark:bg-[#090812] relative text-foreground">
-      {/* Top Visualizer Toolbar */}
-      <div className="h-12 border-b border-purple-200/50 dark:border-white/10 bg-white/80 dark:bg-[#0d0c18]/90 backdrop-blur-xl px-4 flex items-center justify-between z-20 shrink-0">
+      {/* Visualizer Toolbar */}
+      <div className="h-12 border-b border-purple-200/50 dark:border-white/10 bg-white/80 dark:bg-[#0d0c18]/90 backdrop-blur-xl px-4 flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center gap-3">
-          {/* Schema Selector Pill */}
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-xs font-mono text-purple-700 dark:text-purple-300">
             <Database className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-            <span>schema</span>
-            <span className="font-bold text-foreground">main</span>
+            <span className="font-bold text-foreground">Schema Visualizer</span>
           </div>
 
-          {/* Table Search Input */}
           <div className="relative w-48 sm:w-60">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Find table..."
+              placeholder="Find table or column..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-8 pl-8 pr-3 text-xs rounded-lg border-purple-200/60 dark:border-white/10 bg-white/70 dark:bg-card/60 backdrop-blur-md text-foreground focus:border-purple-500/50"
             />
           </div>
-
-          <span className="text-[11px] font-mono text-muted-foreground hidden md:inline">
-            {diagram?.totalTables || 0} tables • {diagram?.totalForeignKeys || 0} relations
-          </span>
         </div>
 
         {/* Toolbar Actions */}
@@ -285,7 +300,7 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
             ) : (
               <Copy className="w-3.5 h-3.5 mr-1.5 text-purple-600 dark:text-purple-400" />
             )}
-            <span>Copy as SQL</span>
+            <span>Copy SQL</span>
           </Button>
 
           <Button
@@ -348,17 +363,15 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="w-2 h-2 rounded-full bg-purple-500 animate-ping" />
-              Loading schema visualizer...
+              Loading database schema...
             </div>
           </div>
         ) : !diagram?.tables || diagram.tables.length === 0 ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-            <Table2 className="w-12 h-12 text-muted-foreground/40 mb-3" />
-            <h3 className="text-sm font-semibold text-foreground">No tables found</h3>
-            <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-              Create tables in the Table Editor or execute DDL in the SQL Runner to see your schema
-              diagram.
-            </p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+              <Table2 className="w-6 h-6" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">No tables found</p>
           </div>
         ) : (
           <div
@@ -369,8 +382,10 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
           >
             {/* SVG Relationship Connector Lines */}
             <svg
-              className="absolute inset-0 pointer-events-none overflow-visible"
-              style={{ width: "100%", height: "100%" }}
+              width={8000}
+              height={8000}
+              className="absolute left-0 top-0 overflow-visible z-10 pointer-events-none"
+              style={{ minWidth: 8000, minHeight: 8000 }}
             >
               <defs>
                 <marker
@@ -382,55 +397,57 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
                   markerHeight="6"
                   orient="auto-start-reverse"
                 >
-                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#8b5cf6" />
                 </marker>
                 <marker
                   id="arrow-highlighted"
                   viewBox="0 0 10 10"
                   refX="8"
                   refY="5"
-                  markerWidth="7"
-                  markerHeight="7"
+                  markerWidth="8"
+                  markerHeight="8"
                   orient="auto-start-reverse"
                 >
                   <path d="M 0 1 L 10 5 L 0 9 z" fill="#a855f7" />
                 </marker>
               </defs>
 
-              {relationshipLines.map((line) => {
-                const dx = Math.abs(line.x2 - line.x1) * 0.5;
-                const pathData = `M ${line.x1} ${line.y1} C ${line.x1 + dx} ${line.y1}, ${
-                  line.x2 - dx
-                } ${line.y2}, ${line.x2} ${line.y2}`;
-
-                return (
-                  <g key={line.id}>
-                    {/* Shadow/Glow on highlight */}
-                    {line.isHighlighted && (
-                      <path
-                        d={pathData}
-                        fill="none"
-                        stroke="#a855f7"
-                        strokeWidth="5"
-                        strokeOpacity="0.35"
-                        strokeLinecap="round"
-                      />
-                    )}
-                    {/* Actual Connector Curve */}
+              {relationshipLines.map((line) => (
+                <g key={line.id}>
+                  {line.isHighlighted && (
                     <path
-                      d={pathData}
+                      d={line.pathData}
                       fill="none"
-                      stroke={line.isHighlighted ? "#9333ea" : "#94a3b8"}
-                      strokeWidth={line.isHighlighted ? 2.5 : 1.5}
-                      strokeDasharray={line.isHighlighted ? "none" : "4 2"}
-                      markerEnd={
-                        line.isHighlighted ? "url(#arrow-highlighted)" : "url(#arrow-default)"
-                      }
-                      className="transition-all duration-150"
+                      stroke="#a855f7"
+                      strokeWidth={5}
+                      strokeOpacity={0.35}
+                      strokeLinecap="round"
                     />
-                  </g>
-                );
-              })}
+                  )}
+                  <path
+                    d={line.pathData}
+                    fill="none"
+                    stroke={line.isHighlighted ? "#9333ea" : "#8b5cf6"}
+                    strokeWidth={line.isHighlighted ? 2.5 : 1.6}
+                    strokeDasharray={line.isHighlighted ? "none" : "4 2"}
+                    strokeOpacity={line.isHighlighted ? 1 : 0.7}
+                    markerEnd={
+                      line.isHighlighted ? "url(#arrow-highlighted)" : "url(#arrow-default)"
+                    }
+                    className="transition-all duration-150"
+                  >
+                    <title>{`${line.fromTable}.${line.fromCol} → ${line.toTable}.${line.toCol} (${line.onDelete})`}</title>
+                  </path>
+                  <circle
+                    cx={line.x1}
+                    cy={line.y1}
+                    r={3}
+                    fill={line.isHighlighted ? "#9333ea" : "#8b5cf6"}
+                    stroke="#ffffff"
+                    strokeWidth={1}
+                  />
+                </g>
+              ))}
             </svg>
 
             {/* Draggable Table Cards */}
@@ -439,53 +456,65 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
                 x: 80 + (idx % Math.max(1, Math.ceil(Math.sqrt(filteredTables.length)))) * 360,
                 y:
                   60 +
-                  Math.floor(idx / Math.max(1, Math.ceil(Math.sqrt(filteredTables.length)))) * 320,
+                  Math.floor(idx / Math.max(1, Math.ceil(Math.sqrt(filteredTables.length)))) * 340,
               };
-              const isSelected = selectedTable === table.name;
+
               const isHovered = hoveredTable === table.name;
+              const isSelected = selectedTable === table.name;
+              const isConnected = relationshipLines.some(
+                (l) => l.isHighlighted && (l.fromTable === table.name || l.toTable === table.name)
+              );
 
               return (
                 <div
                   key={table.name}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    setDraggingTable(table.name);
-                    setSelectedTable(table.name);
-                    setDragOffset({
-                      x: e.clientX - pos.x * zoom - pan.x,
-                      y: e.clientY - pos.y * zoom - pan.y,
-                    });
-                  }}
-                  onMouseEnter={() => setHoveredTable(table.name)}
-                  onMouseLeave={() => setHoveredTable(null)}
                   style={{
-                    transform: `translate(${pos.x}px, ${pos.y}px)`,
-                    width: `${CARD_WIDTH}px`,
+                    width: CARD_WIDTH,
+                    transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
                   }}
                   className={cn(
-                    "absolute select-none rounded-xl border bg-white dark:bg-[#121124]/95 backdrop-blur-xl shadow-lg dark:shadow-2xl transition-shadow cursor-move overflow-hidden",
-                    isSelected
-                      ? "border-purple-500 ring-2 ring-purple-500/30 shadow-purple-500/10"
-                      : isHovered
-                        ? "border-purple-500/60 shadow-md shadow-purple-500/5"
-                        : "border-purple-200/60 dark:border-white/10"
+                    "absolute left-0 top-0 select-none rounded-2xl border transition-shadow z-20",
+                    "bg-white/95 dark:bg-[#11101d]/95 backdrop-blur-xl shadow-xl",
+                    isHovered || isSelected || isConnected
+                      ? "border-purple-500 shadow-2xl shadow-purple-500/20 ring-1 ring-purple-500/40"
+                      : "border-purple-200/60 dark:border-white/10 hover:border-purple-400/70 dark:hover:border-white/20"
                   )}
+                  onMouseEnter={() => setHoveredTable(table.name)}
+                  onMouseLeave={() => setHoveredTable(null)}
+                  onClick={() => setSelectedTable(table.name)}
                 >
-                  {/* Table Card Header */}
-                  <div className="h-11 px-3 border-b border-purple-200/50 dark:border-white/10 bg-purple-50/70 dark:bg-[#16152b] flex items-center justify-between">
+                  {/* Card Header (Drag Handle) */}
+                  <div
+                    onMouseDown={(e) => {
+                      if (e.button === 0) {
+                        e.stopPropagation();
+                        setDraggingTable(table.name);
+                        setDragOffset({
+                          x: e.clientX - pos.x * zoom - pan.x,
+                          y: e.clientY - pos.y * zoom - pan.y,
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "h-11 px-3 flex items-center justify-between rounded-t-2xl cursor-move border-b",
+                      "border-purple-100 dark:border-white/5 bg-purple-500/[0.03] dark:bg-white/[0.02]"
+                    )}
+                  >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Table2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
-                      <span className="text-xs font-bold font-mono text-foreground truncate">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
+                        <Table2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-mono text-xs font-bold truncate text-foreground">
                         {table.name}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <Badge
-                        variant="outline"
-                        className="text-[10px] font-mono px-1.5 py-0 bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/20"
+                        variant="secondary"
+                        className="h-5 px-1.5 text-[10px] font-mono rounded-md bg-purple-500/10 text-purple-700 dark:text-purple-300 border-none font-normal"
                       >
-                        {table.rowCount} rows
+                        {table.rowCount ?? 0} rows
                       </Badge>
 
                       <DropdownMenu modal={false}>
@@ -493,7 +522,8 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 rounded text-muted-foreground hover:text-foreground"
+                            className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <MoreVertical className="w-3.5 h-3.5" />
                           </Button>
@@ -536,68 +566,46 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
                   </div>
 
                   {/* Columns List */}
-                  <div className="divide-y divide-purple-100 dark:divide-white/5 py-1">
+                  <div className="divide-y divide-purple-100/70 dark:divide-white/5 py-1">
                     {table.columns.map((col) => {
                       const isPK = col.pk > 0;
-                      const isFK = table.foreignKeys?.some((fk) => fk.from === col.name);
-                      const isIdentity = isPK && col.type.toLowerCase().includes("int");
-                      const isNonNullable = col.notnull === 1;
+                      const fkInfo = table.foreignKeys?.find((fk) => fk.from === col.name);
+                      const isFK = !!fkInfo;
 
                       return (
                         <div
                           key={col.name}
                           className={cn(
-                            "h-7 px-3 flex items-center justify-between text-xs transition-colors hover:bg-purple-500/10",
+                            "h-7 px-3 flex items-center justify-between text-xs transition-colors hover:bg-purple-500/5",
                             isPK && "bg-purple-50/50 dark:bg-purple-500/5 font-medium"
                           )}
                         >
-                          {/* Column Flags & Name */}
                           <div className="flex items-center gap-2 min-w-0">
-                            {/* Key / Identity / Nullability Icon */}
-                            {isPK ? (
+                            {isPK && (
                               <span title="Primary Key">
                                 <Key className="w-3 h-3 text-amber-500 shrink-0" />
-                              </span>
-                            ) : isIdentity ? (
-                              <span title="Identity">
-                                <Hash className="w-3 h-3 text-indigo-500 shrink-0" />
-                              </span>
-                            ) : isNonNullable ? (
-                              <span
-                                className="text-[9px] text-purple-600 dark:text-purple-400 shrink-0 font-mono font-bold"
-                                title="Non-Nullable"
-                              >
-                                ◆
-                              </span>
-                            ) : (
-                              <span
-                                className="text-[9px] text-muted-foreground/60 shrink-0 font-mono"
-                                title="Nullable"
-                              >
-                                ◇
                               </span>
                             )}
 
                             <span
                               className={cn(
                                 "font-mono truncate text-[11px]",
-                                isPK
-                                  ? "text-foreground font-semibold"
-                                  : isFK
-                                    ? "text-purple-700 dark:text-purple-300 font-medium"
-                                    : "text-foreground/90"
+                                isPK ? "text-foreground font-semibold" : "text-foreground/90"
                               )}
                             >
                               {col.name}
                             </span>
                           </div>
 
-                          {/* Column Type & FK Indicator */}
                           <div className="flex items-center gap-1.5 shrink-0">
                             {isFK && (
                               <span
                                 className="text-[9px] font-mono px-1 py-0 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30"
-                                title="Foreign Key"
+                                title={
+                                  fkInfo
+                                    ? `References ${fkInfo.table}.${fkInfo.to || "id"} (${fkInfo.onDelete || "CASCADE"})`
+                                    : "Foreign Key"
+                                }
                               >
                                 FK
                               </span>
@@ -613,66 +621,6 @@ export default function SchemaVisualizer({ dbName, onSelectTable }: SchemaVisual
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* Bottom Legend */}
-        <div className="absolute bottom-4 left-4 z-20 hidden sm:flex items-center gap-4 px-3.5 py-2 rounded-xl border border-purple-200/50 dark:border-white/10 bg-white/90 dark:bg-[#0d0c18]/90 backdrop-blur-xl text-xs text-muted-foreground shadow-lg">
-          <div className="flex items-center gap-1.5">
-            <Key className="w-3 h-3 text-amber-500" />
-            <span className="text-[11px] text-foreground">Primary key</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Hash className="w-3 h-3 text-indigo-500" />
-            <span className="text-[11px] text-foreground">Identity</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-pink-500" />
-            <span className="text-[11px] text-foreground">Unique</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-muted-foreground/70 font-mono">◇</span>
-            <span className="text-[11px] text-foreground">Nullable</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-purple-600 dark:text-purple-400 font-mono font-bold">
-              ◆
-            </span>
-            <span className="text-[11px] text-foreground">Non-Nullable</span>
-          </div>
-        </div>
-
-        {/* Canvas Minimap Viewport */}
-        {diagram?.tables && diagram.tables.length > 0 && (
-          <div className="absolute bottom-4 right-4 z-20 w-40 h-28 rounded-xl border border-purple-200/50 dark:border-white/10 bg-white/90 dark:bg-[#0d0c18]/90 backdrop-blur-xl p-2 shadow-lg hidden md:flex flex-col justify-between">
-            <div className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-              <span>Canvas Map</span>
-              <span className="font-semibold">{diagram.tables.length} tables</span>
-            </div>
-
-            <div className="relative flex-1 rounded bg-slate-100 dark:bg-black/40 border border-purple-100 dark:border-white/5 my-1 overflow-hidden">
-              {diagram.tables.map((t) => {
-                const pos = positions[t.name] || { x: 0, y: 0 };
-                const miniX = Math.min(130, Math.max(2, pos.x * 0.08));
-                const miniY = Math.min(60, Math.max(2, pos.y * 0.08));
-                return (
-                  <div
-                    key={t.name}
-                    style={{ left: `${miniX}px`, top: `${miniY}px` }}
-                    className={cn(
-                      "absolute w-4 h-2.5 rounded-xs border",
-                      selectedTable === t.name
-                        ? "bg-purple-600 border-purple-500"
-                        : "bg-purple-500/25 border-purple-500/40"
-                    )}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="text-[9px] text-muted-foreground/80 font-mono text-center">
-              Drag cards to arrange
-            </div>
           </div>
         )}
       </div>

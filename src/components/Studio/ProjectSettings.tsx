@@ -96,7 +96,7 @@ export default function ProjectSettings({ dbName, details, tables }: ProjectSett
                 <span className="text-muted-foreground font-mono text-[11px]">Storage Engine</span>
                 <div className="flex items-center gap-1.5 font-medium text-foreground">
                   <ShieldCheck className="w-3.5 h-3.5 text-purple-500" />
-                  <span>Isolated SQLite 3 (WAL Mode)</span>
+                  <span>SQLite 3</span>
                 </div>
               </div>
 
@@ -143,8 +143,8 @@ export default function ProjectSettings({ dbName, details, tables }: ProjectSett
               <div>
                 <p className="text-xs font-semibold text-foreground">Delete this database</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Permanently remove the SQLite file, all tables, schemas, and records. This action
-                  cannot be undone.
+                  Permanently remove the database file, all tables, schemas, and records. This
+                  action cannot be undone.
                 </p>
               </div>
               <Button
