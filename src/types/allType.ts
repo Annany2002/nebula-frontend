@@ -156,3 +156,16 @@ export interface DatabaseObjectsType {
   indexes: IndexInfo[];
   triggers: TriggerInfo[];
 }
+
+export interface ForeignKeyDefinition {
+  target_table: string;
+  target_column: string;
+  on_delete?: "CASCADE" | "SET NULL" | "RESTRICT" | "NO ACTION" | "SET DEFAULT" | string;
+  on_update?: "CASCADE" | "SET NULL" | "RESTRICT" | "NO ACTION" | "SET DEFAULT" | string;
+}
+
+export interface ColumnDefinitionType {
+  name: string;
+  type: string;
+  foreign_key?: ForeignKeyDefinition;
+}

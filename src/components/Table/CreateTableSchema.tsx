@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Plus, Trash2, Table2, Layers } from "lucide-react";
+import { Plus, Trash2, Table2, Link2, X } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -13,11 +13,18 @@ import {
 import { toast } from "sonner";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { useCreateTable } from "@/hooks/queries";
+import { useCreateTable, useTables } from "@/hooks/queries";
+
+interface ForeignKeyConfig {
+  target_table: string;
+  target_column: string;
+  on_delete?: string;
+}
 
 interface ColumnDefinition {
   name: string;
   type: string;
+  foreign_key?: ForeignKeyConfig;
 }
 
 export default function CreateTableSchema({
@@ -30,6 +37,7 @@ export default function CreateTableSchema({
   setOpenChange: Dispatch<SetStateAction<boolean>>;
 }) {
   const { mutate: createTable, isPending } = useCreateTable();
+  const { data: existingTables = [] } = useTables(db_name);
   const [tableName, setTableName] = useState("");
   const [columns, setColumns] = useState<ColumnDefinition[]>([{ name: "", type: "TEXT" }]);
 
@@ -49,6 +57,50 @@ export default function CreateTableSchema({
     const newColumns = [...columns];
     newColumns[index][field] = value;
     setColumns(newColumns);
+  };
+
+  const handleToggleForeignKey = (index: number) => {
+    const newColumns = [...columns];
+    if (newColumns[index].foreign_key) {
+      delete newColumns[index].foreign_key;
+    } else {
+      const defaultTable = existingTables[0]?.tbl_name || existingTables[0]?.name || "";
+      newColumns[index].foreign_key = {
+        target_table: defaultTable,
+        target_column: "id",
+        on_delete: "CASCADE",
+      };
+    }
+    setColumns(newColumns);
+  };
+
+  const handleForeignKeyChange = (index: number, field: keyof ForeignKeyConfig, value: string) => {
+    const newColumns = [...columns];
+    if (!newColumns[index].foreign_key) return;
+
+    newColumns[index].foreign_key = {
+      ...newColumns[index].foreign_key!,
+      [field]: value,
+    };
+
+    // Reset target column if target table changed
+    if (field === "target_table") {
+      newColumns[index].foreign_key!.target_column = "id";
+    }
+
+    setColumns(newColumns);
+  };
+
+  const getTargetTableColumns = (targetTableName: string): string[] => {
+    const table = existingTables.find((t) => (t.tbl_name || t.name) === targetTableName);
+    if (!table || !table.columns || table.columns.length === 0) {
+      return ["id"];
+    }
+    const cols = table.columns.map((c) => c.name);
+    if (!cols.includes("id")) {
+      return ["id", ...cols];
+    }
+    return cols;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -98,6 +150,18 @@ export default function CreateTableSchema({
         return;
       }
       namesSet.add(lower);
+
+      // Validate foreign key if present
+      if (col.foreign_key) {
+        if (!col.foreign_key.target_table) {
+          toast.error(`Select a target table for foreign key on '${col.name}'.`);
+          return;
+        }
+        if (!col.foreign_key.target_column) {
+          toast.error(`Select a target column for foreign key on '${col.name}'.`);
+          return;
+        }
+      }
     }
 
     createTable(
@@ -107,6 +171,15 @@ export default function CreateTableSchema({
         schema: validColumns.map((c) => ({
           name: c.name.trim(),
           type: c.type,
+          ...(c.foreign_key && c.foreign_key.target_table && c.foreign_key.target_column
+            ? {
+                foreign_key: {
+                  target_table: c.foreign_key.target_table,
+                  target_column: c.foreign_key.target_column,
+                  on_delete: c.foreign_key.on_delete || "CASCADE",
+                },
+              }
+            : {}),
         })),
       },
       {
@@ -126,7 +199,7 @@ export default function CreateTableSchema({
           <Plus className="h-4 w-4 mr-1.5" /> Add Table
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg rounded-2xl border border-purple-200/50 dark:border-white/10 bg-white/95 dark:bg-[#0e0d15]/95 backdrop-blur-2xl shadow-2xl p-6">
+      <DialogContent className="sm:max-w-xl rounded-2xl border border-purple-200/50 dark:border-white/10 bg-white/95 dark:bg-[#0e0d15]/95 backdrop-blur-2xl shadow-2xl p-6">
         <DialogHeader>
           <div className="flex items-center gap-2.5 mb-1">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
@@ -180,49 +253,165 @@ export default function CreateTableSchema({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-xs font-medium text-gray-700 dark:text-zinc-300">
-                Custom Columns & Types
+                Custom Columns & Relationships
               </Label>
               <span className="text-[11px] text-gray-400 font-mono">
                 {columns.length} {columns.length === 1 ? "column" : "columns"}
               </span>
             </div>
 
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
               {columns.map((column, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 p-1.5 rounded-xl border border-purple-200/40 dark:border-white/[0.06] bg-purple-500/[0.02] dark:bg-white/[0.02]"
+                  className="rounded-xl border border-purple-200/40 dark:border-white/[0.06] bg-purple-500/[0.02] dark:bg-white/[0.02] p-2 space-y-2"
                 >
-                  <Input
-                    value={column.name}
-                    onChange={(e) => handleColumnChange(index, "name", e.target.value)}
-                    placeholder="e.g. name, email, price"
-                    className="flex-1 h-8 rounded-lg border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 font-mono text-xs"
-                  />
-                  <select
-                    value={column.type}
-                    onChange={(e) => handleColumnChange(index, "type", e.target.value)}
-                    className="h-8 rounded-lg border border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 px-2.5 py-1 text-xs font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
-                  >
-                    <option value="TEXT">TEXT</option>
-                    <option value="INTEGER">INTEGER</option>
-                    <option value="BOOLEAN">BOOLEAN</option>
-                    <option value="DECIMAL">DECIMAL</option>
-                    <option value="UUID">UUID</option>
-                    <option value="TIMESTAMP">TIMESTAMP</option>
-                    <option value="BLOB">BLOB</option>
-                    <option value="REAL">REAL</option>
-                  </select>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 shrink-0"
-                    onClick={() => handleRemoveColumn(index)}
-                    disabled={columns.length <= 1 || isPending}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={column.name}
+                      onChange={(e) => handleColumnChange(index, "name", e.target.value)}
+                      placeholder="e.g. user_id, status, price"
+                      className="flex-1 h-8 rounded-lg border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 font-mono text-xs"
+                    />
+                    <select
+                      value={column.type}
+                      onChange={(e) => handleColumnChange(index, "type", e.target.value)}
+                      className="h-8 rounded-lg border border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 px-2.5 py-1 text-xs font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
+                    >
+                      <option value="TEXT">TEXT</option>
+                      <option value="INTEGER">INTEGER</option>
+                      <option value="BOOLEAN">BOOLEAN</option>
+                      <option value="DECIMAL">DECIMAL</option>
+                      <option value="UUID">UUID</option>
+                      <option value="TIMESTAMP">TIMESTAMP</option>
+                      <option value="BLOB">BLOB</option>
+                      <option value="REAL">REAL</option>
+                    </select>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title={
+                        column.foreign_key
+                          ? "Remove Foreign Key relation"
+                          : existingTables.length === 0
+                            ? "No tables to reference yet"
+                            : "Add Foreign Key relation"
+                      }
+                      className={`h-8 w-8 rounded-lg transition-colors shrink-0 ${
+                        column.foreign_key
+                          ? "text-purple-600 dark:text-purple-400 bg-purple-500/15 border border-purple-500/30"
+                          : "text-gray-400 hover:text-purple-500 hover:bg-purple-500/10"
+                      }`}
+                      onClick={() => handleToggleForeignKey(index)}
+                      disabled={isPending}
+                    >
+                      <Link2 className="h-3.5 w-3.5" />
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 shrink-0"
+                      onClick={() => handleRemoveColumn(index)}
+                      disabled={columns.length <= 1 || isPending}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
+                  {/* Inline Foreign Key Relationship Selector */}
+                  {column.foreign_key && (
+                    <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 rounded-lg bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 text-xs">
+                      <div className="flex items-center gap-1 text-[11px] font-medium text-purple-600 dark:text-purple-400 shrink-0">
+                        <Link2 className="h-3 w-3" />
+                        <span>References</span>
+                      </div>
+
+                      {existingTables.length > 0 ? (
+                        <>
+                          {/* Target Table */}
+                          <select
+                            value={column.foreign_key.target_table}
+                            onChange={(e) =>
+                              handleForeignKeyChange(index, "target_table", e.target.value)
+                            }
+                            className="h-7 rounded-md border border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-2 text-[11px] font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
+                          >
+                            {existingTables.map((t) => {
+                              const tName = t.tbl_name || t.name;
+                              return (
+                                <option key={tName} value={tName}>
+                                  {tName}
+                                </option>
+                              );
+                            })}
+                          </select>
+
+                          <span className="text-gray-400 text-xs">(</span>
+
+                          {/* Target Column */}
+                          <select
+                            value={column.foreign_key.target_column}
+                            onChange={(e) =>
+                              handleForeignKeyChange(index, "target_column", e.target.value)
+                            }
+                            className="h-7 rounded-md border border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-2 text-[11px] font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
+                          >
+                            {getTargetTableColumns(column.foreign_key.target_table).map((col) => (
+                              <option key={col} value={col}>
+                                {col}
+                              </option>
+                            ))}
+                          </select>
+
+                          <span className="text-gray-400 text-xs">)</span>
+
+                          {/* On Delete action */}
+                          <div className="flex items-center gap-1 ml-auto">
+                            <span className="text-[10px] text-gray-400 uppercase font-mono">
+                              On Delete:
+                            </span>
+                            <select
+                              value={column.foreign_key.on_delete || "CASCADE"}
+                              onChange={(e) =>
+                                handleForeignKeyChange(index, "on_delete", e.target.value)
+                              }
+                              className="h-7 rounded-md border border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-1.5 text-[11px] font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
+                            >
+                              <option value="CASCADE">CASCADE</option>
+                              <option value="SET NULL">SET NULL</option>
+                              <option value="RESTRICT">RESTRICT</option>
+                              <option value="NO ACTION">NO ACTION</option>
+                            </select>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
+                          <span>Target table name:</span>
+                          <Input
+                            value={column.foreign_key.target_table}
+                            onChange={(e) =>
+                              handleForeignKeyChange(index, "target_table", e.target.value)
+                            }
+                            placeholder="table_name"
+                            className="h-7 w-28 rounded-md border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-2 text-[11px] font-mono"
+                          />
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleForeignKey(index)}
+                        title="Remove relation"
+                        className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
