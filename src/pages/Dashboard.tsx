@@ -109,7 +109,7 @@ const records = await res.json();`;
               Projects
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Manage your isolated SQLite database projects, view schemas, and query data.
+              Manage your database projects, schemas, and data.
             </p>
           </div>
 
@@ -259,7 +259,7 @@ const records = await res.json();`;
                 </Button>
               </motion.div>
             ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredDatabases.map((db, index) => (
                   <EnhancedDatabaseCard
                     key={db.databaseId}
@@ -270,7 +270,7 @@ const records = await res.json();`;
                 ))}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {filteredDatabases.map((db, index) => (
                   <EnhancedDatabaseCard
                     key={db.databaseId}
@@ -286,11 +286,11 @@ const records = await res.json();`;
 
         {/* Developer Quickstart & Integration Section (Eliminates Empty Void) */}
         {databases.length > 0 && (
-          <div className="space-y-4 pt-4">
+          <div className="space-y-3 pt-2">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-foreground">Developer Quickstart</h2>
               <span className="text-xs text-muted-foreground">
-                Interact with your SQLite databases via auto-generated REST endpoints
+                Interact with your databases via auto-generated REST endpoints
               </span>
             </div>
 
@@ -307,11 +307,11 @@ const records = await res.json();`;
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <div className="flex items-center rounded-lg border border-purple-200/50 dark:border-white/10 p-0.5 bg-muted/40 text-xs">
+                      <div className="flex items-center rounded-full border border-purple-200/50 dark:border-white/10 p-0.5 bg-muted/40 text-xs">
                         <button
                           onClick={() => setQuickstartTab("curl")}
                           className={cn(
-                            "px-2 py-1 rounded text-[11px] font-mono transition-colors",
+                            "px-2 py-1 rounded-full text-[11px] font-mono transition-colors",
                             quickstartTab === "curl"
                               ? "bg-purple-600 text-white font-semibold"
                               : "text-muted-foreground hover:text-foreground"
@@ -322,7 +322,7 @@ const records = await res.json();`;
                         <button
                           onClick={() => setQuickstartTab("fetch")}
                           className={cn(
-                            "px-2 py-1 rounded text-[11px] font-mono transition-colors",
+                            "px-2 py-1 rounded-full text-[11px] font-mono transition-colors",
                             quickstartTab === "fetch"
                               ? "bg-purple-600 text-white font-semibold"
                               : "text-muted-foreground hover:text-foreground"
@@ -401,15 +401,15 @@ const records = await res.json();`;
                       <ShieldCheck className="h-4 w-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-foreground">Local SQLite Isolation</h4>
+                      <h4 className="text-xs font-bold text-foreground">Database Isolation</h4>
                       <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                        Every project lives in an isolated SQLite database file with WAL concurrency
-                        and zero multi-tenant leakage.
+                        Every project runs in an isolated environment with zero noisy-neighbor
+                        contention.
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono mt-2 pt-2 border-t border-purple-200/20 dark:border-white/5">
-                    <span>Engine: Local SQLite</span>
+                    <span>Dedicated Environment</span>
                     <span className="text-emerald-500 font-semibold">Active & Healthy</span>
                   </div>
                 </Card>
