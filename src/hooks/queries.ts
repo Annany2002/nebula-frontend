@@ -254,11 +254,15 @@ export const useAlterTable = () => {
     onSuccess: (data, variables) => {
       const resultingTable = data?.table_name || variables.tableName;
       queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["schema", variables.dbName, variables.tableName] });
+      queryClient.invalidateQueries({
+        queryKey: ["schema", variables.dbName, variables.tableName],
+      });
       if (resultingTable !== variables.tableName) {
         queryClient.invalidateQueries({ queryKey: ["schema", variables.dbName, resultingTable] });
       }
-      queryClient.invalidateQueries({ queryKey: ["records", variables.dbName, variables.tableName] });
+      queryClient.invalidateQueries({
+        queryKey: ["records", variables.dbName, variables.tableName],
+      });
       queryClient.invalidateQueries({ queryKey: ["records", variables.dbName, resultingTable] });
       queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
       queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });

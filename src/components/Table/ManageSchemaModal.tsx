@@ -223,7 +223,9 @@ export default function ManageSchemaModal({
               <div>
                 <DialogTitle className="text-base font-semibold text-foreground flex items-center gap-2">
                   <span>Manage Schema:</span>
-                  <span className="font-mono text-purple-600 dark:text-purple-400">{tableName}</span>
+                  <span className="font-mono text-purple-600 dark:text-purple-400">
+                    {tableName}
+                  </span>
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   Evolve table structure: add, rename, or remove columns safely.
@@ -422,11 +424,7 @@ export default function ManageSchemaModal({
 
                 <div className="space-y-1.5">
                   <Label className="text-xs">Data Type</Label>
-                  <Select
-                    value={newColType}
-                    onValueChange={setNewColType}
-                    disabled={isPending}
-                  >
+                  <Select value={newColType} onValueChange={setNewColType} disabled={isPending}>
                     <SelectTrigger className="h-8 text-xs bg-background">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
@@ -535,7 +533,9 @@ export default function ManageSchemaModal({
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={isPending || !newTableName.trim() || newTableName.trim() === tableName}
+                    disabled={
+                      isPending || !newTableName.trim() || newTableName.trim() === tableName
+                    }
                     className="h-8 text-xs bg-purple-600 hover:bg-purple-700 text-white"
                   >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save"}
