@@ -169,3 +169,30 @@ export interface ColumnDefinitionType {
   type: string;
   foreign_key?: ForeignKeyDefinition;
 }
+
+export interface AlterColumnDefinition {
+  name: string;
+  type: string;
+  default_value?: string;
+  not_null?: boolean;
+  foreign_key?: ForeignKeyDefinition;
+}
+
+export interface AlterTableOperation {
+  action: "add_column" | "drop_column" | "rename_column" | "rename_table";
+  column?: AlterColumnDefinition;
+  column_name?: string;
+  old_name?: string;
+  new_name?: string;
+  new_table_name?: string;
+}
+
+export interface AlterTablePayload {
+  action?: "add_column" | "drop_column" | "rename_column" | "rename_table";
+  column?: AlterColumnDefinition;
+  column_name?: string;
+  old_name?: string;
+  new_name?: string;
+  new_table_name?: string;
+  operations?: AlterTableOperation[];
+}

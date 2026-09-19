@@ -12,6 +12,7 @@ import {
   DatabaseAnalyticsType,
   SchemaDiagramType,
   DatabaseObjectsType,
+  AlterTablePayload,
 } from "@/types/allType";
 import { toast } from "sonner";
 
@@ -220,6 +221,56 @@ export const useDeleteTable = () => {
       toast.success(`Table ${variables.tableName} deleted successfully`);
     },
     onError: () => toast.error("Error deleting table"),
+  });
+};
+
+export const useAlterTable = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      dbName,
+      tableName,
+      payload,
+    }: {
+      dbName: string;
+      tableName: string;
+      payload: AlterTablePayload;
+    }) => {
+      const token = getToken();
+      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}/alter`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to alter table");
+      }
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      const resultingTable = data?.table_name || variables.tableName;
+      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
+      queryClient.invalidateQueries({
+        queryKey: ["schema", variables.dbName, variables.tableName],
+      });
+      if (resultingTable !== variables.tableName) {
+        queryClient.invalidateQueries({ queryKey: ["schema", variables.dbName, resultingTable] });
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["records", variables.dbName, variables.tableName],
+      });
+      queryClient.invalidateQueries({ queryKey: ["records", variables.dbName, resultingTable] });
+      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });
+      toast.success(data?.message || "Table schema updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to alter table");
+    },
   });
 };
 

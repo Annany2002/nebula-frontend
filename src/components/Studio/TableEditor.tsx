@@ -14,6 +14,7 @@ import {
   Layers,
   PanelLeftClose,
   PanelLeftOpen,
+  Columns3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ import { TableType, RecordsQueryParams } from "@/types/allType";
 import { useRecords, useDeleteRecord, useDeleteTable } from "@/hooks/queries";
 import CreateRecord from "@/components/Table/CreateRecord";
 import EditRecord from "@/components/Table/EditRecord";
+import ManageSchemaModal from "@/components/Table/ManageSchemaModal";
 import { cn } from "@/lib/utils";
 
 interface TableEditorProps {
@@ -72,6 +74,7 @@ export default function TableEditor({
   // Record Modals
   const [createRecordOpen, setCreateRecordOpen] = useState(false);
   const [editRecordOpen, setEditRecordOpen] = useState(false);
+  const [manageSchemaOpen, setManageSchemaOpen] = useState(false);
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const [selectedRecordForEdit, setSelectedRecordForEdit] = useState<Record<string, any> | null>(
     null
@@ -365,6 +368,18 @@ export default function TableEditor({
                   <RefreshCw className={cn("w-3.5 h-3.5", recordsLoading && "animate-spin")} />
                 </Button>
 
+                {/* Edit Schema Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setManageSchemaOpen(true)}
+                  className="h-8 px-2.5 text-xs bg-muted/40 border-purple-200/40 dark:border-white/10 text-foreground hover:bg-muted font-medium gap-1.5 rounded-lg"
+                  title="Manage table schema (add, rename, drop columns)"
+                >
+                  <Columns3 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <span className="hidden md:inline">Edit Schema</span>
+                </Button>
+
                 {/* Insert Row Button */}
                 <Button
                   size="sm"
@@ -635,6 +650,21 @@ export default function TableEditor({
           record={selectedRecordForEdit}
           open={editRecordOpen}
           setOpen={setEditRecordOpen}
+        />
+      )}
+
+      {/* Manage Schema Modal */}
+      {manageSchemaOpen && currentTable && (
+        <ManageSchemaModal
+          dbName={dbName}
+          tableName={currentTableName}
+          columns={currentTable.columns}
+          open={manageSchemaOpen}
+          onOpenChange={setManageSchemaOpen}
+          onTableRenamed={(newName) => {
+            onSelectTable(newName);
+            onRefetchTables();
+          }}
         />
       )}
     </div>
