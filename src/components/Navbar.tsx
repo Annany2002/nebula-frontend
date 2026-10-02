@@ -1,150 +1,144 @@
 import { useState, useEffect } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import { Github, LoaderCircleIcon, Menu, X } from "lucide-react";
-import NebulaLogo from "@/assets/nebula-logo";
-import { Button } from "@/components/ui/button";
+import { Github, ArrowUpRight } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/context/auth-context";
 import UserDropDown from "./UserDropDown";
+import LandingBrand from "./landing/LandingBrand";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Code", href: "#code-demo" },
-  { label: "Use Cases", href: "#use-cases" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Product", href: "#features" },
+  { label: "Developers", href: "#code-demo" },
+  { label: "Use cases", href: "#use-cases" },
 ];
 
 const Navbar = () => {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const reducedMotion = useReducedMotion();
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const scroll = () => setScrolled(window.scrollY > 20);
+    scroll();
+    window.addEventListener("scroll", scroll, { passive: true });
+    return () => window.removeEventListener("scroll", scroll);
+  }, []);
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
   }, []);
 
   return (
     <header
-      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "top-0 w-full bg-white/80 dark:bg-[#0c0a12]/80 backdrop-blur-lg border-b border-gray-200/60 dark:border-white/5"
-          : "top-0 w-full bg-transparent"
-      }`}
+      className={`nbl-nav ${scrolled ? "is-scrolled" : ""} ${mobileMenuOpen ? "is-menu-open" : ""}`}
+      style={{ borderRadius: scrolled ? (mobileMenuOpen ? 22 : 32) : 0 }}
     >
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <NebulaLogo />
-
-        <nav className="hidden md:flex items-center gap-8">
+      <div className="nbl-container nbl-nav-inner">
+        <Link to="/" aria-label="Nebula home">
+          <LandingBrand />
+        </Link>
+        <nav className="nbl-desktop-nav" aria-label="Main navigation">
           {navLinks.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="text-[13px] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
-            >
+            <a key={item.label} href={item.href}>
               {item.label}
             </a>
           ))}
-        </nav>
-
-        <div className="hidden md:flex items-center gap-3">
           <a
-            href="https://github.com/Annany2002/nebula-frontend"
+            href="https://github.com/Annany2002/nebula-backend#readme"
             target="_blank"
             rel="noreferrer"
-            aria-label="GitHub repository"
-            className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
           >
-            <Github className="h-4 w-4" />
+            Docs <ArrowUpRight size={12} />
           </a>
-
-          <ThemeToggle />
-
-          {user && user.email ? (
-            isLoading ? (
-              <LoaderCircleIcon className="animate-spin text-purple-500" />
-            ) : (
-              <UserDropDown />
-            )
-          ) : (
-            <Link to="/sign-up">
-              <Button
-                size="sm"
-                className="text-[13px] font-medium bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-4 h-8 transition-colors"
-              >
-                Get Started
-              </Button>
-            </Link>
-          )}
-        </div>
-
-        <div className="md:hidden flex items-center gap-2">
-          <ThemeToggle />
-          <button
-            className="p-2 text-gray-600 dark:text-gray-300"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+        </nav>
+        <div className="nbl-nav-actions">
+          <a
+            className="nbl-nav-github"
+            href="https://github.com/Annany2002/nebula-backend"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Nebula on GitHub"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <Github size={18} />
+          </a>
+          <span className="nbl-theme-toggle">
+            <ThemeToggle />
+          </span>
+          <div className="nbl-nav-account">
+            {user ? (
+              <UserDropDown />
+            ) : (
+              <Link className="nbl-button nbl-button-primary nbl-button-small" to="/sign-up">
+                Get started <ArrowUpRight size={14} />
+              </Link>
+            )}
+          </div>
+          <button
+            type="button"
+            className="nbl-menu-toggle"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="nbl-mobile-nav"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            <svg
+              className="nbl-menu-icon"
+              width="21"
+              height="21"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="18" x2="20" y2="18" />
+            </svg>
           </button>
         </div>
       </div>
-
       <AnimatePresence>
         {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="md:hidden fixed inset-0 bg-black/40 -z-10"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.15 }}
-              className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-[#0c0a12] border-b border-gray-200 dark:border-white/10 p-4 space-y-1"
-            >
-              {navLinks.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                >
-                  {item.label}
-                </a>
-              ))}
-
-              <a
-                href="https://github.com/Annany2002/nebula-frontend"
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300"
-              >
-                <Github className="h-4 w-4" /> GitHub
+          <motion.nav
+            key="mobile-navigation"
+            initial={reducedMotion ? false : { opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: reducedMotion ? 0 : -8 }}
+            transition={{ duration: reducedMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
+            id="nbl-mobile-nav"
+            className="nbl-mobile-nav nbl-container"
+            aria-label="Mobile navigation"
+          >
+            {navLinks.map((item) => (
+              <a key={item.label} href={item.href} onClick={() => setMobileMenuOpen(false)}>
+                {item.label}
+                <ArrowUpRight size={15} />
               </a>
-
-              <div className="pt-2 border-t border-gray-100 dark:border-white/5">
-                {user ? (
-                  <UserDropDown />
-                ) : (
-                  <Link to="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full h-9 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded-lg">
-                      Get Started
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-          </>
+            ))}
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
+              FAQ
+              <ArrowUpRight size={15} />
+            </a>
+            {user ? (
+              <UserDropDown />
+            ) : (
+              <Link
+                className="nbl-button nbl-button-primary"
+                to="/sign-up"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Start building free
+                <ArrowUpRight size={15} />
+              </Link>
+            )}
+          </motion.nav>
         )}
       </AnimatePresence>
     </header>
