@@ -1,0 +1,632 @@
+.nebula-dashboard {
+  background: color-mix(in oklch, hsl(var(--background)) 96%, hsl(var(--primary)));
+}
+.nebula-dashboard > header {
+  background: hsl(var(--card) / 0.96);
+  border-color: hsl(var(--border));
+  box-shadow: none;
+}
+.db-dashboard-main {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 42px 32px 64px;
+}
+.db-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+.db-workspace-label {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.db-page-header h1 {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.db-page-description {
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  margin-top: 9px;
+}
+.db-page-header > button {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: oklch(0.5 0.23 295);
+  box-shadow: 0 2px 5px oklch(0.35 0.1 295 / 0.12);
+  transform: none;
+}
+.db-page-header > button:hover {
+  background: oklch(0.55 0.23 295);
+  transform: none;
+}
+.db-section-heading,
+.db-quickstart-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.db-section-heading h2,
+.db-quickstart-heading h2 {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.db-inventory {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+.db-inventory span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.db-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-block: 18px;
+}
+.db-search {
+  position: relative;
+  width: 340px;
+  max-width: 100%;
+}
+.db-search > svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+.db-search input {
+  height: 40px;
+  padding-left: 38px;
+  padding-right: 36px;
+  border-radius: 8px;
+  background: hsl(var(--card));
+  font-size: 13px;
+}
+.db-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.db-search > button {
+  position: absolute;
+  right: 6px;
+  top: 5px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  color: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+.db-search > button:hover {
+  background: hsl(var(--muted));
+}
+.db-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.db-sort {
+  width: 180px;
+  height: 40px;
+  border-radius: 8px;
+  background: hsl(var(--card));
+  font-size: 13px;
+  gap: 8px;
+}
+.db-view-toggle {
+  display: flex;
+  padding: 3px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: 8px;
+}
+.db-view-toggle button {
+  height: 32px;
+  width: 34px;
+  border-radius: 5px;
+  color: hsl(var(--muted-foreground));
+}
+.db-view-toggle button[aria-pressed="true"] {
+  color: hsl(var(--primary));
+  background: hsl(var(--secondary));
+}
+.db-refresh {
+  height: 40px;
+  width: 40px;
+  border-radius: 8px;
+  background: hsl(var(--card));
+}
+.db-search-summary {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 16px;
+}
+.db-project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  gap: 18px;
+}
+.db-project-list {
+  display: grid;
+  gap: 10px;
+}
+.db-project-card {
+  position: relative;
+  min-width: 0;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: 12px;
+  box-shadow: 0 2px 4px oklch(0.25 0.025 295 / 0.025);
+  transition:
+    border-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
+}
+.db-project-card:is(:hover, :focus-within) {
+  border-color: color-mix(in oklch, hsl(var(--primary)) 45%, hsl(var(--border)));
+  box-shadow: 0 4px 16px oklch(0.3 0.06 295 / 0.06);
+}
+.db-project-link {
+  display: block;
+  padding: 22px;
+  border-radius: inherit;
+}
+.db-project-identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-right: 30px;
+}
+.db-project-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  color: hsl(var(--primary));
+  background: hsl(var(--secondary));
+}
+.db-project-name {
+  min-width: 0;
+}
+.db-project-name h3 {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.db-project-name > span {
+  display: block;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 3px;
+}
+.db-project-menu {
+  position: absolute;
+  right: 14px;
+  top: 18px;
+}
+.db-project-menu button {
+  height: 32px;
+  width: 32px;
+  color: hsl(var(--muted-foreground));
+}
+.db-project-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 23px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.db-project-details > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+.db-project-hint {
+  text-align: right;
+}
+.db-project-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid hsl(var(--border));
+  margin-top: 17px;
+  padding-top: 16px;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+}
+.db-open-studio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: hsl(var(--primary));
+  font-size: 12px;
+  font-weight: 550;
+  flex-shrink: 0;
+}
+.db-project-card.is-list .db-project-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: center;
+  gap: 24px;
+  padding: 17px 62px 17px 20px;
+}
+.db-project-card.is-list .db-project-details,
+.db-project-card.is-list .db-project-footer {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.db-project-card.is-list .db-project-hint {
+  display: none;
+}
+.db-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 24px;
+  border: 1px dashed hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: 12px;
+  text-align: center;
+}
+.db-empty-state > svg {
+  color: hsl(var(--primary));
+  margin-bottom: 20px;
+}
+.db-empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.db-empty-state p {
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  margin: 8px 0 22px;
+  max-width: 350px;
+}
+.db-fetch-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid hsl(var(--destructive) / 0.25);
+  background: hsl(var(--card));
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.db-fetch-error > svg {
+  flex-shrink: 0;
+  color: hsl(var(--destructive));
+}
+.db-fetch-error button {
+  margin-left: auto;
+}
+.db-quickstart-section {
+  margin-top: 42px;
+}
+.db-quickstart-heading {
+  margin-bottom: 18px;
+}
+.db-quickstart-heading p {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 5px;
+}
+.db-quickstart-database {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  min-width: 0;
+}
+.db-quickstart-database button {
+  width: 190px;
+  border-radius: 8px;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+.db-quickstart-workbench {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  overflow: hidden;
+  background: hsl(var(--card));
+}
+.db-quickstart-setup {
+  padding: 26px 24px;
+  border-right: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.45);
+}
+.db-quickstart-setup h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.db-quickstart-setup ol {
+  list-style: none;
+  margin: 23px 0 27px;
+  display: grid;
+  gap: 24px;
+}
+.db-quickstart-setup li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.db-step-number {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 50%;
+  background: hsl(var(--card));
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+}
+.db-quickstart-setup li > div {
+  min-width: 0;
+}
+.db-quickstart-setup li a,
+.db-sql-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 550;
+}
+.db-quickstart-setup li a:hover,
+.db-sql-link:hover {
+  color: hsl(var(--primary));
+}
+.db-quickstart-setup li p {
+  font-size: 11px;
+  line-height: 1.7;
+  color: hsl(var(--muted-foreground));
+  margin-top: 5px;
+}
+.db-sql-link {
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 20px;
+  color: hsl(var(--primary));
+}
+.db-sql-link > svg:last-child {
+  margin-left: auto;
+}
+.db-quickstart-request {
+  min-width: 0;
+  padding: 24px;
+}
+.db-request-target {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  margin-bottom: 16px;
+}
+.db-request-method {
+  font:
+    600 11px "Geist Mono",
+    monospace;
+  color: hsl(var(--primary));
+}
+.db-request-target > button {
+  width: 190px;
+  height: 32px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.db-request-target p {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.db-request-target p button {
+  text-decoration: underline;
+  color: hsl(var(--primary));
+}
+.db-request-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.db-request-toolbar [role="tablist"] {
+  height: 34px;
+  border-radius: 6px;
+  padding: 3px;
+}
+.db-request-toolbar [role="tab"] {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+.db-copy-request {
+  display: flex;
+  gap: 7px;
+  font-size: 12px;
+  height: 32px;
+}
+.db-request-code {
+  padding: 18px;
+  overflow-x: auto;
+  min-height: 120px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--muted) / 0.45);
+  color: hsl(var(--foreground));
+  font:
+    12px / 1.9 "Geist Mono",
+    monospace;
+  tab-size: 2;
+}
+.db-request-note {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 12px;
+  line-height: 1.7;
+}
+.nebula-dashboard :is(a, button, input):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+@media (max-width: 800px) {
+  .db-dashboard-main {
+    padding: 30px 24px 48px;
+  }
+  .db-project-card.is-list .db-project-link {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+  .db-project-card.is-list .db-project-footer {
+    grid-column: 1 / -1;
+  }
+  .db-quickstart-workbench {
+    grid-template-columns: 1fr;
+  }
+  .db-quickstart-setup {
+    border-right: 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .db-quickstart-setup ol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+  .db-sql-link {
+    width: fit-content;
+    padding-top: 0;
+    border: 0;
+  }
+}
+@media (max-width: 600px) {
+  .db-dashboard-main {
+    padding: 26px 20px 40px;
+  }
+  .db-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .db-page-header h1 {
+    font-size: 28px;
+  }
+  .db-page-description {
+    font-size: 13px;
+  }
+  .db-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .db-search {
+    width: 100%;
+  }
+  .db-toolbar-actions {
+    gap: 8px;
+  }
+  .db-sort {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+  .db-inventory {
+    gap: 12px;
+    font-size: 11px;
+  }
+  .db-inventory svg {
+    display: none;
+  }
+  .db-project-link {
+    padding: 19px;
+  }
+  .db-project-footer {
+    font-size: 10px;
+  }
+  .db-project-hint {
+    font-size: 11px;
+  }
+  .db-project-card.is-list .db-project-link {
+    padding: 17px 52px 17px 17px;
+  }
+  .db-project-card.is-list .db-project-identity {
+    padding-right: 0;
+    gap: 10px;
+  }
+  .db-project-card.is-list .db-project-name h3 {
+    font-size: 14px;
+  }
+  .db-quickstart-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .db-quickstart-database {
+    width: 100%;
+  }
+  .db-quickstart-database button {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+  }
+  .db-quickstart-setup,
+  .db-quickstart-request {
+    padding: 22px 18px;
+  }
+  .db-quickstart-setup ol {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .db-request-code {
+    padding: 14px;
+    font-size: 11px;
+  }
+  .db-request-toolbar {
+    gap: 8px;
+  }
+  .db-copy-request {
+    padding-inline: 6px;
+    gap: 4px;
+    font-size: 11px;
+  }
+  .db-request-toolbar [role="tab"] {
+    padding-inline: 9px;
+    font-size: 11px;
+  }
+  .db-fetch-error {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nebula-dashboard *,
+  .nebula-dashboard *::before,
+  .nebula-dashboard *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
