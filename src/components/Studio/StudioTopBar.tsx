@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ChevronDown, Database, Globe, Plus, Check, Github } from "lucide-react";
+import { ChevronDown, Database, Globe, Check } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,6 @@ import { useDatabases } from "@/hooks/queries";
 import UserDropDown from "@/components/UserDropDown";
 import ConnectModal from "./ConnectModal";
 import { StudioTab } from "./StudioRail";
-import NebulaLogo from "@/assets/nebula-logo";
 
 interface StudioTopBarProps {
   dbName: string;
@@ -22,112 +21,98 @@ interface StudioTopBarProps {
   apiKey: string;
   userId?: string;
 }
-
-export default function StudioTopBar({ dbName, apiKey, userId }: StudioTopBarProps) {
+const tabLabels: Record<StudioTab, string> = {
+  overview: "Overview",
+  editor: "Table editor",
+  database: "Database",
+  sql: "SQL editor",
+  apikeys: "API keys",
+  settings: "Settings",
+};
+export default function StudioTopBar({
+  dbName,
+  currentTab = "overview",
+  apiKey,
+  userId,
+}: StudioTopBarProps) {
   const navigate = useNavigate();
-  const { data: databases = [] } = useDatabases();
+  const { data: databases = [], isLoading, isError, refetch } = useDatabases();
   const [connectOpen, setConnectOpen] = useState(false);
-
   const resolvedUserId = userId || localStorage.getItem("user_id") || "";
-
-  const handleSelectDB = (targetDB: string) => {
-    if (targetDB === dbName) return;
-    navigate(`/databases/${targetDB}/overview`);
-  };
-
+  const dashboardLink = resolvedUserId ? `/dashboard/${resolvedUserId}` : "/";
   return (
     <>
-      <header className="h-12 bg-white/80 dark:bg-[#0c0b16]/85 backdrop-blur-xl border-b border-purple-200/50 dark:border-white/10 px-4 flex items-center justify-between z-20 flex-shrink-0">
-        {/* Left: Breadcrumbs & Database Switcher */}
-        <div className="flex items-center space-x-2.5 text-xs">
-          {/* Logo & Projects Navigation */}
-          <Link
-            to={resolvedUserId ? `/dashboard/${resolvedUserId}` : "/"}
-            className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-          >
+      <header className="studio-topbar">
+        <div className="studio-breadcrumbs">
+          <Link to={dashboardLink} className="studio-topbar-projects">
             Projects
           </Link>
-
-          <span className="text-muted-foreground/40 font-light">/</span>
-
-          {/* Database Switcher */}
+          <span className="studio-topbar-projects" aria-hidden="true">
+            /
+          </span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-purple-500/10 dark:bg-white/5 border border-purple-200/50 dark:border-white/10 hover:bg-purple-500/15 dark:hover:bg-white/10 transition-colors font-semibold text-foreground focus:outline-none shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="font-mono text-purple-700 dark:text-purple-300">{dbName}</span>
-                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              <button
+                type="button"
+                className="studio-db-switcher"
+                aria-label={`Switch database, current ${dbName}`}
+              >
+                <Database size={15} />
+                <span title={dbName}>{dbName}</span>
+                <ChevronDown size={13} />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-56 bg-popover/95 backdrop-blur-xl border-purple-200/50 dark:border-white/10 text-popover-foreground p-1 shadow-xl shadow-purple-950/20"
-            >
-              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal px-2 py-1.5">
-                Switch Database
+            <DropdownMenuContent align="start" className="w-60">
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                Switch database
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border" />
-              {databases.map((db) => {
-                const isSelected = db.dbName === dbName;
-                return (
+              <DropdownMenuSeparator />
+              {isLoading ? (
+                <DropdownMenuItem disabled>Loading databases…</DropdownMenuItem>
+              ) : isError ? (
+                <DropdownMenuItem onSelect={() => refetch()}>
+                  Retry loading databases
+                </DropdownMenuItem>
+              ) : (
+                databases.map((db) => (
                   <DropdownMenuItem
                     key={db.databaseId}
-                    onClick={() => handleSelectDB(db.dbName)}
-                    className="flex items-center justify-between text-xs px-2 py-1.5 rounded cursor-pointer hover:bg-purple-500/10 focus:bg-purple-500/10"
+                    onSelect={() => {
+                      if (db.dbName !== dbName) navigate(`/databases/${db.dbName}/overview`);
+                    }}
+                    className="gap-2 text-xs"
                   >
-                    <div className="flex items-center space-x-2 truncate">
-                      <Database className="w-3.5 h-3.5 text-purple-500" />
-                      <span className="truncate font-medium">{db.dbName}</span>
-                    </div>
-                    {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                    )}
+                    <Database size={14} className="shrink-0 text-primary" />
+                    <span className="flex-1 truncate">{db.dbName}</span>
+                    {db.dbName === dbName && <Check size={14} className="text-primary" />}
                   </DropdownMenuItem>
-                );
-              })}
-              <DropdownMenuSeparator className="bg-border" />
-              {resolvedUserId && (
-                <DropdownMenuItem
-                  onClick={() => navigate(`/dashboard/${resolvedUserId}`)}
-                  className="flex items-center space-x-2 text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Create New Database</span>
-                </DropdownMenuItem>
+                ))
               )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to={dashboardLink}>Manage projects</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Connect Button */}
+          <span className="studio-topbar-section">
+            <span aria-hidden="true">/</span>
+            {tabLabels[currentTab]}
+          </span>
+        </div>
+        <div className="studio-topbar-actions">
           <Button
             size="sm"
+            variant="outline"
+            className="studio-connect-button"
             onClick={() => setConnectOpen(true)}
-            className="h-7 px-2.5 text-[11px] bg-white/10 dark:bg-white/5 border border-purple-200/40 dark:border-white/10 hover:bg-purple-500/15 text-foreground font-medium gap-1.5 shadow-xs transition-colors"
+            aria-label="Connect to database"
           >
-            <Globe className="w-3 h-3 text-purple-500" />
+            <Globe size={15} />
             <span>Connect</span>
           </Button>
-        </div>
-
-        {/* Right Section: GitHub + User Profile */}
-        <div className="flex items-center space-x-2.5">
-          <a
-            href="https://github.com/Annany2002/nebula-frontend"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-md hover:bg-purple-500/10"
-          >
-            <Github className="w-3.5 h-3.5" />
-            <span>GitHub</span>
-          </a>
-
-          <div className="pl-1 border-l border-purple-200/40 dark:border-white/10">
-            <UserDropDown />
-          </div>
+          <UserDropDown />
         </div>
       </header>
-
-      {/* Connect Modal */}
       <ConnectModal
         open={connectOpen}
         onOpenChange={setConnectOpen}
