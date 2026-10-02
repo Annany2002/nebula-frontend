@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pencil, X, Calendar, Mail, User } from "lucide-react";
+import { ArrowLeft, Calendar, Pencil, Loader2, Mail, UserRound, AlertCircle } from "lucide-react";
 import { useCurrentUser, useUpdateProfile } from "@/hooks/queries";
+import { useAuth } from "@/context/auth-context";
 import LoginNavBar from "@/components/LoginNavbar";
-import BreadCrumbNav from "@/components/BreadCrumbNav";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -18,131 +17,116 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/formatDate";
+import "@/styles/profile.css";
 
 const editSchema = z.object({
   username: z.string().min(6, "Username must be at least 6 characters"),
   email: z.string().email("Please enter a valid email address"),
 });
-
 type EditFormValues = z.infer<typeof editSchema>;
 
 const Profile = () => {
-  const { data: profile, isLoading, isError } = useCurrentUser();
+  const { user, refreshUser } = useAuth();
+  const { data: profile, isLoading, isError, refetch } = useCurrentUser();
   const updateProfile = useUpdateProfile();
   const [isEditing, setIsEditing] = useState(false);
-
   const form = useForm<EditFormValues>({
     resolver: zodResolver(editSchema),
-    values: {
-      username: profile?.username ?? "",
-      email: profile?.email ?? "",
-    },
+    values: { username: profile?.username ?? "", email: profile?.email ?? "" },
   });
-
-  const onSubmit = async (data: EditFormValues) => {
+  const onSubmit = (data: EditFormValues) => {
     const changes: { username?: string; email?: string } = {};
     if (data.username !== profile?.username) changes.username = data.username;
     if (data.email !== profile?.email) changes.email = data.email;
-
-    if (Object.keys(changes).length === 0) {
+    if (!Object.keys(changes).length) {
       setIsEditing(false);
       return;
     }
-
     updateProfile.mutate(changes, {
-      onSuccess: () => setIsEditing(false),
+      onSuccess: () => {
+        setIsEditing(false);
+        refreshUser();
+      },
     });
   };
-
-  const initials = profile?.username ? profile.username.substring(0, 2).toUpperCase() : "??";
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen">
-        <LoginNavBar />
-        <div className="flex h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || !profile) {
-    return (
-      <div className="min-h-screen">
-        <LoginNavBar />
-        <div className="flex h-[60vh] items-center justify-center">
-          <p className="text-muted-foreground">Failed to load profile. Please try again.</p>
-        </div>
-      </div>
-    );
-  }
+  const cancel = () => {
+    form.reset();
+    updateProfile.reset();
+    setIsEditing(false);
+  };
 
   return (
-    <div className="min-h-screen">
+    <div className="nebula-profile min-h-screen">
       <LoginNavBar />
-
-      <div className="px-4 md:px-6 lg:px-8 py-6 space-y-8">
-        <BreadCrumbNav />
-
-        {/* Header */}
-        <div>
-          <motion.h1
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-2xl md:text-3xl font-bold tracking-tight"
-          >
-            Your Profile
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-muted-foreground mt-1"
-          >
-            View and manage your account information.
-          </motion.p>
-        </div>
-
-        {/* Profile Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="max-w-2xl"
+      <main className="profile-main">
+        <Link
+          className="profile-back"
+          to={`/dashboard/${user?.userId || localStorage.getItem("user_id") || ""}`}
         >
-          <Card className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-white/20 dark:border-gray-700/50">
-            <CardHeader className="flex flex-row items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border bg-primary/10 text-primary text-xl font-bold">
-                {initials}
+          <ArrowLeft size={14} />
+          Back to projects
+        </Link>
+        <header className="profile-heading">
+          <h1>Your account</h1>
+          <p>The details behind your workspace.</p>
+        </header>
+        {isLoading ? (
+          <div className="profile-layout" role="status" aria-label="Loading account">
+            <Skeleton className="h-64 rounded-xl" />
+            <Skeleton className="h-80 rounded-xl" />
+          </div>
+        ) : isError || !profile ? (
+          <div className="profile-error" role="alert">
+            <AlertCircle size={22} />
+            <h2>We couldn’t load your account.</h2>
+            <p>Please try again.</p>
+            <Button variant="outline" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <div className="profile-layout">
+            <aside className="profile-summary">
+              <div className="profile-avatar" aria-hidden="true">
+                {profile.username.slice(0, 2).toUpperCase()}
               </div>
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-xl truncate">{profile.username}</CardTitle>
-                <CardDescription className="truncate">{profile.email}</CardDescription>
+              <h2 title={profile.username}>{profile.username}</h2>
+              <p>Nebula workspace member</p>
+              <div className="profile-member">
+                <Calendar size={15} />
+                <span>
+                  Member since
+                  <time dateTime={profile.createdAt}>
+                    {formatDateTime(profile.createdAt) || "Date unavailable"}
+                  </time>
+                </span>
               </div>
-              <Button
-                variant={isEditing ? "ghost" : "outline"}
-                size="icon"
-                className="h-9 w-9 shrink-0"
-                onClick={() => {
-                  if (isEditing) {
-                    form.reset();
-                  }
-                  setIsEditing(!isEditing);
-                }}
-              >
-                {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-              </Button>
-            </CardHeader>
-
-            <Separator />
-
-            <CardContent className="pt-6">
+            </aside>
+            <section className="profile-details" aria-labelledby="profile-details-heading">
+              <div className="profile-details-heading">
+                <div>
+                  <h2 id="profile-details-heading">Account information</h2>
+                  <p>Keep your contact details up to date.</p>
+                </div>
+                {!isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      updateProfile.reset();
+                      setIsEditing(true);
+                    }}
+                  >
+                    <Pencil size={14} />
+                    Edit profile
+                  </Button>
+                )}
+              </div>
               {isEditing ? (
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="profile-form" noValidate>
                     <FormField
                       control={form.control}
                       name="username"
@@ -152,8 +136,8 @@ const Profile = () => {
                           <FormControl>
                             <Input
                               {...field}
-                              className="bg-transparent"
-                              placeholder="Enter username"
+                              autoComplete="username"
+                              disabled={updateProfile.isPending}
                             />
                           </FormControl>
                           <FormMessage />
@@ -170,30 +154,38 @@ const Profile = () => {
                             <Input
                               {...field}
                               type="email"
-                              className="bg-transparent"
-                              placeholder="you@example.com"
+                              autoComplete="email"
+                              disabled={updateProfile.isPending}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <div className="flex gap-3 pt-2">
-                      <Button
-                        type="submit"
-                        disabled={updateProfile.isPending}
-                        className="rounded-2xl"
-                      >
-                        {updateProfile.isPending ? "Saving..." : "Save Changes"}
+                    {updateProfile.isError && (
+                      <p role="alert" className="text-sm text-destructive">
+                        {updateProfile.error.message}
+                      </p>
+                    )}
+                    <div className="profile-form-actions">
+                      <Button type="submit" disabled={updateProfile.isPending}>
+                        {updateProfile.isPending ? (
+                          <>
+                            <Loader2
+                              size={15}
+                              className="animate-spin motion-reduce:animate-none"
+                            />
+                            Saving…
+                          </>
+                        ) : (
+                          "Save changes"
+                        )}
                       </Button>
                       <Button
                         type="button"
-                        variant="ghost"
-                        className="rounded-2xl"
-                        onClick={() => {
-                          form.reset();
-                          setIsEditing(false);
-                        }}
+                        variant="outline"
+                        onClick={cancel}
+                        disabled={updateProfile.isPending}
                       >
                         Cancel
                       </Button>
@@ -201,36 +193,28 @@ const Profile = () => {
                   </form>
                 </Form>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Username</p>
-                      <p className="font-medium">{profile.username}</p>
-                    </div>
+                <dl className="profile-fields">
+                  <div>
+                    <dt>
+                      <UserRound size={16} />
+                      Username
+                    </dt>
+                    <dd>{profile.username}</dd>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium">{profile.email}</p>
-                    </div>
+                  <div>
+                    <dt>
+                      <Mail size={16} />
+                      Email address
+                    </dt>
+                    <dd>{profile.email}</dd>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Member since</p>
-                      <p className="font-medium">{formatDateTime(profile.createdAt)}</p>
-                    </div>
-                  </div>
-                </div>
+                </dl>
               )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            </section>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
-
 export default Profile;

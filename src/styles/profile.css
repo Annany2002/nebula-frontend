@@ -1,0 +1,213 @@
+.nebula-profile {
+  background: color-mix(in oklch, hsl(var(--background)) 96%, hsl(var(--primary)));
+  color: hsl(var(--foreground));
+}
+.nebula-profile > header {
+  background: hsl(var(--card) / 0.96);
+  border-color: hsl(var(--border));
+  box-shadow: none;
+}
+.profile-main {
+  max-width: 1060px;
+  margin-inline: auto;
+  padding: 36px 32px 64px;
+}
+.profile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+.profile-back:hover {
+  color: hsl(var(--primary));
+}
+.profile-heading {
+  margin: 28px 0 32px;
+}
+.profile-heading h1 {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.profile-heading p {
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 6px;
+}
+.profile-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.profile-summary,
+.profile-details {
+  min-width: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  background: hsl(var(--card));
+}
+.profile-summary {
+  padding: 28px;
+}
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: hsl(var(--secondary));
+  color: hsl(var(--primary));
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.profile-summary h2 {
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.profile-summary > p {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 5px;
+}
+.profile-member {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 22px;
+  margin-top: 26px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.profile-member svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.profile-member time {
+  display: block;
+  font-size: 12px;
+  color: hsl(var(--foreground));
+  margin-top: 5px;
+  line-height: 1.8;
+}
+.profile-details-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 25px 28px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.profile-details-heading h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.profile-details-heading p {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 5px;
+}
+.profile-details-heading button {
+  gap: 7px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.profile-fields,
+.profile-form {
+  padding: 28px;
+}
+.profile-fields > div + div {
+  margin-top: 28px;
+}
+.profile-fields dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.profile-fields dd {
+  margin-top: 9px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.profile-form {
+  display: grid;
+  gap: 22px;
+}
+.profile-form label {
+  font-size: 12px;
+}
+.profile-form input {
+  height: 42px;
+  background: hsl(var(--background));
+}
+.profile-form-actions {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 22px;
+}
+.profile-form-actions button {
+  font-size: 12px;
+}
+.profile-error {
+  padding: 44px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: 12px;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.profile-error svg {
+  color: hsl(var(--primary));
+}
+.profile-error h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.profile-error p {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+}
+.nebula-profile :is(a, button, input):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+@media (max-width: 800px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .profile-main {
+    padding: 26px 20px 40px;
+  }
+  .profile-heading h1 {
+    font-size: 27px;
+  }
+  .profile-summary,
+  .profile-fields,
+  .profile-form,
+  .profile-details-heading {
+    padding: 22px;
+  }
+  .profile-details-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nebula-profile *,
+  .nebula-profile *::before,
+  .nebula-profile *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
