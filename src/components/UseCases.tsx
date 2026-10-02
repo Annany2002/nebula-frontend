@@ -1,191 +1,133 @@
 import { motion } from "framer-motion";
-import {
-  Rocket,
-  Code2,
-  Smartphone,
-  Server,
-  CheckCircle,
-  XCircle,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
-interface PersonaCard {
-  icon: typeof Rocket;
-  title: string;
-  role: string;
-  description: string;
-  highlight: string;
-}
-
-const personas: PersonaCard[] = [
+const useCases = [
   {
-    icon: Rocket,
-    title: "SaaS Startups & MVPs",
-    role: "Ship in Days, Not Months",
+    title: "SaaS multi-tenancy",
     description:
-      "Eliminate weeks spent provisioning Postgres clusters, writing boilerplate ORM queries, and configuring auth flows. Ship your MVP before competitors finish their sprint planning.",
-    highlight: "Zero devops required to go live",
+      "Give each customer their own .db file. No row-level security, no shared table contention. Back up a single tenant by copying one file.",
   },
   {
-    icon: Code2,
-    title: "Indie Hackers & Solo Devs",
-    role: "Zero Maintenance, Zero Bill Shock",
+    title: "Self-hosted on a $5 VPS",
     description:
-      "Avoid paying $50/mo minimum cloud database fees for your side projects. Run multiple production databases on a $5 VPS or self-host with standard SQLite portability.",
-    highlight: "100% portable .db files",
+      "Run a single binary with ~32 MB RAM baseline. No Postgres, no Redis, no container orchestration. Ship production databases on hardware you control.",
   },
   {
-    icon: Smartphone,
-    title: "Mobile & Edge Apps",
-    role: "Low-Latency Data Sync",
+    title: "Mobile and edge apps",
     description:
-      "Clean, consistent REST APIs make connecting iOS, Android, Flutter, and React Native apps straightforward. Sub-millisecond reads keep your UI snappy.",
-    highlight: "Sub-millisecond API response",
-  },
-  {
-    icon: Server,
-    title: "Internal Tools & Portals",
-    role: "Instant Data Store",
-    description:
-      "Quickly spin up structured data backends for internal dashboards, telemetry collectors, or team tooling without asking your infrastructure team for database access.",
-    highlight: "Visual schema & table editor",
+      "Standard REST endpoints that any HTTP client can call. No native database drivers needed for iOS, Android, Flutter, or React Native.",
   },
 ];
 
 const comparisonRows = [
   {
-    feature: "Storage Architecture",
-    nebula: "Isolated SQLite per DB (Zero Contention)",
-    traditional: "Shared Multi-Tenant Cluster",
+    aspect: "Storage model",
+    nebula: "Dedicated SQLite file per database",
+    traditional: "Shared table space in a single cluster",
   },
   {
-    feature: "P99 API Latency",
-    nebula: "< 1.5 ms (Local Engine)",
-    traditional: "45 - 120 ms (Network Hops)",
+    aspect: "Deployment",
+    nebula: "Single Go binary (~28 MB)",
+    traditional: "API server, database, cache, pooler",
   },
   {
-    feature: "Data Portability",
-    nebula: "100% Standard .db file download",
-    traditional: "Complex dump & restore tools",
+    aspect: "External dependencies",
+    nebula: "None",
+    traditional: "PostgreSQL, Redis, PgBouncer",
   },
   {
-    feature: "Self-Hosting",
-    nebula: "Single Go binary / Docker Compose",
-    traditional: "15+ containers & microservices",
+    aspect: "Data portability",
+    nebula: "Standard SQLite 3.x file, readable anywhere",
+    traditional: "Proprietary formats, cloud lock-in",
   },
   {
-    feature: "Auth Built-In",
-    nebula: "Dual JWT + Scoped API Keys",
-    traditional: "Often extra add-on / 3rd party",
+    aspect: "Schema changes",
+    nebula: "Online ALTER TABLE via REST or UI",
+    traditional: "Migration pipelines, maintenance windows",
+  },
+  {
+    aspect: "Idle memory",
+    nebula: "~32 MB",
+    traditional: "300 MB to 1 GB",
   },
 ];
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] } },
+};
 
 const UseCases = () => {
   return (
     <section id="use-cases" className="py-24 relative z-10">
-      <div className="container max-w-7xl mx-auto px-6">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="glass-pill mb-4">
-            <Users className="h-3.5 w-3.5 mr-1.5" /> Built For High-Velocity Builders
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
-            Designed for Real-World <span className="gradient-text">Product Velocity</span>
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-2xl mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-950 dark:text-white">
+            Built for real deployments
           </h2>
-          <p className="text-lg text-gray-600 dark:text-zinc-300">
-            Whether you are testing an idea over the weekend or scaling an active product, Nebula
-            cuts out backend friction so you can focus on user experience.
+          <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+            Whether you're running a multi-tenant SaaS or a weekend project on a cheap VPS, the
+            architecture stays the same.
           </p>
         </div>
 
-        {/* 4 Persona Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {personas.map((p, i) => {
-            const Icon = p.icon;
-            return (
-              <motion.div
-                key={p.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className="bento-card p-6 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="p-3 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/40 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 w-fit mb-5">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                    {p.title}
-                  </h3>
-                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-3">
-                    {p.role}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-zinc-300 leading-relaxed mb-6">
-                    {p.description}
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-purple-200/30 dark:border-white/10 flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle className="h-3.5 w-3.5 shrink-0" />
-                  <span>{p.highlight}</span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Comparison Matrix Table */}
+        {/* Use cases as inline text, not cards */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="rounded-2xl border border-purple-300/40 dark:border-white/10 bg-white/15 dark:bg-white/[0.03] backdrop-blur-md overflow-hidden shadow-xl"
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="grid md:grid-cols-3 gap-10 mb-24"
         >
-          <div className="p-6 md:p-8 border-b border-purple-200/30 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Nebula vs. Traditional Cloud Backends
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">
-                How our isolated Go + SQLite architecture compares to legacy multi-tenant platforms.
+          {useCases.map((uc) => (
+            <div key={uc.title}>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{uc.title}</h3>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                {uc.description}
               </p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-200/40 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-semibold w-fit">
-              Architecture Matrix
-            </span>
-          </div>
+          ))}
+        </motion.div>
+
+        {/* Comparison table */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            Architecture comparison
+          </h3>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-purple-200/30 dark:border-white/10 text-xs uppercase tracking-wider text-gray-500 dark:text-zinc-400 bg-purple-500/5 dark:bg-white/[0.02]">
-                  <th className="py-4 px-6 font-semibold">Capability</th>
-                  <th className="py-4 px-6 font-semibold text-purple-600 dark:text-purple-400">
-                    Nebula BaaS
+                <tr className="border-b-2 border-gray-200 dark:border-white/10">
+                  <th className="py-3 pr-6 font-medium text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wider">
+                    Aspect
                   </th>
-                  <th className="py-4 px-6 font-semibold text-gray-500 dark:text-zinc-400">
-                    Traditional Heavyweight Stack
+                  <th className="py-3 px-6 font-medium text-purple-600 dark:text-purple-400 text-xs uppercase tracking-wider">
+                    Nebula
+                  </th>
+                  <th className="py-3 pl-6 font-medium text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wider">
+                    Traditional stack
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-purple-200/30 dark:divide-white/10">
-                {comparisonRows.map((row, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-purple-500/5 dark:hover:bg-white/[0.02] transition-colors"
-                  >
-                    <td className="py-4 px-6 font-medium text-gray-900 dark:text-white">
-                      {row.feature}
+              <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                {comparisonRows.map((row) => (
+                  <tr key={row.aspect}>
+                    <td className="py-3.5 pr-6 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                      {row.aspect}
                     </td>
-                    <td className="py-4 px-6 font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
-                      <span>{row.nebula}</span>
+                    <td className="py-3.5 px-6 text-gray-700 dark:text-gray-300">
+                      <span className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                        {row.nebula}
+                      </span>
                     </td>
-                    <td className="py-4 px-6 text-gray-500 dark:text-zinc-400">
+                    <td className="py-3.5 pl-6 text-gray-400 dark:text-gray-500">
                       {row.traditional}
                     </td>
                   </tr>

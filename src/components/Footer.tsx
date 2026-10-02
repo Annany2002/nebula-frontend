@@ -4,26 +4,26 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-purple-200/30 dark:border-white/10 bg-white/20 dark:bg-black/40 backdrop-blur-md text-gray-700 dark:text-zinc-300 relative z-10 transition-colors overflow-hidden">
-      <div className="container max-w-7xl mx-auto px-6 pt-12 pb-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-purple-200/30 dark:border-white/5">
-          <div className="flex items-center gap-3">
+    <footer className="border-t border-gray-200 dark:border-white/5 relative z-10">
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
             <NebulaLogo showText={false} />
-            <span className="text-xs text-gray-500 dark:text-zinc-500 border-l border-purple-200/40 dark:border-white/10 pl-3">
-              © {currentYear} Nebula Project. MIT License.
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              &copy; {currentYear} Nebula. MIT License.
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-xs text-gray-600 dark:text-zinc-400 font-medium">
+          <div className="flex items-center gap-6 text-sm text-gray-400 dark:text-gray-500">
             <a
               href="#features"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               Features
             </a>
             <a
               href="#code-demo"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               Code
             </a>
@@ -31,7 +31,7 @@ const Footer = () => {
               href="https://github.com/Annany2002/nebula-frontend"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               GitHub
             </a>
@@ -39,7 +39,7 @@ const Footer = () => {
               href="https://x.com/annanyvishwaka1"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               Twitter
             </a>
@@ -47,14 +47,14 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Big Nebula Wordmark */}
-      <div className="w-full select-none pointer-events-none overflow-hidden pt-2 pb-0">
+      {/* Large wordmark */}
+      <div className="w-full select-none pointer-events-none overflow-hidden pb-0">
         <div
+          className="text-[20vw] font-black tracking-tighter text-center leading-[0.72] lowercase text-gray-100 dark:text-white/[0.03]"
           style={{
-            WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 85%)",
-            maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 85%)",
+            WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 90%)",
+            maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 90%)",
           }}
-          className="text-[25vw] font-black tracking-tight text-center leading-[0.72] lowercase bg-clip-text text-transparent background-shine bg-[length:250%_100%] w-full"
         >
           nebula
         </div>

@@ -1,116 +1,100 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, HelpCircle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus, Minus } from "lucide-react";
 
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-const faqs: FAQItem[] = [
+const faqs = [
   {
-    question: "How does isolated SQLite work in Nebula?",
+    question: "How does isolated SQLite work?",
     answer:
-      "Every user database created in Nebula is an isolated, physical SQLite file stored on disk. This means your databases never contend for shared memory pools or tables. You get zero noisy-neighbor issues, instant point-in-time snapshots, and microsecond query latency.",
+      "Every database you create is an independent .db file at data/<user_id>/<db_name>.db. They never share memory pools or table spaces. A lock or crash in one database has zero impact on any other.",
   },
   {
-    question: "Can I export or download my raw SQLite database files?",
+    question: "Can I export my raw database files?",
     answer:
-      "Yes, completely! Because databases are standard SQLite files, you have 100% data ownership with zero vendor lock-in. You can download the `.db` files, open them in SQLite tools (like TablePlus or DB Browser), or replicate them to any cloud storage.",
+      "Yes. They're standard SQLite 3 files. Download them, open them in TablePlus, DBeaver, or DB Browser, back them up with cp, or replicate them to any storage you control.",
   },
   {
-    question: "How does authentication work between JWT and API Keys?",
+    question: "How does authentication work?",
     answer:
-      "Nebula utilizes dual-layer authentication. User registration, profile updates, and database provisioning use secure JWT Bearer tokens. Data-plane operations (creating tables, querying and inserting records) use database-scoped API keys (`Authorization: ApiKey <key>`) for high-throughput programmatic access.",
+      "Dual-layer. JWT Bearer tokens for user registration, profile management, and database provisioning. Database-scoped API keys (Authorization: ApiKey <key>) for data-plane operations like querying and inserting records.",
   },
   {
-    question: "Can I self-host Nebula on my own hardware or cloud VPS?",
+    question: "Can I self-host on my own server?",
     answer:
-      "Yes. Nebula is open-source (MIT licensed) and written in Go. You can run the pre-compiled binary with zero external dependencies, or spin it up alongside the frontend using Docker Compose in seconds.",
+      "Yes. Nebula is MIT-licensed and written in Go. Run the ~28 MB binary directly, or use Docker Compose. Zero external service dependencies.",
   },
   {
-    question: "How fast is Nebula compared to PostgreSQL or Supabase?",
+    question: "Why SQLite instead of Postgres?",
     answer:
-      "Because Nebula writes directly to dedicated local SQLite engines via Go's native CGO/cgo-free driver, there is zero network overhead between the API layer and the database process. Benchmark tests routinely achieve sub-1.5ms P99 responses with over 120,000 requests per second on standard hardware.",
+      "Embedding SQLite via CGO eliminates the network serialization and connection pool overhead of TCP-based database servers. Storage operations hit local filesystem memory-mapped pages directly. No daemon to manage, no connection limits to tune.",
   },
   {
-    question: "Is there a limit on how many tables or columns I can create?",
+    question: "Are there schema limits?",
     answer:
-      "There are no artificial schema constraints. You can dynamically define tables, specify column data types, set unique indexes, and alter schemas on the fly using either the visual dashboard or the REST API.",
+      "No artificial constraints. Create tables, define columns with types, set unique indexes, and alter schemas on the fly through the REST API or the visual Studio UI.",
   },
 ];
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const toggle = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
   return (
     <section id="faq" className="py-24 relative z-10">
-      <div className="container max-w-4xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <div className="glass-pill mb-4">
-            <HelpCircle className="h-3.5 w-3.5 mr-1.5" /> Frequently Asked Questions
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid lg:grid-cols-12 gap-12 items-start">
+          {/* Left: Sticky heading */}
+          <div className="lg:col-span-4 lg:sticky lg:top-24">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-950 dark:text-white">
+              Frequently asked questions
+            </h2>
+            <p className="mt-4 text-base text-gray-500 dark:text-gray-400 leading-relaxed">
+              Architecture, self-hosting, and data ownership.
+            </p>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Everything you need to know
-          </h2>
-          <p className="text-gray-600 dark:text-zinc-300">
-            Got questions about architecture, self-hosting, or performance? We've got answers.
-          </p>
-        </div>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => {
-            const isOpen = openIndex === index;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: index * 0.05 }}
-                viewport={{ once: true }}
-                className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-                  isOpen
-                    ? "bg-white/25 dark:bg-purple-950/20 border-purple-300 dark:border-purple-600/60 shadow-lg shadow-purple-500/5"
-                    : "bg-white/15 dark:bg-white/[0.03] border-purple-200/40 dark:border-white/[0.06] hover:border-purple-300 dark:hover:border-white/10"
-                } backdrop-blur-md`}
-              >
-                <button
-                  onClick={() => toggle(index)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4 focus:outline-none"
-                >
-                  <span className="font-semibold text-base md:text-lg text-gray-900 dark:text-white">
-                    {faq.question}
-                  </span>
-                  <motion.div
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="shrink-0 p-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-200/30 dark:border-purple-500/20 text-purple-600 dark:text-purple-400"
+          {/* Right: Accordion */}
+          <div className="lg:col-span-8 divide-y divide-gray-200 dark:divide-white/10">
+            {faqs.map((faq, index) => {
+              const isOpen = openIndex === index;
+              return (
+                <div key={index} className="py-5 first:pt-0">
+                  <button
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    className="w-full text-left flex items-start justify-between gap-4 group"
                   >
-                    <ChevronDown className="h-4 w-4" />
-                  </motion.div>
-                </button>
-
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    <span
+                      className={`text-base font-medium transition-colors ${
+                        isOpen
+                          ? "text-gray-900 dark:text-white"
+                          : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
+                      }`}
                     >
-                      <div className="px-6 pb-6 pt-1 text-sm md:text-base text-gray-600 dark:text-zinc-300 leading-relaxed border-t border-purple-100/30 dark:border-white/[0.04]">
-                        {faq.answer}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
+                      {faq.question}
+                    </span>
+                    <span className="shrink-0 mt-1 text-gray-400">
+                      {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    </span>
+                  </button>
+
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="pt-3 text-sm text-gray-500 dark:text-gray-400 leading-relaxed pr-8">
+                          {faq.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

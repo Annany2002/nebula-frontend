@@ -96,8 +96,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        mono: ["Fira Code", "monospace"],
+        sans: ["Geist", "system-ui", "sans-serif"],
+        mono: ["Geist Mono", "monospace"],
       },
       boxShadow: {
         glass: "0 8px 32px rgba(0, 0, 0, 0.06)",
