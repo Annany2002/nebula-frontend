@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Github } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
+import PasswordInput from "@/components/auth/PasswordInput";
 import {
   Form,
   FormControl,
@@ -25,7 +25,6 @@ type FormValues = z.infer<typeof formSchema>;
 
 const SignIn = () => {
   const { login, isLoading } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -36,19 +35,19 @@ const SignIn = () => {
   });
 
   const onSubmit = async (data: FormValues) => {
-    login({ email: data.email, password: data.password });
+    await login({ email: data.email, password: data.password });
   };
 
   return (
     <AuthLayout
-      title="Welcome Back"
-      description="Sign in to your account to continue"
+      title="Welcome back."
+      description="Sign in to your Nebula workspace."
       footerText="Don't have an account?"
       footerLinkText="Sign up"
       footerLinkHref="/sign-up"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form" noValidate>
           <FormField
             control={form.control}
             name="email"
@@ -60,7 +59,7 @@ const SignIn = () => {
                     placeholder="you@example.com"
                     type="email"
                     {...field}
-                    className="bg-transparent"
+                    autoComplete="email"
                   />
                 </FormControl>
                 <FormMessage />
@@ -74,38 +73,28 @@ const SignIn = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Input
-                      placeholder="••••••••"
-                      type={showPassword ? "text" : "password"}
-                      {...field}
-                      className="bg-transparent"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
+                  <PasswordInput
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full rounded-2xl" disabled={isLoading}>
-            {isLoading ? "Signing In..." : "Sign In"}
-          </Button>
-          <div className="w-full flex items-center gap-2">
-            <div className="h-[0.5px] w-full bg-primary dark:bg-white/10" />
-            or
-            <div className="h-[0.5px] w-full bg-primary dark:bg-white/10" />
-          </div>
-          <Button disabled className="w-full rounded-2xl">
-            Continue with Github <Github />
+          <Button type="submit" className="auth-submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 size={16} className="animate-spin motion-reduce:animate-none" />
+                Signing in…
+              </>
+            ) : (
+              <>
+                Sign in
+                <ArrowRight size={16} aria-hidden="true" />
+              </>
+            )}
           </Button>
         </form>
       </Form>
