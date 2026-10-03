@@ -1,32 +1,56 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { NebulaLogo } from "@/assets/nebula-logo";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/context/auth-context";
+import "@/styles/not-found.css";
 
 const NotFound = () => {
   const location = useLocation();
-
-  useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const projectsLink =
+    isAuthenticated && user?.userId ? `/dashboard/${encodeURIComponent(user.userId)}` : null;
+  const canGoBack = typeof window.history.state?.idx === "number" && window.history.state.idx > 0;
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative z-10">
-      <div className="text-center p-8 glass max-w-md">
-        <h1 className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-800 to-purple-600 dark:from-purple-400 dark:to-purple-300 animate-gradient-flow">
+    <div className="nebula-not-found">
+      <header className="not-found-header">
+        <Link to="/" aria-label="Nebula home">
+          <NebulaLogo />
+        </Link>
+        <ThemeToggle />
+      </header>
+      <main className="not-found-main" aria-labelledby="not-found-heading">
+        <p className="not-found-code" aria-label="Error 404">
           404
-        </h1>
-        <p className="text-xl mb-8 text-gray-700 dark:text-gray-300 animate-fade-in">
-          Oops! This page couldn't be found.
         </p>
-        <Button
-          onClick={() => (window.location.href = "/")}
-          className="bg-purple-600 hover:bg-purple-700 inline-flex items-center animate-fade-in-delayed"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Return to Home
-        </Button>
-      </div>
+        <div className="not-found-content">
+          <h1 id="not-found-heading">Page not found.</h1>
+          <p className="not-found-description">
+            The link may be out of date, or the address may be incorrect.
+          </p>
+          <div className="not-found-path">
+            <span>Requested page</span>
+            <code>{location.pathname}</code>
+          </div>
+          <div className="not-found-actions">
+            <Button asChild>
+              <Link to={projectsLink || "/"}>
+                {projectsLink ? "Back to projects" : "Go to homepage"}
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </Button>
+            {canGoBack && (
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                <ArrowLeft size={15} aria-hidden="true" />
+                Go back
+              </Button>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
