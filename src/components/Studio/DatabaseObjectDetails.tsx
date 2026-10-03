@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  ListFilter,
   Zap,
   HardDriveDownload,
   Download,
@@ -20,7 +19,7 @@ import { toast } from "sonner";
 import { useDatabaseObjects, useExportDatabaseSQL } from "@/hooks/queries";
 interface Props {
   dbName: string;
-  subView: "indexes" | "triggers" | "backups";
+  subView: "triggers" | "backups";
 }
 export default function DatabaseObjectDetails({ dbName, subView }: Props) {
   const { data: objects, refetch: refetchObjects } = useDatabaseObjects(dbName);
@@ -29,13 +28,6 @@ export default function DatabaseObjectDetails({ dbName, subView }: Props) {
   const [copiedDump, setCopiedDump] = useState(false);
   const [sqlPreview, setSqlPreview] = useState<string | null>(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
-  // Filtered Indexes
-  const filteredIndexes = (objects?.indexes || []).filter(
-    (idx) =>
-      idx.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      idx.tableName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   // Filtered Triggers
   const filteredTriggers = (objects?.triggers || []).filter(
     (trg) =>
@@ -104,7 +96,6 @@ export default function DatabaseObjectDetails({ dbName, subView }: Props) {
       <div className="h-12 border-b border-purple-200/30 dark:border-white/10 px-6 flex items-center justify-between bg-card/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-bold text-foreground capitalize flex items-center gap-2">
-            {subView === "indexes" && <ListFilter className="w-4 h-4 text-indigo-500" />}
             {subView === "triggers" && <Zap className="w-4 h-4 text-amber-500" />}
             {subView === "backups" && <HardDriveDownload className="w-4 h-4 text-emerald-500" />}
             <span>{subView}</span>
@@ -141,70 +132,6 @@ export default function DatabaseObjectDetails({ dbName, subView }: Props) {
       {/* Content Body */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="w-full max-w-7xl mx-auto space-y-5">
-          {/* VIEW 2: INDEXES */}
-          {subView === "indexes" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-foreground">Indexes</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Indexes defined for optimizing query lookups
-                  </p>
-                </div>
-                <Badge variant="outline" className="font-mono text-xs">
-                  {filteredIndexes.length} {filteredIndexes.length === 1 ? "index" : "indexes"}
-                </Badge>
-              </div>
-
-              {filteredIndexes.length === 0 ? (
-                <div className="text-center py-16 border border-dashed border-purple-200/30 dark:border-white/10 rounded-2xl p-6">
-                  <ListFilter className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
-                  <h4 className="text-sm font-semibold text-foreground">No custom indexes</h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Execute CREATE INDEX statements in SQL Editor to accelerate frequent queries.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {filteredIndexes.map((idx) => (
-                    <Card
-                      key={idx.name}
-                      className="rounded-xl border border-purple-200/40 dark:border-white/10 bg-card/60 backdrop-blur-md p-4 space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <ListFilter className="w-4 h-4 text-indigo-400" />
-                          <span className="text-xs font-bold font-mono text-foreground">
-                            {idx.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground font-mono">
-                            on{" "}
-                            <span className="text-purple-300 font-semibold">{idx.tableName}</span>
-                          </span>
-                        </div>
-
-                        {idx.unique && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-mono bg-pink-500/10 text-pink-400 border-pink-500/20"
-                          >
-                            UNIQUE
-                          </Badge>
-                        )}
-                      </div>
-
-                      {idx.sql && (
-                        <div className="rounded-lg bg-muted/60 dark:bg-black/40 border border-purple-200/30 dark:border-white/5 p-2.5 text-[11px] font-mono text-foreground/80 overflow-x-auto">
-                          <code>{idx.sql};</code>
-                        </div>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* VIEW 3: TRIGGERS */}
           {subView === "triggers" && (
             <div className="space-y-4">
