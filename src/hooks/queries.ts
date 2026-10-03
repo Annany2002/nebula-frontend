@@ -229,14 +229,26 @@ export const useDeleteTable = () => {
   return useMutation({
     mutationFn: async ({ dbName, tableName }: { dbName: string; tableName: string }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/tables/${encodeURIComponent(tableName)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (!response.ok) throw new Error("Failed to delete table");
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
+      const { dbName, tableName } = variables;
+      queryClient.setQueryData<TableType[]>(["tables", dbName], (old) =>
+        old?.filter((table) => table.name !== tableName)
+      );
+      queryClient.removeQueries({ queryKey: ["records", dbName, tableName] });
+      queryClient.removeQueries({ queryKey: ["schema", dbName, tableName] });
+      for (const key of ["tables", "schemaDiagram", "databaseObjects", "databaseDetails"]) {
+        queryClient.invalidateQueries({ queryKey: [key, dbName] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["databases"] });
       toast.success(`Table ${variables.tableName} deleted successfully`);
     },
     onError: () => toast.error("Error deleting table"),
