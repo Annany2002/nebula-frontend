@@ -1,0 +1,229 @@
+.db-export-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+.db-export-heading {
+  padding: 24px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.db-export-heading h1 {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.db-export-heading p {
+  margin-top: 5px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  overflow-wrap: anywhere;
+}
+.db-export-heading p span {
+  color: hsl(var(--foreground));
+}
+.db-export-body {
+  padding: 24px 24px 40px;
+  max-width: 1200px;
+}
+.db-export-formats {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+}
+.db-export-formats > h2 {
+  padding: 14px 18px;
+  background: hsl(var(--muted) / 0.4);
+  border-radius: 8px 8px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+.db-export-format {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px;
+  padding: 24px 18px;
+  border-top: 1px solid hsl(var(--border));
+}
+.db-export-format > svg {
+  margin-top: 2px;
+  color: hsl(var(--muted-foreground));
+}
+.db-export-description h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.db-export-description h3 span {
+  font-size: 11px;
+  font-weight: 400;
+  margin-left: 6px;
+  color: hsl(var(--muted-foreground));
+}
+.db-export-description p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--muted-foreground));
+  max-width: 56ch;
+  margin-top: 6px;
+}
+.db-export-description > code {
+  display: block;
+  font-size: 11px;
+  margin-top: 10px;
+  color: hsl(var(--muted-foreground));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.db-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.db-export-page button {
+  font-size: 12px;
+  gap: 6px;
+  height: 34px;
+}
+.db-export-status {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 14px;
+  overflow-wrap: anywhere;
+}
+.db-export-status:empty {
+  display: none;
+}
+.db-export-preview {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+.db-export-preview > header {
+  position: relative;
+  padding: 16px 18px;
+  padding-right: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.db-export-preview-title {
+  min-width: 0;
+  flex: 1;
+}
+.db-export-preview h2 {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.db-export-preview-title p {
+  font-size: 11px;
+  margin-top: 5px;
+  color: hsl(var(--muted-foreground));
+}
+.db-export-preview button.w-10 {
+  width: 30px;
+}
+.db-export-close {
+  position: absolute;
+  right: 14px;
+  top: 16px;
+}
+.db-export-preview pre {
+  padding: 18px;
+  font-size: 11px;
+  line-height: 1.8;
+  max-height: 360px;
+  overflow: auto;
+  background: hsl(var(--muted) / 0.3);
+}
+.db-export-error {
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--destructive));
+  margin-bottom: 16px;
+}
+.db-export-preview .db-export-error {
+  padding: 12px 18px;
+  margin: 0;
+}
+.db-export-truncated {
+  padding: 12px 18px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  border-top: 1px solid hsl(var(--border));
+}
+.db-export-note {
+  margin-top: 28px;
+  max-width: 65ch;
+}
+.db-export-note h2 {
+  font-size: 12px;
+  font-weight: 500;
+}
+.db-export-note p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 6px;
+  color: hsl(var(--muted-foreground));
+}
+.db-export-page pre:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
+@media (max-width: 1100px) {
+  .db-export-format {
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+  .db-export-format > button,
+  .db-export-format > .db-export-actions {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+@media (max-width: 640px) {
+  .db-export-heading {
+    padding: 16px;
+  }
+  .db-export-heading h1 {
+    font-size: 20px;
+  }
+  .db-export-body {
+    padding: 20px 16px 32px;
+  }
+  .db-export-format {
+    padding: 18px 14px;
+    gap: 12px;
+  }
+  .db-export-format > button,
+  .db-export-format > .db-export-actions {
+    grid-column: 1 / -1;
+  }
+  .db-export-description p {
+    font-size: 11px;
+  }
+  .db-export-preview > header {
+    padding: 14px;
+  }
+  .db-export-preview-title {
+    flex-basis: 100%;
+    padding-right: 36px;
+  }
+  .db-export-close {
+    top: 10px;
+    right: 10px;
+  }
+  .db-export-preview pre {
+    padding: 14px;
+    font-size: 10px;
+  }
+}

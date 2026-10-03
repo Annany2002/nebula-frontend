@@ -1,6 +1,6 @@
 import DatabaseSqlObjects from "@/components/Studio/DatabaseSqlObjects";
 import DatabaseTables from "@/components/Studio/DatabaseTables";
-import DatabaseObjectDetails from "@/components/Studio/DatabaseObjectDetails";
+import DatabaseExports from "@/components/Studio/DatabaseExports";
 export type DatabaseSubView = "tables" | "indexes" | "triggers" | "backups";
 interface Props {
   dbName: string;
@@ -29,6 +29,6 @@ export default function DatabaseObjectsView({
       onSelectTable={onSelectTable}
     />
   ) : (
-    <DatabaseObjectDetails key={`${dbName}:${subView}`} dbName={dbName} />
+    <DatabaseExports key={dbName} dbName={dbName} />
   );
 }

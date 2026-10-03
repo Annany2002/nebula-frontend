@@ -675,18 +675,3 @@ export const useDatabaseObjects = (dbName: string | undefined) => {
     enabled: !!dbName,
   });
 };
-
-// Database SQL Export Hook
-export const useExportDatabaseSQL = (dbName: string | undefined) => {
-  return useMutation({
-    mutationFn: async (): Promise<{ sql: string; filename: string }> => {
-      if (!dbName) throw new Error("Database name required");
-      const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/export/sql`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Failed to export database SQL");
-      return response.json();
-    },
-  });
-};
