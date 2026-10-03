@@ -14,6 +14,7 @@ import {
   DatabaseObjectsType,
   AlterTablePayload,
   APIKeyMetadataType,
+  ColumnDefinitionType,
 } from "@/types/allType";
 import { toast } from "sonner";
 import { apiKeyPrefix } from "@/lib/apiKey";
@@ -198,11 +199,10 @@ export const useCreateTable = () => {
     }: {
       dbName: string;
       tableName: string;
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      schema: Record<string, unknown> | Array<{ name: string; type: string }> | any;
+      schema: ColumnDefinitionType[];
     }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables`, {
+      const response = await fetch(`${url}/api/v1/databases/${encodeURIComponent(dbName)}/tables`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -210,14 +210,21 @@ export const useCreateTable = () => {
         },
         body: JSON.stringify({ table_name: tableName, schema }),
       });
-      if (!response.ok) throw new Error("Failed to create table");
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(
+          typeof data?.error === "string" ? data.error : "Couldn’t create the table. Try again."
+        );
+      }
       return response.json();
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databaseDetail", variables.dbName] });
+    onSuccess: async (_, variables) => {
+      await Promise.all([
+        ...["tables", "schemaDiagram", "databaseObjects", "databaseDetails"].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key, variables.dbName] })
+        ),
+        queryClient.invalidateQueries({ queryKey: ["databases"] }),
+      ]);
       toast.success("Table created successfully");
     },
     onError: () => toast.error("Failed to create table"),
@@ -268,35 +275,45 @@ export const useAlterTable = () => {
       payload: AlterTablePayload;
     }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}/alter`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/tables/${encodeURIComponent(tableName)}/alter`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to alter table");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          typeof errorData?.error === "string"
+            ? errorData.error
+            : "Couldn’t update the schema. Try again."
+        );
       }
       return response.json();
     },
-    onSuccess: (data, variables) => {
-      const resultingTable = data?.table_name || variables.tableName;
-      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
-      queryClient.invalidateQueries({
-        queryKey: ["schema", variables.dbName, variables.tableName],
-      });
-      if (resultingTable !== variables.tableName) {
-        queryClient.invalidateQueries({ queryKey: ["schema", variables.dbName, resultingTable] });
-      }
-      queryClient.invalidateQueries({
-        queryKey: ["records", variables.dbName, variables.tableName],
-      });
-      queryClient.invalidateQueries({ queryKey: ["records", variables.dbName, resultingTable] });
-      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });
+    onSuccess: async (data, variables) => {
+      const resultingTable =
+        variables.payload.action === "rename_table"
+          ? variables.payload.new_table_name || variables.tableName
+          : data?.table_name || variables.tableName;
+      const refresh = Promise.all([
+        ...["tables", "schemaDiagram", "databaseObjects", "databaseDetails"].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key, variables.dbName] })
+        ),
+        ...Array.from(new Set([variables.tableName, resultingTable])).flatMap((tableName) =>
+          ["schema", "records"].map((key) =>
+            queryClient.invalidateQueries({ queryKey: [key, variables.dbName, tableName] })
+          )
+        ),
+        queryClient.invalidateQueries({ queryKey: ["databases"] }),
+      ]);
+      // Let the dialog navigate before a renamed table disappears from the current view.
+      if (variables.payload.action !== "rename_table") await refresh;
       toast.success(data?.message || "Table schema updated successfully");
     },
     onError: (error: Error) => {
