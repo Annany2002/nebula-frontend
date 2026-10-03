@@ -10,7 +10,7 @@ import ProjectSettings from "@/components/Studio/ProjectSettings";
 import DatabaseSubSidebar, { DatabaseSubTab } from "@/components/Studio/DatabaseSubSidebar";
 import SchemaVisualizer from "@/components/Studio/SchemaVisualizer";
 import DatabaseObjectsView from "@/components/Studio/DatabaseObjectsView";
-import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
+import ApiKeys from "@/components/Studio/ApiKeys";
 import CreateTableSchema from "@/components/Table/CreateTableSchema";
 import ConnectModal from "@/components/Studio/ConnectModal";
 import { useTables, useDatabaseDetails } from "@/hooks/queries";
@@ -212,13 +212,7 @@ export default function DatabaseStudio() {
 
                 {currentTab === "sql" && <SqlEditor dbName={db_name} tables={tables} />}
 
-                {currentTab === "apikeys" && (
-                  <div className="flex-1 overflow-y-auto p-6">
-                    <div className="max-w-4xl mx-auto">
-                      <DatabaseApiKey databaseName={db_name} />
-                    </div>
-                  </div>
-                )}
+                {currentTab === "apikeys" && <ApiKeys key={db_name} dbName={db_name} />}
 
                 {currentTab === "settings" && (
                   <ProjectSettings dbName={db_name} details={dbDetails} tables={tables} />

@@ -1,171 +1,315 @@
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import {
+  AlertCircle,
+  Check,
+  Copy,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Loader2,
+  RotateCw,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Copy, Check, Trash2, RotateCw } from "lucide-react";
 import { useApiKey, useGenerateApiKey, useDeleteApiKey } from "@/hooks/queries";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { apiKeyPrefix } from "@/lib/apiKey";
+import { formatDateTime } from "@/lib/formatDate";
+import "@/styles/api-keys.css";
 
 interface DatabaseApiKeyProps {
   databaseName?: string;
 }
-
 export function DatabaseApiKey({ databaseName = "" }: DatabaseApiKeyProps) {
-  const { data: fetchedKey = "", isLoading } = useApiKey(databaseName);
-  const { mutate: generateKey, isPending: generating } = useGenerateApiKey();
-  const { mutate: deleteKey, isPending: deleting } = useDeleteApiKey();
-
-  const [localKey, setLocalKey] = useState<string | null>(null);
-  const [showKey, setShowKey] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  // Use local key override if set by mutation, otherwise query data
-  const apiKey = localKey !== null ? localKey : fetchedKey;
-
-  const handleGenerateKey = () => {
-    if (!databaseName) return;
-    generateKey(databaseName, {
-      onSuccess: (data: { api_key?: string }) => {
-        if (data?.api_key) {
-          setLocalKey(data.api_key);
-        }
+  return <KeyManager key={databaseName} databaseName={databaseName} />;
+}
+function KeyManager({ databaseName }: DatabaseApiKeyProps) {
+  const id = useId();
+  const {
+    data: metadata,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useApiKey(databaseName || "");
+  const generate = useGenerateApiKey();
+  const revoke = useDeleteApiKey();
+  const [secret, setSecret] = useState("");
+  const [showSecret, setShowSecret] = useState(false);
+  const [copiedSecret, setCopiedSecret] = useState("");
+  const [copyError, setCopyError] = useState("");
+  const [confirmation, setConfirmation] = useState<"rotate" | "revoke" | null>(null);
+  const [confirmationPrefix, setConfirmationPrefix] = useState("");
+  const copyTimer = useRef<ReturnType<typeof setTimeout>>();
+  const mounted = useRef(true);
+  const rotateButton = useRef<HTMLButtonElement>(null);
+  const revokeButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(copyTimer.current);
+    };
+  }, []);
+  const busy = generate.isPending || revoke.isPending;
+  const canChange = !!databaseName && metadata !== undefined && !isError && !isFetching && !busy;
+  const activeConfirmation = metadata?.key_prefix === confirmationPrefix ? confirmation : null;
+  const freshKey = secret && metadata?.key_prefix === apiKeyPrefix(secret) ? secret : "";
+  const createdAt = formatDateTime(metadata?.created_at);
+  const clearSecret = () => {
+    setSecret("");
+    setShowSecret(false);
+    setCopiedSecret("");
+    setCopyError("");
+    clearTimeout(copyTimer.current);
+    generate.reset();
+  };
+  const create = () => {
+    if (!canChange || (metadata && activeConfirmation !== "rotate")) return;
+    setCopyError("");
+    setCopiedSecret("");
+    generate.reset();
+    generate.mutate(databaseName || "", {
+      onSuccess: (data) => {
+        setSecret(data.api_key);
+        setShowSecret(false);
+        setConfirmation(null);
+        generate.reset();
       },
     });
   };
-
-  const handleDeleteKey = () => {
-    if (!databaseName) return;
-    deleteKey(databaseName, {
+  const remove = () => {
+    if (!canChange || !metadata || activeConfirmation !== "revoke") return;
+    revoke.mutate(databaseName || "", {
       onSuccess: () => {
-        setLocalKey("");
+        clearSecret();
+        setConfirmation(null);
       },
     });
   };
-
-  const copyToClipboard = (text: string) => {
-    window.navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast.success("API key copied to clipboard");
-    setTimeout(() => setCopied(false), 2000);
+  const confirm = (action: "rotate" | "revoke") => {
+    generate.reset();
+    revoke.reset();
+    setConfirmationPrefix(metadata?.key_prefix || "");
+    setConfirmation(action);
   };
-
-  const maskedKey = apiKey ? `${apiKey.slice(0, 8)}${"•".repeat(16)}${apiKey.slice(-6)}` : "";
-
+  const cancel = () => {
+    const trigger = activeConfirmation === "rotate" ? rotateButton.current : revokeButton.current;
+    setConfirmation(null);
+    generate.reset();
+    revoke.reset();
+    requestAnimationFrame(() => {
+      if (mounted.current) trigger?.focus();
+    });
+  };
+  const copy = async () => {
+    setCopyError("");
+    try {
+      await navigator.clipboard.writeText(freshKey);
+      if (!mounted.current) return;
+      setCopiedSecret(freshKey);
+      clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopiedSecret(""), 2000);
+    } catch {
+      if (mounted.current)
+        setCopyError("Couldn’t copy. Select and copy the revealed key, or try again.");
+    }
+  };
   return (
-    <div className="rounded-2xl border border-purple-200/50 dark:border-white/[0.08] bg-white/40 dark:bg-white/[0.03] backdrop-blur-xl p-4 sm:p-5 transition-all">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Info Column */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">API Key</h3>
-            <span
-              className={cn(
-                "text-[10px] font-mono px-2 py-0.5 rounded-full font-medium",
-                apiKey
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                  : "bg-muted text-muted-foreground"
-              )}
-            >
-              {apiKey ? "Active" : "None"}
-            </span>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-zinc-400">
-            Authenticate requests to project{" "}
-            <code className="px-1.5 py-0.5 rounded bg-muted/60 dark:bg-white/10 font-mono text-[11px] text-foreground">
-              {databaseName}
-            </code>{" "}
-            via the SDK or REST API.
-          </p>
+    <section className="api-key-manager" aria-labelledby={`${id}-title`}>
+      <header className="api-key-section-heading">
+        <div>
+          <KeyRound size={17} />
+          <h2 id={`${id}-title`}>Database key</h2>
         </div>
-
-        {/* Action Column */}
-        <div className="flex items-center gap-2 shrink-0">
-          {apiKey ? (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 backdrop-blur-md">
-                <code className="font-mono text-xs text-gray-700 dark:text-zinc-300 truncate max-w-[200px] sm:max-w-[280px]">
-                  {showKey ? apiKey : maskedKey}
-                </code>
-                <div className="flex items-center gap-1 shrink-0">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-lg text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
-                          onClick={() => setShowKey(!showKey)}
-                        >
-                          {showKey ? (
-                            <EyeOff className="h-3.5 w-3.5" />
-                          ) : (
-                            <Eye className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{showKey ? "Hide key" : "Show key"}</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-lg text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
-                          onClick={() => copyToClipboard(apiKey)}
-                        >
-                          {copied ? (
-                            <Check className="h-3.5 w-3.5 text-emerald-500" />
-                          ) : (
-                            <Copy className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{copied ? "Copied!" : "Copy key"}</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </div>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleDeleteKey}
-                      disabled={deleting}
-                      size="icon"
-                      variant="outline"
-                      className="h-9 w-9 rounded-xl border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:border-red-300 shrink-0"
-                    >
-                      {deleting ? (
-                        <RotateCw className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-3.5 w-3.5" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Revoke API Key</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+        {!isLoading && !isError && metadata !== undefined && (
+          <span className={metadata ? "api-key-state is-configured" : "api-key-state"}>
+            {metadata ? "Configured" : "No key"}
+          </span>
+        )}
+      </header>
+      {isLoading ? (
+        <div className="api-key-loading" role="status" aria-label="Loading API key details">
+          <span className="animate-pulse motion-reduce:animate-none" />
+          <span className="animate-pulse motion-reduce:animate-none" />
+          <span className="sr-only">Loading API key details</span>
+        </div>
+      ) : !databaseName ? (
+        <p className="api-key-error" role="alert">
+          Choose a database to manage its key.
+        </p>
+      ) : isError && !metadata ? (
+        <div className="api-key-load-error" role="alert">
+          <AlertCircle size={20} />
+          <h3>Key details couldn’t be loaded.</h3>
+          <p>{error.message}</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            Retry
+          </Button>
+        </div>
+      ) : metadata ? (
+        <>
+          {isError && (
+            <div className="api-key-refresh-error" role="alert">
+              <p>Key details couldn’t be refreshed. Showing the last loaded details.</p>
+              <Button variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
+                Retry
+              </Button>
             </div>
-          ) : (
+          )}
+          <dl className="api-key-details">
+            <div>
+              <dt>Key prefix</dt>
+              <dd>
+                <code>{metadata.key_prefix}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>Created</dt>
+              <dd>
+                {createdAt ? (
+                  <time dateTime={metadata.created_at}>{createdAt}</time>
+                ) : (
+                  "Date unavailable"
+                )}
+              </dd>
+            </div>
+          </dl>
+          <p className="api-key-description">
+            The full secret is only returned when a key is generated. Use your saved key to
+            authenticate requests.
+          </p>
+          <div className="api-key-actions">
             <Button
-              onClick={handleGenerateKey}
-              disabled={generating || isLoading}
+              ref={rotateButton}
+              variant="outline"
               size="sm"
-              className="h-9 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs shadow-sm"
+              onClick={() => confirm("rotate")}
+              disabled={!canChange || !!activeConfirmation}
             >
-              {generating ? (
-                <span className="flex items-center gap-1.5">
-                  <RotateCw className="h-3.5 w-3.5 animate-spin" />
-                  Generating...
-                </span>
+              <RotateCw size={14} />
+              Rotate key
+            </Button>
+            <Button
+              ref={revokeButton}
+              variant="ghost"
+              size="sm"
+              className="api-key-revoke"
+              onClick={() => confirm("revoke")}
+              disabled={!canChange || !!activeConfirmation}
+            >
+              <Trash2 size={14} />
+              Revoke key
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="api-key-empty">
+          <h3>No API key for this database.</h3>
+          <p>
+            Generate a key to connect your app to <code>{databaseName}</code>.
+          </p>
+          <Button size="sm" onClick={create} disabled={!canChange}>
+            {generate.isPending ? (
+              <>
+                <Loader2 size={14} className="animate-spin motion-reduce:animate-none" />
+                Generating…
+              </>
+            ) : (
+              <>
+                <KeyRound size={14} />
+                Generate key
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+      {!activeConfirmation && generate.isError && (
+        <p className="api-key-error" role="alert">
+          {generate.error.message}
+        </p>
+      )}
+      {activeConfirmation && (
+        <section className="api-key-confirmation" aria-labelledby={`${id}-confirm`}>
+          <h3 id={`${id}-confirm`}>
+            {activeConfirmation === "rotate" ? "Rotate" : "Revoke"} key for {databaseName}?
+          </h3>
+          <p>
+            {activeConfirmation === "rotate"
+              ? "The current key will stop working immediately. Copy the replacement and update every app using this database."
+              : "Apps using this key will lose access immediately. Your database and its records will remain available in Studio."}
+          </p>
+          {(generate.isError || revoke.isError) && (
+            <p className="api-key-error" role="alert">
+              {generate.error?.message || revoke.error?.message}
+            </p>
+          )}
+          <div>
+            <Button variant="outline" size="sm" onClick={cancel} disabled={busy} autoFocus>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              className={
+                activeConfirmation === "revoke"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+              disabled={!canChange}
+              onClick={activeConfirmation === "rotate" ? create : remove}
+            >
+              {busy ? (
+                <>
+                  <Loader2 size={14} className="animate-spin motion-reduce:animate-none" />
+                  {activeConfirmation === "rotate" ? "Rotating…" : "Revoking…"}
+                </>
+              ) : activeConfirmation === "rotate" ? (
+                "Rotate and generate key"
               ) : (
-                "Generate Key"
+                "Revoke this key"
               )}
             </Button>
+          </div>
+        </section>
+      )}
+      {freshKey && (
+        <section className="api-key-secret" aria-labelledby={`${id}-secret`}>
+          <h3 id={`${id}-secret`}>Copy your new key</h3>
+          <p>Save this secret now. It won’t be available after you leave this page.</p>
+          <div className="api-key-secret-value">
+            <code aria-label="New API key">
+              {showSecret ? freshKey : "••••••••••••••••••••••••••••••••"}
+            </code>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={showSecret ? "Hide new key" : "Show new key"}
+              aria-pressed={showSecret}
+              disabled={busy}
+              onClick={() => setShowSecret((previous) => !previous)}
+            >
+              {showSecret ? <EyeOff size={15} /> : <Eye size={15} />}
+            </Button>
+          </div>
+          <div className="api-key-secret-actions">
+            <Button size="sm" disabled={busy} onClick={copy} autoFocus>
+              {copiedSecret === freshKey ? <Check size={14} /> : <Copy size={14} />}
+              <span>{copiedSecret === freshKey ? "Key copied" : "Copy new key"}</span>
+            </Button>
+            <Button variant="ghost" size="sm" disabled={busy} onClick={clearSecret}>
+              I’ve saved this key
+            </Button>
+          </div>
+          {copyError && (
+            <p className="api-key-error" role="alert">
+              {copyError}
+            </p>
           )}
-        </div>
-      </div>
-    </div>
+          <span className="sr-only" role="status">
+            {copiedSecret === freshKey ? "API key copied to clipboard" : ""}
+          </span>
+        </section>
+      )}
+    </section>
   );
 }

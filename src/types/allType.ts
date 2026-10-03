@@ -6,6 +6,7 @@ export interface DataBaseType {
   filePath: string;
   tables: number;
   apiKey: string;
+  apiKeyPrefix?: string;
 }
 
 export interface TableColumnType {
@@ -71,6 +72,7 @@ export interface DatabaseDetailType {
   sizeBytes: number;
   sizeDisplay: string;
   apiKey: string;
+  apiKeyPrefix?: string;
 }
 
 export interface SQLQueryResultType {
@@ -195,4 +197,9 @@ export interface AlterTablePayload {
   new_name?: string;
   new_table_name?: string;
   operations?: AlterTableOperation[];
+}
+
+export interface APIKeyMetadataType {
+  key_prefix: string;
+  created_at: string;
 }

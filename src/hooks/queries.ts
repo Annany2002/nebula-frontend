@@ -13,8 +13,10 @@ import {
   SchemaDiagramType,
   DatabaseObjectsType,
   AlterTablePayload,
+  APIKeyMetadataType,
 } from "@/types/allType";
 import { toast } from "sonner";
+import { apiKeyPrefix } from "@/lib/apiKey";
 
 export const getToken = () => localStorage.getItem("token");
 
@@ -387,74 +389,90 @@ export const useUpdateRecord = () => {
 export const useApiKey = (dbName: string) => {
   return useQuery({
     queryKey: ["apikey", dbName],
-    queryFn: async (): Promise<string> => {
-      const token = getToken();
+    queryFn: async ({ signal }): Promise<APIKeyMetadataType | null> => {
       const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
-        headers: { Authorization: `Bearer ${token}` },
+        signal,
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!response.ok) {
-        if (response.status === 404) return "";
-        throw new Error("Failed to fetch API key");
-      }
+      if (response.status === 404) return null;
+      if (!response.ok) throw new Error("Couldn’t load API key details.");
       const data = await response.json();
-      return data.key || "";
+      if (typeof data?.key_prefix !== "string" || !data.key_prefix) {
+        throw new Error("API key details were incomplete. Try refreshing.");
+      }
+      return {
+        key_prefix: data.key_prefix,
+        created_at: typeof data.created_at === "string" ? data.created_at : "",
+      };
     },
     enabled: !!dbName,
-    retry: false, // Don't retry if 404 (no key)
+    retry: false,
   });
 };
 
 export const useGenerateApiKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (dbName: string) => {
-      const token = getToken();
+    gcTime: 0,
+    onMutate: (dbName: string) => queryClient.cancelQueries({ queryKey: ["apikey", dbName] }),
+    mutationFn: async (dbName: string): Promise<{ api_key: string }> => {
       const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!response.ok) throw new Error("Failed to generate API key");
-      return response.json();
-    },
-    onSuccess: (data: { api_key?: string }, dbName: string) => {
-      const newKey = data?.api_key || "";
-      if (newKey) {
-        queryClient.setQueryData(["apikey", dbName], newKey);
-        queryClient.setQueryData<DataBaseType[]>(["databases"], (old) => {
-          if (!old) return old;
-          return old.map((db) => (db.dbName === dbName ? { ...db, apiKey: newKey } : db));
-        });
+      if (!response.ok) throw new Error("Couldn’t generate a key. Please try again.");
+      const data = await response.json();
+      if (typeof data?.api_key !== "string" || !data.api_key) {
+        throw new Error("The secret wasn’t returned. Refresh the key details before trying again.");
       }
-      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databases"] });
-      toast.success("API key generated successfully");
+      return { api_key: data.api_key };
     },
-    onError: () => toast.error("Failed to generate API key"),
+    onSuccess: (data, dbName) => {
+      const prefix = apiKeyPrefix(data.api_key);
+      queryClient.setQueryData<APIKeyMetadataType>(["apikey", dbName], {
+        key_prefix: prefix,
+        created_at: "",
+      });
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) =>
+        old?.map((db) => (db.dbName === dbName ? { ...db, apiKey: "", apiKeyPrefix: prefix } : db))
+      );
+      queryClient.invalidateQueries({ queryKey: ["databases"] });
+      queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
+      toast.success("API key generated. Copy it before leaving this page.");
+    },
+    onSettled: (_, __, dbName) => {
+      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+    },
+    onError: () => toast.error("Couldn’t generate an API key"),
   });
 };
 
 export const useDeleteApiKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
+    onMutate: (dbName: string) => queryClient.cancelQueries({ queryKey: ["apikey", dbName] }),
     mutationFn: async (dbName: string) => {
-      const token = getToken();
       const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!response.ok) throw new Error("Failed to delete API key");
+      if (!response.ok) throw new Error("Couldn’t revoke this key. Please try again.");
     },
-    onSuccess: (_, dbName: string) => {
-      queryClient.setQueryData(["apikey", dbName], "");
-      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) => {
-        if (!old) return old;
-        return old.map((db) => (db.dbName === dbName ? { ...db, apiKey: "" } : db));
-      });
-      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+    onSuccess: (_, dbName) => {
+      queryClient.setQueryData(["apikey", dbName], null);
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) =>
+        old?.map((db) =>
+          db.dbName === dbName ? { ...db, apiKey: "", apiKeyPrefix: undefined } : db
+        )
+      );
       queryClient.invalidateQueries({ queryKey: ["databases"] });
-      toast.success("API key deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
+      toast.success("API key revoked");
     },
-    onError: () => toast.error("Failed to delete API key"),
+    onSettled: (_, __, dbName) => {
+      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+    },
+    onError: () => toast.error("Couldn’t revoke the API key"),
   });
 };
 
