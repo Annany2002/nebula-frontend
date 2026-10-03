@@ -67,6 +67,11 @@
   padding-left: 33px;
   padding-right: 32px;
 }
+.db-tables-page .db-tables-search input:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
 .db-tables-search button {
   position: absolute;
   right: 5px;
@@ -74,14 +79,43 @@
   padding: 5px;
   color: hsl(var(--muted-foreground));
 }
+.db-tables-sort {
+  position: relative;
+}
+.db-tables-sort-value {
+  display: block;
+  visibility: hidden;
+  padding: 0 32px 0 12px;
+  height: 34px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.db-tables-sort > svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
 .db-tables-sort select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  appearance: none;
   height: 34px;
   border: 1px solid hsl(var(--input));
   border-radius: 6px;
   background: hsl(var(--background));
   color: hsl(var(--foreground));
-  padding: 0 8px;
+  padding: 0 32px 0 12px;
   font-size: 12px;
+}
+.db-tables-sort select:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
 }
 .db-tables-count {
   font-size: 11px;
@@ -374,8 +408,7 @@
   gap: 6px;
   font-size: 12px;
 }
-.db-tables-page button:focus-visible,
-.db-tables-sort select:focus-visible {
+.db-tables-page button:focus-visible {
   outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }

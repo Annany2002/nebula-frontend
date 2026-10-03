@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import {
   ArrowUpRight,
   Check,
+  ChevronDown,
   Copy,
   KeyRound,
   Loader2,
@@ -36,6 +37,11 @@ import {
 import { useDeleteTable, useTables } from "@/hooks/queries";
 import { TableType } from "@/types/allType";
 import "@/styles/database-tables.css";
+const tableSorts = [
+  { value: "name", label: "Name: A to Z" },
+  { value: "rows-desc", label: "Most rows first" },
+  { value: "rows-asc", label: "Fewest rows first" },
+];
 interface Props {
   dbName: string;
   onSelectTable?: (name: string) => void;
@@ -219,11 +225,17 @@ export default function DatabaseTables({ dbName, onSelectTable, onOpenCreateTabl
           </div>
           <label className="db-tables-sort">
             <span className="sr-only">Sort tables</span>
+            <span className="db-tables-sort-value" aria-hidden="true">
+              {tableSorts.find((option) => option.value === sort)?.label}
+            </span>
             <select value={sort} onChange={(event) => setSort(event.target.value)}>
-              <option value="name">Name: A to Z</option>
-              <option value="rows-desc">Most rows first</option>
-              <option value="rows-asc">Fewest rows first</option>
+              {tableSorts.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
+            <ChevronDown size={14} aria-hidden="true" />
           </label>
           <span className="db-tables-count">
             {search.trim() ? `${filtered.length} of ${tables.length}` : tables.length}{" "}
