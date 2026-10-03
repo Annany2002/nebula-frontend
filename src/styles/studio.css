@@ -95,21 +95,63 @@
 }
 .studio-rail-footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
-  padding-top: 12px;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid hsl(var(--border));
 }
+.studio-rail-tooltip[data-state] {
+  animation: none;
+  max-width: 160px;
+  padding: 5px 8px;
+  font-size: 11px;
+  line-height: 16px;
+}
 .studio-rail-footer > :is(button, a) {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
+  width: 100%;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  text-align: left;
+  transition:
+    color 150ms,
+    background 150ms;
+}
+.studio-rail-footer svg {
+  flex-shrink: 0;
+}
+.studio-rail-external {
+  margin-left: auto;
+}
+.studio-rail-appearance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding-left: 10px;
+  padding-right: 4px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.studio-rail-theme {
+  display: flex;
+}
+.studio-rail-theme > button {
+  position: relative;
+  width: 30px;
+  height: 30px;
   border-radius: 6px;
   color: hsl(var(--muted-foreground));
 }
-.studio-rail-footer > :is(button, a):hover {
+.studio-rail-footer > :is(button, a):hover,
+.studio-rail-theme > button:hover {
   background: hsl(var(--muted));
   color: hsl(var(--foreground));
 }
@@ -135,8 +177,13 @@
 .studio-rail.is-collapsed .studio-rail-nav {
   margin-top: 18px;
 }
-.studio-rail.is-collapsed .studio-rail-footer {
-  flex-direction: column;
+.studio-rail.is-collapsed :is(.studio-rail-footer-label, .studio-rail-external) {
+  display: none;
+}
+.studio-rail.is-collapsed .studio-rail-footer > :is(button, a),
+.studio-rail.is-collapsed .studio-rail-appearance {
+  justify-content: center;
+  padding-inline: 0;
 }
 .studio-main {
   flex: 1;
@@ -755,6 +802,8 @@
   .studio-rail .studio-projects-link span,
   .studio-rail .studio-rail-context,
   .studio-rail .studio-nav-item span,
+  .studio-rail .studio-rail-footer-label,
+  .studio-rail .studio-rail-external,
   .studio-rail .studio-collapse {
     display: none;
   }
@@ -766,8 +815,10 @@
   .studio-rail .studio-rail-nav {
     margin-top: 18px;
   }
-  .studio-rail .studio-rail-footer {
-    flex-direction: column;
+  .studio-rail .studio-rail-footer > :is(button, a),
+  .studio-rail .studio-rail-appearance {
+    justify-content: center;
+    padding-inline: 0;
   }
   .studio-topbar {
     padding-inline: 12px;
