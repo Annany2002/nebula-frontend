@@ -326,7 +326,7 @@ export const useDeleteRecord = () => {
     }) => {
       const token = getToken();
       const response = await fetch(
-        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${recordId}`,
+        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${encodeURIComponent(String(recordId))}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -360,7 +360,7 @@ export const useUpdateRecord = () => {
     }) => {
       const token = getToken();
       const response = await fetch(
-        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${recordId}`,
+        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${encodeURIComponent(String(recordId))}`,
         {
           method: "PUT",
           headers: {
