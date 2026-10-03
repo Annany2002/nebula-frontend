@@ -419,10 +419,13 @@ export const useApiKey = (dbName: string) => {
   return useQuery({
     queryKey: ["apikey", dbName],
     queryFn: async ({ signal }): Promise<APIKeyMetadataType | null> => {
-      const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
-        signal,
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/account/databases/${encodeURIComponent(dbName)}/apikey`,
+        {
+          signal,
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
       if (response.status === 404) return null;
       if (!response.ok) throw new Error("Couldn’t load API key details.");
       const data = await response.json();
