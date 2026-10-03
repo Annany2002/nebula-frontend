@@ -108,7 +108,7 @@ export default function DatabaseStudio() {
   // Handle table switch in editor
   const handleSelectTable = (tblName: string) => {
     setActiveTableState(tblName);
-    navigate(`/databases/${db_name}/tables/${tblName}`);
+    navigate(tblName ? `/databases/${db_name}/tables/${tblName}` : `/databases/${db_name}/tables`);
   };
 
   if (!db_name) {
