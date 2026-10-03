@@ -639,14 +639,38 @@ export const useSchemaDiagram = (dbName: string | undefined) => {
 export const useDatabaseObjects = (dbName: string | undefined) => {
   return useQuery({
     queryKey: ["databaseObjects", dbName],
-    queryFn: async (): Promise<DatabaseObjectsType> => {
+    queryFn: async ({ signal }): Promise<DatabaseObjectsType> => {
       if (!dbName) throw new Error("Database name required");
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/objects`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/objects`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          signal,
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch database objects");
-      return response.json();
+      const data = await response.json();
+      const isNamedObject = (item: unknown) => {
+        if (!item || typeof item !== "object") return false;
+        const object = item as Record<string, unknown>;
+        return (
+          typeof object.name === "string" &&
+          !!object.name &&
+          typeof object.tableName === "string" &&
+          !!object.tableName &&
+          (object.sql == null || typeof object.sql === "string")
+        );
+      };
+      if (
+        !Array.isArray(data?.indexes) ||
+        !Array.isArray(data?.triggers) ||
+        !data.indexes.every(isNamedObject) ||
+        !data.triggers.every(isNamedObject)
+      ) {
+        throw new Error("Database object details were incomplete. Try refreshing.");
+      }
+      return data;
     },
     enabled: !!dbName,
   });
