@@ -1,219 +1,367 @@
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Database,
-  HardDrive,
-  Table2,
-  Calendar,
-  Layers,
-  AlertTriangle,
-  Trash2,
-  Loader2,
-  ShieldCheck,
-} from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Check, Copy, Download, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useDeleteDatabase } from "@/hooks/queries";
 import { useAuth } from "@/context/auth-context";
 import { DatabaseDetailType, TableType } from "@/types/allType";
 import { formatDateTime } from "@/lib/formatDate";
+import "@/styles/settings.css";
 
 interface ProjectSettingsProps {
   dbName: string;
   details?: DatabaseDetailType;
+  detailsLoading: boolean;
+  detailsError: boolean;
+  refreshing: boolean;
+  onRefresh: () => void;
   tables: TableType[];
 }
-
-export default function ProjectSettings({ dbName, details, tables }: ProjectSettingsProps) {
+function fileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  const unit = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), 3);
+  return `${(bytes / 1024 ** unit).toLocaleString(undefined, { maximumFractionDigits: 1 })} ${["B", "KB", "MB", "GB"][unit]}`;
+}
+export default function ProjectSettings({
+  dbName,
+  details,
+  detailsLoading,
+  detailsError,
+  refreshing,
+  onRefresh,
+  tables,
+}: ProjectSettingsProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { mutate: deleteDb, isPending: isDeleting } = useDeleteDatabase();
-
+  const id = useId();
+  const deletion = useDeleteDatabase();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [confirmInput, setConfirmInput] = useState("");
-
+  const [confirmation, setConfirmation] = useState("");
+  const [copied, setCopied] = useState<{ field: "name" | "id"; value: string } | null>(null);
+  const [copyError, setCopyError] = useState("");
+  const copyTimer = useRef<ReturnType<typeof setTimeout>>();
+  const mounted = useRef(true);
+  const deleteTrigger = useRef<HTMLButtonElement>(null);
+  const deleteSubmitted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(copyTimer.current);
+    };
+  }, []);
+  const createdAt = formatDateTime(details?.createdAt);
+  const knownRows = tables.every((table) => typeof table.rowCount === "number");
+  const recordCount =
+    details?.totalRecords ??
+    (knownRows ? tables.reduce((sum, table) => sum + (table.rowCount ?? 0), 0) : null);
+  const size =
+    details?.sizeDisplay ||
+    (typeof details?.sizeBytes === "number" &&
+    Number.isFinite(details.sizeBytes) &&
+    details.sizeBytes >= 0
+      ? fileSize(details.sizeBytes)
+      : "Unavailable");
+  const databaseId = details?.databaseId == null ? "Unavailable" : String(details.databaseId);
+  const copy = async (value: string, field: "name" | "id") => {
+    setCopyError("");
+    try {
+      await navigator.clipboard.writeText(value);
+      if (!mounted.current) return;
+      setCopied({ field, value });
+      clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopied(null), 2000);
+    } catch {
+      if (mounted.current)
+        setCopyError("Couldn’t copy. Select the value and copy it manually, or try again.");
+    }
+  };
   const handleDelete = () => {
-    if (confirmInput !== dbName) return;
-    deleteDb(dbName, {
+    if (confirmation !== dbName || deletion.isPending || deleteSubmitted.current) return;
+    deleteSubmitted.current = true;
+    deletion.mutate(dbName, {
       onSuccess: () => {
         setDeleteOpen(false);
-        const currentUserId = user?.userId || localStorage.getItem("user_id");
-        navigate(currentUserId ? `/dashboard/${currentUserId}` : "/");
+        const userId = user?.userId || localStorage.getItem("user_id");
+        navigate(userId ? `/dashboard/${userId}` : "/", { replace: true });
+      },
+      onSettled: () => {
+        deleteSubmitted.current = false;
       },
     });
   };
-
-  const totalRows = tables.reduce((acc, t) => acc + (t.rowCount || 0), 0);
-
+  const value = (content: React.ReactNode) =>
+    detailsLoading ? (
+      <span
+        className="settings-value-skeleton animate-pulse motion-reduce:animate-none"
+        aria-hidden="true"
+      />
+    ) : (
+      content
+    );
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Page Header */}
+    <div className="settings-page">
+      <header className="settings-heading">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Project Settings</h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            General configuration, storage engine metrics, and database lifecycle settings.
+          <h1>Settings</h1>
+          <p>
+            Database details and lifecycle for <span>{dbName}</span>.
           </p>
         </div>
-
-        {/* Database Information Card */}
-        <Card className="rounded-2xl border border-purple-200/50 dark:border-purple-500/15 bg-card/80 backdrop-blur-xl shadow-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Database className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                <CardTitle className="text-sm font-bold">General Information</CardTitle>
-              </div>
-              <Badge
-                variant="outline"
-                className="text-[10px] font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-              >
-                Active
-              </Badge>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefresh}
+          disabled={refreshing || deletion.isPending}
+          aria-label="Refresh database details"
+        >
+          <RefreshCw
+            size={14}
+            className={refreshing ? "animate-spin motion-reduce:animate-none" : ""}
+          />
+          <span>Refresh</span>
+        </Button>
+      </header>
+      <div className="settings-body">
+        {detailsError && (
+          <div className="settings-refresh-error" role="alert">
+            <p>
+              {details
+                ? "Database details couldn’t be refreshed. Showing the last loaded information."
+                : "Some database details couldn’t be loaded."}
+            </p>
+            <Button variant="outline" size="sm" onClick={onRefresh} disabled={refreshing}>
+              Retry
+            </Button>
+          </div>
+        )}
+        <section className="settings-section" aria-labelledby="settings-general-heading">
+          <div className="settings-section-intro">
+            <h2 id="settings-general-heading">General</h2>
+            <p>Identifiers for this database.</p>
+          </div>
+          <dl className="settings-detail-list">
+            <div>
+              <dt>Database name</dt>
+              <dd>
+                <code>{dbName}</code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={
+                    copied?.field === "name" && copied.value === dbName
+                      ? "Database name copied"
+                      : "Copy database name"
+                  }
+                  onClick={() => copy(dbName, "name")}
+                >
+                  {copied?.field === "name" && copied.value === dbName ? (
+                    <Check size={14} />
+                  ) : (
+                    <Copy size={14} />
+                  )}
+                </Button>
+              </dd>
             </div>
-            <CardDescription className="text-xs">
-              Project identifiers and database configuration.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-1 text-xs">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3 rounded-xl bg-purple-500/5 dark:bg-white/[0.02] border border-purple-200/40 dark:border-white/5 space-y-1">
-                <span className="text-muted-foreground font-mono text-[11px]">Database Name</span>
-                <p className="font-mono font-semibold text-foreground">{dbName}</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-purple-500/5 dark:bg-white/[0.02] border border-purple-200/40 dark:border-white/5 space-y-1">
-                <span className="text-muted-foreground font-mono text-[11px]">Storage Engine</span>
-                <div className="flex items-center gap-1.5 font-medium text-foreground">
-                  <ShieldCheck className="w-3.5 h-3.5 text-purple-500" />
-                  <span>SQLite 3</span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-purple-500/5 dark:bg-white/[0.02] border border-purple-200/40 dark:border-white/5 space-y-1">
-                <span className="text-muted-foreground font-mono text-[11px]">
-                  Tables & Records
-                </span>
-                <div className="flex items-center gap-2 font-mono font-semibold text-foreground">
-                  <Table2 className="w-3.5 h-3.5 text-purple-500" />
-                  <span>
-                    {tables.length} tables • {totalRows} records
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-purple-500/5 dark:bg-white/[0.02] border border-purple-200/40 dark:border-white/5 space-y-1">
-                <span className="text-muted-foreground font-mono text-[11px]">Created At</span>
-                <div className="flex items-center gap-1.5 text-muted-foreground font-mono">
-                  <Calendar className="w-3.5 h-3.5 text-purple-500" />
-                  <span>
-                    {details?.createdAt ? formatDateTime(details.createdAt) : "Recently created"}
-                  </span>
-                </div>
-              </div>
+            <div>
+              <dt>Database ID</dt>
+              <dd>
+                {value(
+                  <>
+                    <code>{databaseId}</code>
+                    {details?.databaseId != null && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={
+                          copied?.field === "id" && copied.value === databaseId
+                            ? "Database ID copied"
+                            : "Copy database ID"
+                        }
+                        onClick={() => copy(databaseId, "id")}
+                      >
+                        {copied?.field === "id" && copied.value === databaseId ? (
+                          <Check size={14} />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                      </Button>
+                    )}
+                  </>
+                )}
+              </dd>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Danger Zone */}
-        <Card className="rounded-2xl border border-red-500/30 dark:border-red-500/20 bg-red-500/[0.02] backdrop-blur-xl shadow-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              <CardTitle className="text-sm font-bold text-red-600 dark:text-red-400">
-                Danger Zone
-              </CardTitle>
+            <div>
+              <dt>Created</dt>
+              <dd>
+                {value(
+                  createdAt ? (
+                    <time dateTime={details?.createdAt}>{createdAt}</time>
+                  ) : (
+                    "Date unavailable"
+                  )
+                )}
+              </dd>
             </div>
-            <CardDescription className="text-xs">
-              Destructive actions for this project database. Proceed with caution.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-red-500/20 bg-red-500/5">
-              <div>
-                <p className="text-xs font-semibold text-foreground">Delete this database</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Permanently remove the database file, all tables, schemas, and records. This
-                  action cannot be undone.
-                </p>
-              </div>
+          </dl>
+        </section>
+        {copyError && (
+          <p className="settings-copy-error" role="alert">
+            {copyError}
+          </p>
+        )}
+        <section className="settings-section" aria-labelledby="settings-storage-heading">
+          <div className="settings-section-intro">
+            <h2 id="settings-storage-heading">Storage</h2>
+            <p>Current database size and contents.</p>
+          </div>
+          <dl className="settings-detail-list">
+            <div>
+              <dt>Engine</dt>
+              <dd>SQLite</dd>
+            </div>
+            <div>
+              <dt>File size</dt>
+              <dd>{value(size)}</dd>
+            </div>
+            <div>
+              <dt>Tables</dt>
+              <dd>{(details?.tables ?? tables.length).toLocaleString()}</dd>
+            </div>
+            <div>
+              <dt>Records</dt>
+              <dd>{value(recordCount == null ? "Unavailable" : recordCount.toLocaleString())}</dd>
+            </div>
+          </dl>
+        </section>
+        <section
+          className="settings-section settings-delete-section"
+          aria-labelledby="settings-delete-heading"
+        >
+          <div className="settings-section-intro">
+            <h2 id="settings-delete-heading">Delete database</h2>
+            <p>This action is permanent.</p>
+          </div>
+          <div className="settings-delete-content">
+            <h3>Remove {dbName}</h3>
+            <p>
+              Delete this database, all of its tables and records, and its API key. Export a copy
+              first if you need to keep the data.
+            </p>
+            <div className="settings-delete-actions">
               <Button
-                variant="destructive"
+                variant="outline"
                 size="sm"
+                onClick={() =>
+                  navigate(`/databases/${encodeURIComponent(dbName)}/database/backups`)
+                }
+              >
+                <Download size={14} />
+                Export a copy
+              </Button>
+              <Button
+                ref={deleteTrigger}
+                variant="outline"
+                size="sm"
+                className="settings-delete-button"
                 onClick={() => {
-                  setConfirmInput("");
+                  deletion.reset();
+                  setConfirmation("");
                   setDeleteOpen(true);
                 }}
-                className="h-8 px-3 text-xs bg-red-600 hover:bg-red-700 text-white font-medium shrink-0"
               >
-                <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                Delete Project
+                <Trash2 size={14} />
+                Delete database
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-red-500/30">
-          <DialogHeader>
-            <div className="flex items-center space-x-2 text-red-600 dark:text-red-400 mb-1">
-              <AlertTriangle className="w-5 h-5" />
-              <DialogTitle className="text-base font-bold">Delete Database</DialogTitle>
-            </div>
-            <DialogDescription className="text-xs text-muted-foreground">
-              This action is permanent and irreversible. Type{" "}
-              <span className="font-mono font-bold text-foreground">{dbName}</span> to confirm
-              deletion.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-2 space-y-2">
-            <Input
-              value={confirmInput}
-              onChange={(e) => setConfirmInput(e.target.value)}
-              placeholder={dbName}
-              className="font-mono text-xs h-9 border-red-500/30 focus:border-red-500"
-            />
           </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDeleteOpen(false)}
-              className="text-xs h-8"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              disabled={confirmInput !== dbName || isDeleting}
-              onClick={handleDelete}
-              className="text-xs h-8 bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-              ) : (
-                <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+        </section>
+        <span className="sr-only" role="status">
+          {detailsLoading ? "Loading database details" : copied ? "Copied to clipboard" : ""}
+        </span>
+      </div>
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          if (!deletion.isPending) setDeleteOpen(open);
+        }}
+      >
+        <AlertDialogContent
+          className="settings-delete-dialog"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            deleteTrigger.current?.focus();
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {dbName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the database, its tables and records, and its API key. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleDelete();
+            }}
+          >
+            <div className="settings-delete-fields">
+              <label htmlFor={`${id}-confirmation`}>Type the database name</label>
+              <p id={`${id}-hint`}>
+                Enter <code>{dbName}</code> exactly to confirm.
+              </p>
+              <Input
+                id={`${id}-confirmation`}
+                value={confirmation}
+                onChange={(event) => setConfirmation(event.target.value)}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                disabled={deletion.isPending}
+                aria-describedby={`${id}-hint`}
+                placeholder={dbName}
+              />
+              {deletion.isError && (
+                <p className="settings-delete-error" role="alert">
+                  {deletion.error.message} Check your connection, then try again.
+                </p>
               )}
-              Confirm Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel asChild>
+                <Button type="button" variant="outline" disabled={deletion.isPending}>
+                  Cancel
+                </Button>
+              </AlertDialogCancel>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={confirmation !== dbName || deletion.isPending}
+              >
+                {deletion.isPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin motion-reduce:animate-none" />
+                    Deleting…
+                  </>
+                ) : (
+                  "Delete database"
+                )}
+              </Button>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

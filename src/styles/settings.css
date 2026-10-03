@@ -1,0 +1,290 @@
+.settings-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+.settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.settings-heading h1 {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.settings-heading p {
+  margin-top: 5px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.settings-heading p span {
+  color: hsl(var(--foreground));
+}
+.settings-heading button {
+  height: 34px;
+  gap: 7px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.settings-body {
+  max-width: 1000px;
+  padding: 8px 24px 48px;
+}
+.settings-section {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 40px;
+  padding-block: 30px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.settings-section-intro h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.settings-section-intro p {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 8px;
+}
+.settings-detail-list {
+  min-width: 0;
+}
+.settings-detail-list > div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 24px;
+  min-height: 46px;
+  align-items: center;
+  border-bottom: 1px solid hsl(var(--border) / 0.65);
+  padding-block: 12px;
+}
+.settings-detail-list > div:first-child {
+  padding-top: 0;
+}
+.settings-detail-list > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.settings-detail-list dt {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.settings-detail-list dd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.settings-detail-list code {
+  font-size: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.settings-detail-list button {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: hsl(var(--muted-foreground));
+}
+.settings-detail-list button:hover {
+  color: hsl(var(--primary));
+}
+.settings-value-skeleton {
+  display: block;
+  width: 65%;
+  height: 12px;
+  border-radius: 3px;
+  background: hsl(var(--muted));
+}
+.settings-refresh-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0 10px;
+}
+.settings-refresh-error p {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.8;
+}
+.settings-refresh-error button {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.settings-copy-error {
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--destructive));
+  margin-top: 12px;
+}
+.settings-delete-section {
+  border-bottom: 0;
+}
+.settings-delete-content {
+  min-width: 0;
+}
+.settings-delete-content h3 {
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.settings-delete-content > p {
+  margin-top: 8px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.8;
+  max-width: 65ch;
+}
+.settings-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.settings-delete-actions button {
+  font-size: 12px;
+  gap: 7px;
+}
+.settings-delete-actions .settings-delete-button {
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.3);
+}
+.settings-delete-actions .settings-delete-button:hover {
+  background: hsl(var(--destructive) / 0.06);
+  border-color: hsl(var(--destructive) / 0.6);
+}
+.settings-delete-dialog {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  border-radius: 12px;
+  padding: 24px;
+}
+.settings-delete-dialog h2 {
+  overflow-wrap: anywhere;
+}
+.settings-delete-dialog [id$="description"] {
+  line-height: 1.8;
+  font-size: 12px;
+}
+.settings-delete-fields {
+  padding-block: 6px 22px;
+}
+.settings-delete-fields > label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+}
+.settings-delete-fields > p:not(.settings-delete-error) {
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--muted-foreground));
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.settings-delete-fields > p code {
+  color: hsl(var(--foreground));
+}
+.settings-delete-fields input {
+  margin-top: 12px;
+  font-family: monospace;
+  font-size: 12px;
+  height: 40px;
+}
+.settings-delete-error {
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--destructive));
+  margin-top: 14px;
+}
+.settings-delete-dialog button {
+  font-size: 12px;
+  gap: 7px;
+}
+.settings-delete-dialog form > div:last-child {
+  gap: 8px;
+}
+@media (max-width: 1099px) {
+  .settings-section {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+@media (max-width: 760px) {
+  .settings-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .settings-heading {
+    padding: 22px 18px;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .settings-heading h1 {
+    font-size: 22px;
+  }
+  .settings-heading > button {
+    width: 34px;
+    padding: 0;
+    margin-top: 3px;
+  }
+  .settings-heading > button > span {
+    display: none;
+  }
+  .settings-body {
+    padding-inline: 18px;
+  }
+  .settings-section {
+    padding-block: 26px;
+  }
+  .settings-detail-list > div {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .settings-delete-dialog {
+    padding: 20px;
+  }
+}
+@media (max-width: 370px) {
+  .settings-heading,
+  .settings-body {
+    padding-inline: 14px;
+  }
+  .settings-detail-list > div {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .settings-delete-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-page *,
+  .settings-delete-dialog {
+    animation: none !important;
+    transition: none !important;
+  }
+}

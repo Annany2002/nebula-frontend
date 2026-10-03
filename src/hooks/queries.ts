@@ -164,8 +164,25 @@ export const useDeleteDatabase = () => {
       if (!response.ok) throw new Error("Failed to delete database");
     },
     onSuccess: (_, dbName) => {
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) =>
+        old?.filter((database) => database.dbName !== dbName)
+      );
+      queryClient.removeQueries({
+        predicate: ({ queryKey }) =>
+          queryKey[1] === dbName &&
+          [
+            "tables",
+            "records",
+            "schema",
+            "apikey",
+            "databaseDetails",
+            "databaseAnalytics",
+            "schemaDiagram",
+            "databaseObjects",
+          ].includes(String(queryKey[0])),
+      });
       queryClient.invalidateQueries({ queryKey: ["databases"] });
-      toast.success(`Project ${dbName} successfully deleted`);
+      toast.success(`Database ${dbName} deleted`);
     },
     onError: () => toast.error("Error in deleting database"),
   });

@@ -71,6 +71,8 @@ export default function DatabaseStudio() {
   const {
     data: dbDetails,
     isError: detailsError,
+    isLoading: detailsLoading,
+    isFetching: detailsFetching,
     refetch: refetchDetails,
   } = useDatabaseDetails(db_name);
 
@@ -215,7 +217,16 @@ export default function DatabaseStudio() {
                 {currentTab === "apikeys" && <ApiKeys key={db_name} dbName={db_name} />}
 
                 {currentTab === "settings" && (
-                  <ProjectSettings dbName={db_name} details={dbDetails} tables={tables} />
+                  <ProjectSettings
+                    key={db_name}
+                    dbName={db_name}
+                    details={dbDetails}
+                    detailsLoading={detailsLoading}
+                    detailsError={detailsError}
+                    refreshing={detailsFetching}
+                    onRefresh={() => refetchDetails()}
+                    tables={tables}
+                  />
                 )}
               </>
             )}
