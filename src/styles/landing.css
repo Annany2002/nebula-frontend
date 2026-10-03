@@ -272,8 +272,11 @@
 .nbl-theme-toggle {
   display: flex;
 }
-.nbl-theme-toggle > button {
+.nebula-landing .nbl-theme-toggle > button,
+.nebula-landing .nbl-theme-toggle > button:hover {
   position: relative;
+  color: var(--nbl-muted);
+  background: transparent;
 }
 .nbl-theme-toggle :is(.lucide-sun, .lucide-moon) {
   transition:
