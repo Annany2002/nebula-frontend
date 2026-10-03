@@ -1,135 +1,132 @@
-# Nebula Frontend
+# Nebula Studio
 
-This repository contains the frontend web application for the **Nebula BaaS** project. It provides a modern, user-friendly interface for interacting with the backend API to manage databases, schemas, API keys, and data.
+The React and TypeScript interface for [Nebula](https://github.com/Annany2002/nebula-backend), an open-source Backend-as-a-Service built with Go and SQLite. Studio brings database management, a table editor, SQL execution, and schema visualization into one workspace.
 
----
-
-## Built With
-
-- **Framework:** React
-- **Build Tool:** Vite
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS, Shadcn UI
-
----
+![Nebula landing page and interactive Studio preview](docs/images/landing.png)
 
 ## Features
 
-- 🚪 Signup / Login UI with JWT-based authentication
-- 📊 Dashboard for managing:
-  - Databases
-  - Tables (with column schema definition)
-  - API Keys
-- 🔐 Secure API Key generation and management
-- ⚡️ Fast, modern DX with Vite + HMR
-- 🌙 Dark mode (Shadcn-powered)
+- **Projects:** create and delete databases, search and sort projects, switch between grid and list views, and copy connection examples.
+- **Table editor:** insert, edit, and delete records; paginate and sort; search the loaded page; choose visible columns; inspect and edit the schema.
+- **Schema management:** create tables with foreign keys, add/rename/drop columns, and rename tables.
+- **Schema visualizer:** draggable table cards, foreign-key connections, pan/zoom, fit view, automatic layout, search, and a list view.
+- **SQL editor:** run SQL with Ctrl/Cmd + Enter, browse table columns, inspect results and execution time, and copy results as TSV.
+- **Database objects:** browse tables, indexes, triggers, and SQL definitions.
+- **Database exports:** download a SQLite snapshot or SQL dump, preview SQL, and copy it.
+- **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
+- **Account and keys:** signup/login, profile editing, and database API key generation, rotation, and revocation.
+- **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
----
+Studio's record search operates on the current page. The backend separately supports column equality filters through the records API. The Exports page does not provide scheduled backups or a restore workflow.
 
-## Prerequisites
+## Screenshots
 
-- Node.js (v18 or v20+ recommended)
-- npm or yarn
-- A running instance of the [Nebula Backend](https://github.com/Annany2002/nebula-backend)
+These captures use synthetic demo data, rather than a live account. They show both light and dark themes.
 
----
+### Projects
 
-## Getting Started
+![Projects dashboard with database cards and connection quickstart](docs/images/projects.png)
 
-Clone the repository:
+### Table editor
+
+![Table editor with the table browser, records, sorting, and pagination](docs/images/table-editor.png)
+
+### Schema visualizer
+
+![Schema visualizer showing commerce tables and foreign-key relationships](docs/images/schema-visualizer.png)
+
+### SQL editor
+
+![SQL editor showing an aggregate query, results, and schema browser](docs/images/sql-editor.png)
+
+## Local setup
+
+You need Node.js/npm and a running [Nebula backend](https://github.com/Annany2002/nebula-backend#quick-start). The backend defaults to `http://localhost:8080`.
 
 ```bash
 git clone https://github.com/Annany2002/nebula-frontend.git
 cd nebula-frontend
-```
-
-Install dependencies:
-
-```bash
 npm install
-# OR
-yarn install
-```
-
-Configure backend URL:
-
-```bash
-cp .env.example .env.local
-# Edit `.env.local` and set:
-```
-
-Start development server:
-
-```bash
+printf 'VITE_BACKEND_URL=http://localhost:8080\n' > .env.local
 npm run dev
 ```
 
-App runs at: [http://localhost:5173](http://localhost:5173)
+Open [http://localhost:3000](http://localhost:3000). Sign up, log in, create a database, and open it in Studio.
 
----
+### Configuration
 
-## Building for Production
+| Variable           | Purpose                           | Default                 |
+| ------------------ | --------------------------------- | ----------------------- |
+| `VITE_BACKEND_URL` | Backend origin, without `/api/v1` | `http://localhost:8080` |
 
-Set production backend URL in `.env.production.local`, then run:
+Restart Vite after changing environment variables. Configure backend `ALLOWED_ORIGINS` to include the Studio origin. Vite environment variables are public client configuration; do not put passwords or private server secrets in them.
 
-```bash
-npm run build
+Studio uses JWT Bearer authentication for account and database operations. Generating, rotating, or revoking an API key also uses the account JWT; database keys are intended for your application connections.
+
+## Development
+
+| Command                 | Purpose                                             |
+| ----------------------- | --------------------------------------------------- |
+| `npm run dev`           | Start Vite on port 3000                             |
+| `npm run check`         | Run type checking, ESLint, and Prettier checks      |
+| `npm run typecheck`     | Check application TypeScript without emitting files |
+| `npm run typecheck:all` | Check application and Vite configuration projects   |
+| `npm run lint`          | Run ESLint                                          |
+| `npm run format:check`  | Check formatting                                    |
+| `npm run preview`       | Preview an existing production bundle               |
+
+Verify UI changes in both themes and at desktop and mobile widths. Check keyboard navigation, loading/error/empty states, and reduced motion. Use `npm run check` for development verification.
+
+### Production build
+
+Set `VITE_BACKEND_URL` for your deployment in `.env.production.local` or the hosting provider's build environment, then run `npm run build` when preparing a release. The bundle is written to `dist/`.
+
+Configure SPA fallback so direct links to Studio routes serve `index.html`. The repository includes `vercel.json` for Vercel routing.
+
+## Application structure
+
+```text
+src/
+├── App.tsx              # Routes and providers
+├── context/             # Account session
+├── hooks/queries.ts     # TanStack Query API hooks
+├── lib/                 # Configuration and shared helpers
+├── pages/               # Landing, authentication, Projects, Studio, profile, 404
+├── components/
+│   ├── Studio/          # Navigation, SQL, visualizer, records, objects, exports
+│   ├── Table/           # Table creation and schema editing
+│   ├── Database/        # Database cards and dialogs
+│   └── ui/              # Shared Radix-based UI components
+└── styles/              # Landing and Studio styles
 ```
 
-Output goes to `dist/` – ready to deploy to Netlify, Vercel, S3, etc.
+## Studio routes
 
----
+Studio and profile routes require login.
 
-## Backend Integration
+| Route                                    | View                   |
+| ---------------------------------------- | ---------------------- |
+| `/`                                      | Landing page           |
+| `/sign-in`, `/sign-up`                   | Account authentication |
+| `/dashboard/:userId`                     | Projects               |
+| `/profile`                               | Account profile        |
+| `/databases/:db_name/overview`           | Database overview      |
+| `/databases/:db_name/tables/:table_name` | Table editor           |
+| `/databases/:db_name/sql`                | SQL editor             |
+| `/databases/:db_name/visualizer`         | Schema visualizer      |
+| `/databases/:db_name/database/tables`    | Table inventory        |
+| `/databases/:db_name/database/indexes`   | Indexes                |
+| `/databases/:db_name/database/triggers`  | Triggers               |
+| `/databases/:db_name/database/backups`   | Exports                |
+| `/databases/:db_name/apikeys`            | API keys               |
+| `/databases/:db_name/settings`           | Database settings      |
 
-- Communicates with backend via `VITE_NEBULA_API_BASE_URL`
-- Handles:
+The exports route retains the `backups` URL segment. Derive active Studio tabs from route segments, so `/databases/...` does not accidentally match every database tab.
 
-  - Signup/Login → receives JWT
-  - API Key actions → uses `Authorization: ApiKey <key>`
+## Stack
 
-- Ensure backend CORS is configured to allow frontend origin
+React 18 · TypeScript · Vite 5/SWC · Tailwind CSS 3 · Radix/shadcn UI · TanStack Query · React Router 6 · Framer Motion · React Hook Form/Zod · Sonner.
 
----
+## Contributing and license
 
-## Contributing
-
-We welcome contributions!
-Please check out the following before opening an issue or PR:
-
-- [📜 Contribution Guide](./CONTRIBUTING.md)
-- [🐞 Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.yaml)
-- [✨ Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.yaml)
-- [🔁 Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md)
-
-To begin:
-
-```bash
-# Fork + Clone
-# Create a new branch
-git checkout -b feat/improve-auth-ui
-
-# After changes:
-npm run lint   # Check code style
-npm run dev    # Run locally
-```
-
----
-
-## Testing
-
-We encourage testing UI changes manually for visual accuracy.
-If applicable, add/modify unit or integration tests.
-
----
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
-
----
-
-## Acknowledgements
-
-Thanks for checking out Nebula Frontend!
-Join us in building a developer-friendly, open-source BaaS ✨
+See [CONTRIBUTING.md](CONTRIBUTING.md). This project is [MIT licensed](LICENSE).
