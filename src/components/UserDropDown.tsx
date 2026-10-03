@@ -9,28 +9,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { Loader } from "lucide-react";
-import { useEffect, useState } from "react";
 
 export default function UserDropDown() {
   const { user, isLoading, logout } = useAuth();
-  const [initials, setInitials] = useState("");
-
-  useEffect(() => {
-    if (user && user.username) {
-      setInitials(user.username.substring(0, 2).toLocaleUpperCase());
-    } else {
-      setInitials(""); // Handle cases where user or username is undefined
-    }
-  }, [user]);
+  const initials = user?.username?.substring(0, 2).toLocaleUpperCase() || "";
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
+          aria-label="Account menu"
           className="h-8 w-8 rounded-full border border-purple-200/50 dark:border-white/10 bg-purple-500/10 dark:bg-white/5 hover:bg-purple-500/20 dark:hover:bg-white/10 flex items-center justify-center cursor-pointer text-purple-600 dark:text-purple-300 font-semibold text-xs transition-colors"
         >
-          {isLoading ? <Loader className="h-3.5 w-3.5 animate-spin" /> : initials ? initials : "?"}
+          {isLoading ? (
+            <Loader className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />
+          ) : (
+            initials || "?"
+          )}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -57,7 +53,7 @@ export default function UserDropDown() {
         <DropdownMenuItem asChild>
           {isLoading ? (
             <span className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-muted-foreground">
-              <Loader className="h-3 w-3 animate-spin" /> Loading...
+              <Loader className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Loading...
             </span>
           ) : user && user.userId ? (
             <Link

@@ -1,104 +1,60 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Plus, Minus } from "lucide-react";
+import { ArrowUpRight, Plus } from "lucide-react";
+import Reveal from "./landing/Reveal";
 
-const faqs = [
+const questions = [
   {
-    question: "How does isolated SQLite work?",
+    question: "How are my databases isolated?",
     answer:
-      "Every database you create is an independent .db file at data/<user_id>/<db_name>.db. They never share memory pools or table spaces. A lock or crash in one database has zero impact on any other.",
+      "Each database has its own SQLite file under your workspace. Tables, records and schemas live in that file, rather than sharing tables with other projects. The API enforces access through your account or a key scoped to that database.",
   },
   {
-    question: "Can I export my raw database files?",
+    question: "Can I take my data with me?",
     answer:
-      "Yes. They're standard SQLite 3 files. Download them, open them in TablePlus, DBeaver, or DB Browser, back them up with cp, or replicate them to any storage you control.",
+      "Yes. Export a consistent SQLite snapshot or a SQL dump from Nebula. The SQLite file can be opened with standard tools such as DB Browser for SQLite, TablePlus or DBeaver.",
+  },
+  {
+    question: "Can I self-host Nebula?",
+    answer:
+      "Yes. The backend is a Go binary with SQLite embedded through CGO. Build it for your server, configure the environment and run it. There is no separate database service to provision. Source code and setup instructions are available on GitHub.",
   },
   {
     question: "How does authentication work?",
     answer:
-      "Dual-layer. JWT Bearer tokens for user registration, profile management, and database provisioning. Database-scoped API keys (Authorization: ApiKey <key>) for data-plane operations like querying and inserting records.",
+      "JWT Bearer tokens authenticate your account and Studio session. Database-scoped API keys authenticate programmatic data access. Key secrets are stored as hashes and are shown when generated, so save them somewhere secure.",
   },
   {
-    question: "Can I self-host on my own server?",
+    question: "Is Nebula free to use?",
     answer:
-      "Yes. Nebula is MIT-licensed and written in Go. Run the ~28 MB binary directly, or use Docker Compose. Zero external service dependencies.",
-  },
-  {
-    question: "Why SQLite instead of Postgres?",
-    answer:
-      "Embedding SQLite via CGO eliminates the network serialization and connection pool overhead of TCP-based database servers. Storage operations hit local filesystem memory-mapped pages directly. No daemon to manage, no connection limits to tune.",
-  },
-  {
-    question: "Are there schema limits?",
-    answer:
-      "No artificial constraints. Create tables, define columns with types, set unique indexes, and alter schemas on the fly through the REST API or the visual Studio UI.",
+      "Nebula is open source under the MIT license. You can inspect the code, use it in your applications and host it yourself. When self-hosting, you pay for the infrastructure you choose.",
   },
 ];
 
-const FAQ = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-  return (
-    <section id="faq" className="py-24 relative z-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
-          {/* Left: Sticky heading */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-950 dark:text-white">
-              Frequently asked questions
-            </h2>
-            <p className="mt-4 text-base text-gray-500 dark:text-gray-400 leading-relaxed">
-              Architecture, self-hosting, and data ownership.
-            </p>
-          </div>
-
-          {/* Right: Accordion */}
-          <div className="lg:col-span-8 divide-y divide-gray-200 dark:divide-white/10">
-            {faqs.map((faq, index) => {
-              const isOpen = openIndex === index;
-              return (
-                <div key={index} className="py-5 first:pt-0">
-                  <button
-                    onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="w-full text-left flex items-start justify-between gap-4 group"
-                  >
-                    <span
-                      className={`text-base font-medium transition-colors ${
-                        isOpen
-                          ? "text-gray-900 dark:text-white"
-                          : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
-                      }`}
-                    >
-                      {faq.question}
-                    </span>
-                    <span className="shrink-0 mt-1 text-gray-400">
-                      {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    </span>
-                  </button>
-
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0, 1] }}
-                        className="overflow-hidden"
-                      >
-                        <p className="pt-3 text-sm text-gray-500 dark:text-gray-400 leading-relaxed pr-8">
-                          {faq.answer}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+const Faq = () => (
+  <section id="faq" className="nbl-section nbl-faq" aria-labelledby="faq-title">
+    <div className="nbl-container nbl-faq-grid">
+      <Reveal className="nbl-faq-heading">
+        <h2 id="faq-title">Before you start.</h2>
+        <a
+          href="https://github.com/Annany2002/nebula-backend/issues"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Ask us on GitHub <ArrowUpRight size={15} />
+        </a>
+      </Reveal>
+      <div className="nbl-faq-list">
+        {questions.map((item) => (
+          <details key={item.question}>
+            <summary>
+              {item.question}
+              <Plus size={17} aria-hidden="true" />
+            </summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
-export default FAQ;
+export default Faq;

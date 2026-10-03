@@ -10,9 +10,13 @@ import {
   ArrowRight,
   KeyRound,
   AlertTriangle,
+  Table2,
+  Search,
+  Network,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { TableType, DatabaseDetailType } from "@/types/allType";
 import { formatDateTime } from "@/lib/formatDate";
 import { useDatabaseAnalytics } from "@/hooks/queries";
@@ -24,6 +28,8 @@ interface ProjectOverviewProps {
   dbName: string;
   details?: DatabaseDetailType;
   tables: TableType[];
+  detailsError?: boolean;
+  onRetryDetails?: () => void;
   onNavigateTab: (tab: StudioTab) => void;
   onSelectTable: (tableName: string) => void;
   onOpenCreateTable: () => void;
@@ -34,234 +40,278 @@ export default function ProjectOverview({
   dbName,
   details,
   tables,
+  detailsError,
+  onRetryDetails,
   onNavigateTab,
   onSelectTable,
   onOpenCreateTable,
   onOpenConnect,
 }: ProjectOverviewProps) {
-  const [copiedUrl, setCopiedUrl] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(false);
+  const [copied, setCopied] = useState<"url" | "key" | null>(null);
   const [showKey, setShowKey] = useState(false);
-
+  const [search, setSearch] = useState("");
   const { data: analytics } = useDatabaseAnalytics(dbName);
-
   const totalRecords =
-    details?.totalRecords ?? tables.reduce((acc, t) => acc + (t.rowCount ?? 0), 0);
-
+    details?.totalRecords ??
+    (tables.every((table) => table.rowCount !== undefined)
+      ? tables.reduce((total, table) => total + (table.rowCount ?? 0), 0)
+      : undefined);
   const projectUrl = `${url}/api/v1/databases/${dbName}`;
-
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(projectUrl);
-    setCopiedUrl(true);
-    toast.success("Project URL copied");
-    setTimeout(() => setCopiedUrl(false), 2000);
+  const visibleTables = tables.filter((table) =>
+    table.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const copy = async (text: string, kind: "url" | "key") => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(kind);
+      toast.success(kind === "url" ? "API URL copied" : "API key copied");
+      setTimeout(() => setCopied((current) => (current === kind ? null : current)), 2000);
+    } catch {
+      toast.error("Couldn’t copy. Please try again.");
+    }
   };
-
-  const handleCopyKey = () => {
-    if (!details?.apiKey) return;
-    navigator.clipboard.writeText(details.apiKey);
-    setCopiedKey(true);
-    toast.success("API key copied");
-    setTimeout(() => setCopiedKey(false), 2000);
-  };
-
-  const advisorIssues = analytics?.advisor || [];
-
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-5">
-      {/* Top Project Heading & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-200/40 dark:border-white/5">
-        <div className="flex items-center gap-2.5">
-          <h1 className="text-xl font-bold tracking-tight text-foreground font-sans">{dbName}</h1>
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Active
-          </span>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyUrl}
-            className="h-7 px-2.5 text-xs font-mono gap-1 border-purple-200/40 dark:border-white/10"
-          >
-            {copiedUrl ? (
-              <Check className="w-3 h-3 text-emerald-500" />
-            ) : (
-              <Copy className="w-3 h-3" />
-            )}
-            <span>URL</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onOpenConnect}
-            className="h-7 px-2.5 text-xs gap-1 border-purple-200/40 dark:border-white/10"
-          >
-            <Globe className="w-3 h-3 text-purple-500" />
-            <span>Connect</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onNavigateTab("sql")}
-            className="h-7 px-2.5 text-xs gap-1 border-purple-200/40 dark:border-white/10"
-          >
-            <Terminal className="w-3 h-3 text-purple-500" />
-            <span>SQL</span>
-          </Button>
-
-          <Button
-            size="sm"
-            onClick={onOpenCreateTable}
-            className="h-7 px-2.5 text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium gap-1 shadow-xs"
-          >
-            <Plus className="w-3 h-3" />
-            <span>New Table</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* 4 Core Specifications Tiles (Simple & Mini) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div
-          onClick={() => onNavigateTab("editor")}
-          className="p-3.5 rounded-xl bg-card/60 border border-purple-200/40 dark:border-white/5 hover:border-purple-500/40 transition-all cursor-pointer"
-        >
-          <div className="text-xs text-muted-foreground font-medium">Tables</div>
-          <div className="text-xl font-bold font-mono text-foreground mt-1">{tables.length}</div>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-card/60 border border-purple-200/40 dark:border-white/5">
-          <div className="text-xs text-muted-foreground font-medium">Total Records</div>
-          <div className="text-xl font-bold font-mono text-foreground mt-1">
-            {totalRecords.toLocaleString()}
+    <div className="studio-page-scroll">
+      <div className="studio-overview">
+        <header className="studio-page-heading">
+          <div>
+            <p className="studio-eyebrow">DATABASE OVERVIEW</p>
+            <h1 title={dbName}>{dbName}</h1>
+            <p>Your schema, data, and app connections in one place.</p>
           </div>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-card/60 border border-purple-200/40 dark:border-white/5">
-          <div className="text-xs text-muted-foreground font-medium">Storage Engine</div>
-          <div className="text-xl font-bold font-mono text-foreground mt-1">SQLite 3</div>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-card/60 border border-purple-200/40 dark:border-white/5">
-          <div className="text-xs text-muted-foreground font-medium">Created</div>
-          <div className="text-sm font-semibold font-mono text-foreground mt-1 truncate">
-            {details?.createdAt ? formatDateTime(details.createdAt) : "Recently"}
+          <div className="studio-page-actions">
+            <Button variant="outline" size="sm" onClick={() => onNavigateTab("sql")}>
+              <Terminal size={15} />
+              SQL editor
+            </Button>
+            <Button size="sm" onClick={onOpenCreateTable}>
+              <Plus size={15} />
+              New table
+            </Button>
           </div>
-        </div>
-      </div>
-
-      {/* Mini Telemetry Status (Only if traffic exists) */}
-      {analytics && analytics.totalRequests > 0 && (
-        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-card/40 border border-purple-200/30 dark:border-white/5 text-xs text-muted-foreground font-mono">
-          <span>
-            Traffic: <strong className="text-foreground">{analytics.totalRequests}</strong> requests
-          </span>
-          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-            {analytics.successRate !== undefined ? analytics.successRate.toFixed(1) : "100.0"}%
-            success
-          </span>
-        </div>
-      )}
-
-      {/* Advisory Warnings (Only if issues found) */}
-      {advisorIssues.length > 0 && (
-        <div className="space-y-2">
-          {advisorIssues.map((issue) => (
-            <div
-              key={issue.id}
-              className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 text-xs flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span className="font-semibold text-foreground truncate">{issue.title}</span>
-                <span className="text-muted-foreground truncate hidden sm:inline">
-                  {issue.description}
-                </span>
+        </header>
+        {detailsError && (
+          <div className="studio-inline-error" role="alert">
+            <span>Database details couldn’t be loaded.</span>
+            <button type="button" onClick={onRetryDetails}>
+              Retry
+            </button>
+          </div>
+        )}
+        <dl className="studio-overview-metrics">
+          <div>
+            <dt>Tables</dt>
+            <dd>{tables.length.toLocaleString()}</dd>
+          </div>
+          <div>
+            <dt>Records</dt>
+            <dd>{totalRecords?.toLocaleString() ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>Storage used</dt>
+            <dd>{details?.sizeDisplay || "—"}</dd>
+          </div>
+          <div>
+            <dt>Storage engine</dt>
+            <dd className="studio-metric-engine">
+              <Database size={18} />
+              SQLite
+            </dd>
+          </div>
+        </dl>
+        <div className="studio-overview-layout">
+          <section className="studio-overview-tables" aria-labelledby="overview-tables-heading">
+            <div className="studio-section-heading">
+              <div>
+                <h2 id="overview-tables-heading">
+                  Your tables <span>{tables.length}</span>
+                </h2>
+                <p>Choose a table to explore its records.</p>
               </div>
-              <Badge variant="outline" className="text-[9px] font-mono shrink-0">
-                {issue.severity}
-              </Badge>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* API Key (Simple & Mini) */}
-      {details?.apiKey && (
-        <div className="p-3 rounded-xl bg-card/60 border border-purple-200/40 dark:border-white/5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <KeyRound className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
-            <span className="text-xs font-mono text-muted-foreground shrink-0">API Key:</span>
-            <span className="font-mono text-xs text-foreground truncate select-all">
-              {showKey ? details.apiKey : "••••••••••••••••••••••••••••••••"}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowKey(!showKey)}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            >
-              {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCopyKey}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            >
-              {copiedKey ? (
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-              ) : (
-                <Copy className="w-3.5 h-3.5" />
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Tables Section (Simple & Mini) */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider font-mono text-muted-foreground">
-            Tables ({tables.length})
-          </h2>
-        </div>
-
-        {tables.length === 0 ? (
-          <div className="p-6 rounded-xl border border-dashed border-purple-200/50 dark:border-white/10 text-center space-y-2 bg-card/30">
-            <p className="text-xs text-muted-foreground">No tables in this database</p>
-            <Button size="sm" variant="outline" onClick={onOpenCreateTable} className="text-xs h-7">
-              Create Table
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {tables.map((table) => (
-              <div
-                key={table.name}
-                onClick={() => onSelectTable(table.name)}
-                className="group p-3 rounded-xl border border-purple-200/40 dark:border-white/5 bg-card/60 hover:border-purple-500/40 hover:bg-purple-500/5 cursor-pointer transition-all flex items-center justify-between"
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onNavigateTab("database")}
+                aria-label="View schema"
               >
-                <div className="min-w-0">
-                  <p className="font-mono text-xs font-semibold text-foreground truncate group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">
-                    {table.name}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                    {table.rowCount ?? 0} {table.rowCount === 1 ? "row" : "rows"}
-                  </p>
+                <Network size={15} />
+                <span>Schema</span>
+              </Button>
+            </div>
+            {tables.length > 0 ? (
+              <>
+                <div className="studio-table-search">
+                  <Search size={15} />
+                  <Input
+                    type="search"
+                    aria-label="Search tables"
+                    placeholder="Find a table…"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-purple-600 dark:group-hover:text-purple-300 group-hover:translate-x-0.5 transition-all shrink-0" />
+                <div className="studio-overview-table-list">
+                  {visibleTables.length ? (
+                    visibleTables.map((table) => (
+                      <button
+                        type="button"
+                        key={table.name}
+                        onClick={() => onSelectTable(table.name)}
+                        className="studio-overview-table"
+                        aria-label={`Open ${table.name}`}
+                      >
+                        <span className="studio-table-icon">
+                          <Table2 size={17} />
+                        </span>
+                        <span className="studio-table-name">
+                          <strong title={table.name}>{table.name}</strong>
+                          <span>
+                            {table.columns.length}{" "}
+                            {table.columns.length === 1 ? "column" : "columns"}
+                          </span>
+                        </span>
+                        <span className="studio-table-rows">
+                          {table.rowCount === undefined
+                            ? "—"
+                            : `${table.rowCount.toLocaleString()} ${table.rowCount === 1 ? "row" : "rows"}`}
+                        </span>
+                        <ArrowRight size={15} />
+                      </button>
+                    ))
+                  ) : (
+                    <div className="studio-table-no-results">
+                      <p>No tables match “{search}”.</p>
+                      <button type="button" onClick={() => setSearch("")}>
+                        Clear search
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="studio-overview-empty">
+                <Table2 size={27} />
+                <h3>Start with your first table.</h3>
+                <p>Define its columns, then add records or connect your app.</p>
+                <Button size="sm" onClick={onOpenCreateTable}>
+                  <Plus size={15} />
+                  Create table
+                </Button>
+              </div>
+            )}
+          </section>
+          <aside
+            className="studio-overview-connection"
+            aria-labelledby="overview-connection-heading"
+          >
+            <div className="studio-connection-heading">
+              <Globe size={18} />
+              <h2 id="overview-connection-heading">Connect your app</h2>
+            </div>
+            <p>Use your database’s REST API from any application.</p>
+            <p className="studio-credential-label" id="overview-url-label">
+              API base URL
+            </p>
+            <div className="studio-credential">
+              <code aria-labelledby="overview-url-label" title={projectUrl}>
+                {projectUrl}
+              </code>
+              <button
+                type="button"
+                onClick={() => copy(projectUrl, "url")}
+                aria-label={copied === "url" ? "API URL copied" : "Copy API URL"}
+              >
+                {copied === "url" ? <Check size={15} /> : <Copy size={15} />}
+              </button>
+            </div>
+            {details?.apiKey ? (
+              <>
+                <p className="studio-credential-label" id="overview-key-label">
+                  API key
+                </p>
+                <div className="studio-credential">
+                  <code aria-labelledby="overview-key-label">
+                    {showKey ? details.apiKey : "••••••••••••••••••••••••"}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setShowKey((value) => !value)}
+                    aria-label={showKey ? "Hide API key" : "Show API key"}
+                    aria-pressed={showKey}
+                  >
+                    {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copy(details.apiKey, "key")}
+                    aria-label={copied === "key" ? "API key copied" : "Copy API key"}
+                  >
+                    {copied === "key" ? <Check size={15} /> : <Copy size={15} />}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="studio-key-link"
+                onClick={() => onNavigateTab("apikeys")}
+              >
+                <KeyRound size={15} />
+                Manage your API keys
+                <ArrowRight size={14} />
+              </button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="studio-connection-examples"
+              onClick={onOpenConnect}
+            >
+              View connection examples
+              <ArrowRight size={15} />
+            </Button>
+            <dl className="studio-created-at">
+              <dt>Created</dt>
+              <dd>
+                {details?.createdAt ? (
+                  <time dateTime={details.createdAt}>{formatDateTime(details.createdAt)}</time>
+                ) : (
+                  "Date unavailable"
+                )}
+              </dd>
+            </dl>
+          </aside>
+        </div>
+        {analytics && analytics.totalRequests > 0 && (
+          <div className="studio-overview-traffic">
+            <span>
+              API activity <strong>{analytics.totalRequests.toLocaleString()} requests</strong>
+            </span>
+            {analytics.successRate !== undefined && (
+              <span>
+                <strong>{analytics.successRate.toFixed(1)}%</strong> successful
+              </span>
+            )}
+            <span>{analytics.timeframe}</span>
+          </div>
+        )}
+        {!!analytics?.advisor?.length && (
+          <section className="studio-advisor" aria-labelledby="advisor-heading">
+            <h2 id="advisor-heading">Schema advisor</h2>
+            {analytics.advisor.map((issue) => (
+              <div key={issue.id} className="studio-advisor-issue">
+                <AlertTriangle size={17} />
+                <div>
+                  <h3>
+                    {issue.title}
+                    <span>{issue.severity}</span>
+                  </h3>
+                  <p>{issue.description}</p>
+                  {issue.suggestion && <p>{issue.suggestion}</p>}
+                </div>
               </div>
             ))}
-          </div>
+          </section>
         )}
       </div>
     </div>

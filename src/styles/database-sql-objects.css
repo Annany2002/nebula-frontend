@@ -1,0 +1,392 @@
+.db-objects-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+.db-objects-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.db-objects-heading h1 {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.db-objects-heading p {
+  margin-top: 5px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.db-objects-heading p span {
+  color: hsl(var(--foreground));
+}
+.db-objects-heading > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.db-objects-heading button {
+  height: 34px;
+  gap: 6px;
+  font-size: 12px;
+}
+.db-objects-body {
+  padding: 20px 24px 40px;
+}
+.db-objects-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.db-objects-search {
+  position: relative;
+  min-width: 180px;
+  max-width: 360px;
+  flex: 1;
+}
+.db-objects-search > svg {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+.db-objects-search input {
+  height: 34px;
+  padding-left: 32px;
+  padding-right: 32px;
+  font-size: 12px;
+}
+.db-objects-page .db-objects-search input:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+.db-objects-search > button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  padding: 5px;
+  color: hsl(var(--muted-foreground));
+}
+.db-objects-filter {
+  position: relative;
+}
+.db-objects-filter-value {
+  display: block;
+  visibility: hidden;
+  padding: 0 32px 0 12px;
+  height: 34px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.db-objects-filter > svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+.db-objects-toolbar select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  height: 34px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--input));
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 0 32px 0 12px;
+}
+.db-objects-toolbar select:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+.db-objects-count {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.db-objects-catalog {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  overflow: hidden;
+}
+.db-objects-catalog table {
+  table-layout: fixed;
+  width: 100%;
+  font-size: 12px;
+}
+.db-objects-catalog th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  padding: 12px 16px;
+  background: hsl(var(--muted) / 0.5);
+}
+.db-objects-catalog th:first-child {
+  width: 40%;
+}
+.db-objects-catalog th:last-child {
+  width: 112px;
+}
+.db-objects-catalog td {
+  padding: 14px 16px;
+  border-top: 1px solid hsl(var(--border));
+}
+.db-objects-row[data-expanded="true"] {
+  background: hsl(var(--muted) / 0.3);
+}
+.db-objects-row:hover {
+  background: hsl(var(--muted) / 0.25);
+}
+.db-objects-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.db-objects-name svg {
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+}
+.db-objects-name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 550;
+  font-size: 12px;
+}
+.db-objects-table-link,
+.db-objects-target {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  color: hsl(var(--muted-foreground));
+}
+.db-objects-table-link:hover,
+.db-objects-mobile-summary button:hover {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.db-objects-type {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.db-objects-type[data-unique="true"] {
+  color: hsl(var(--primary));
+}
+.db-objects-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+}
+.db-objects-actions button {
+  height: 28px;
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 11px;
+}
+.db-objects-actions button.w-10 {
+  width: 28px;
+  padding: 0;
+}
+.db-objects-definition td {
+  padding: 12px 16px 16px;
+  background: hsl(var(--muted) / 0.2);
+  border-top: 0;
+}
+.db-objects-definition pre {
+  padding: 16px;
+  max-height: 300px;
+  overflow: auto;
+  background: hsl(var(--muted) / 0.4);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.db-objects-definition p {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.db-objects-mobile-summary {
+  display: none;
+}
+.db-objects-note {
+  margin-top: 16px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: hsl(var(--muted-foreground));
+  max-width: 80ch;
+}
+.db-objects-alert {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: hsl(var(--destructive));
+  margin-bottom: 16px;
+}
+.db-objects-alert button {
+  height: 28px;
+  font-size: 11px;
+}
+.db-objects-loading {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 0 16px;
+}
+.db-objects-loading > div {
+  height: 50px;
+  margin-block: 12px;
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+.db-objects-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  color: hsl(var(--muted-foreground));
+  padding: 70px 20px;
+  border-top: 1px solid hsl(var(--border));
+}
+.db-objects-state h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+.db-objects-state p {
+  font-size: 12px;
+  line-height: 1.8;
+  max-width: 360px;
+}
+.db-objects-state button {
+  gap: 6px;
+  font-size: 12px;
+}
+.db-objects-page button:focus-visible,
+.db-objects-definition pre:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+@media (max-width: 900px) {
+  .db-objects-catalog table,
+  .db-objects-catalog thead,
+  .db-objects-catalog tbody {
+    display: block;
+  }
+  .db-objects-catalog thead tr,
+  .db-objects-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px;
+  }
+  .db-objects-catalog th,
+  .db-objects-catalog td {
+    min-width: 0;
+  }
+  .db-objects-row > td:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .db-objects-definition,
+  .db-objects-definition td {
+    display: block;
+  }
+  .db-objects-desktop {
+    display: none;
+  }
+  .db-objects-catalog th:first-child {
+    width: auto;
+  }
+  .db-objects-mobile-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    font-size: 10px;
+    color: hsl(var(--muted-foreground));
+  }
+  .db-objects-mobile-summary button,
+  .db-objects-mobile-summary .db-objects-target {
+    max-width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
+}
+@media (max-width: 640px) {
+  .db-objects-catalog thead tr,
+  .db-objects-row {
+    grid-template-columns: minmax(0, 1fr) 90px;
+  }
+  .db-objects-heading {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+  .db-objects-heading h1 {
+    font-size: 20px;
+  }
+  .db-objects-body {
+    padding: 16px 16px 32px;
+  }
+  .db-objects-toolbar {
+    gap: 10px;
+  }
+  .db-objects-search {
+    max-width: none;
+    flex-basis: 100%;
+  }
+  .db-objects-catalog td,
+  .db-objects-catalog th {
+    padding: 12px 10px;
+  }
+  .db-objects-catalog th:last-child {
+    width: 90px;
+  }
+  .db-objects-name svg {
+    display: none;
+  }
+  .db-objects-name > span {
+    font-size: 11px;
+  }
+  .db-objects-mobile-summary {
+    font-size: 9px;
+    gap: 8px;
+  }
+  .db-objects-actions button {
+    padding: 0 4px;
+  }
+  .db-objects-definition pre {
+    font-size: 10px;
+    padding: 12px;
+  }
+}

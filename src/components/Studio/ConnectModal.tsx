@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Copy, Check, Terminal, Code2, Globe } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowUpRight, Check, Copy, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,238 +10,200 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { url } from "@/lib/config";
-import { toast } from "sonner";
+import { useApiKey } from "@/hooks/queries";
+import { connectionExamples, ConnectionExampleId, databaseApiUrl } from "@/lib/connectionExamples";
+import "@/styles/connection-dialog.css";
 
 interface ConnectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   dbName: string;
-  apiKey: string;
+  returnFocusTo: HTMLElement | null;
 }
-
-export default function ConnectModal({ open, onOpenChange, dbName, apiKey }: ConnectModalProps) {
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(label);
-    toast.success(`${label} copied to clipboard`);
-    setTimeout(() => setCopiedKey(null), 2000);
-  };
-
-  const curlSnippet = `# Fetch all tables
-curl -X GET "${url}/api/v1/databases/${dbName}/tables" \\
-  -H "Authorization: ApiKey ${apiKey || "YOUR_API_KEY"}"
-
-# Query records from a table
-curl -X GET "${url}/api/v1/databases/${dbName}/tables/<TABLE_NAME>/records?limit=25" \\
-  -H "Authorization: ApiKey ${apiKey || "YOUR_API_KEY"}"
-
-# Execute custom SQL
-curl -X POST "${url}/api/v1/databases/${dbName}/sql" \\
-  -H "Authorization: ApiKey ${apiKey || "YOUR_API_KEY"}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"query": "SELECT * FROM <TABLE_NAME> LIMIT 10;"}'`;
-
-  const jsSnippet = `// Using standard fetch in JavaScript / TypeScript
-const API_URL = "${url}/api/v1/databases/${dbName}";
-const API_KEY = "${apiKey || "YOUR_API_KEY"}";
-
-// 1. Fetch records
-async function getRecords(tableName) {
-  const res = await fetch(\`\${API_URL}/tables/\${tableName}/records?limit=25\`, {
-    headers: {
-      "Authorization": \`ApiKey \${API_KEY}\`
-    }
-  });
-  return await res.json();
-}
-
-// 2. Execute custom SQL
-async function executeSQL(query) {
-  const res = await fetch(\`\${API_URL}/sql\`, {
-    method: "POST",
-    headers: {
-      "Authorization": \`ApiKey \${API_KEY}\`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ query })
-  });
-  return await res.json();
-}`;
-
-  const pythonSnippet = `import requests
-
-API_URL = "${url}/api/v1/databases/${dbName}"
-API_KEY = "${apiKey || "YOUR_API_KEY"}"
-headers = {"Authorization": f"ApiKey {API_KEY}"}
-
-# 1. Fetch records
-resp = requests.get(f"{API_URL}/tables/<TABLE_NAME>/records?limit=25", headers=headers)
-print(resp.json())
-
-# 2. Execute SQL
-sql_resp = requests.post(
-    f"{API_URL}/sql",
-    headers=headers,
-    json={"query": "SELECT * FROM <TABLE_NAME> LIMIT 10;"}
-)
-print(sql_resp.json())`;
-
+export default function ConnectModal({
+  open,
+  onOpenChange,
+  dbName,
+  returnFocusTo,
+}: ConnectModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-2xl border-purple-200/50 dark:border-purple-500/20 text-card-foreground shadow-2xl rounded-2xl p-6">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-bold flex items-center gap-2">
-            <Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            Connect to {dbName}
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-xs">
-            Connect to your database backend using REST or SQL endpoints.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* API Credentials */}
-        <div className="space-y-3 my-2 min-w-0">
-          <div className="p-3 bg-muted/40 border border-purple-200/40 dark:border-white/10 rounded-xl space-y-1.5 min-w-0">
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-              Project API Base URL
-            </div>
-            <div className="flex items-center justify-between font-mono text-xs bg-background/80 px-3 py-2 rounded-lg border border-purple-200/30 dark:border-white/10 min-w-0 gap-2">
-              <span className="text-purple-600 dark:text-purple-300 truncate font-mono">
-                {`${url}/api/v1/databases/${dbName}`}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-muted-foreground hover:text-foreground shrink-0"
-                onClick={() => copyToClipboard(`${url}/api/v1/databases/${dbName}`, "API Base URL")}
-              >
-                {copiedKey === "API Base URL" ? (
-                  <Check className="w-3.5 h-3.5 text-purple-500" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="p-3 bg-muted/40 border border-purple-200/40 dark:border-white/10 rounded-xl space-y-1.5 min-w-0">
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-              Project API Key (Secret)
-            </div>
-            <div className="flex items-center justify-between font-mono text-xs bg-background/80 px-3 py-2 rounded-lg border border-purple-200/30 dark:border-white/10 min-w-0 gap-2">
-              <span className="text-foreground truncate font-mono">
-                {apiKey ? apiKey : "No API key found. Generate one in API Keys tab."}
-              </span>
-              {apiKey && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-muted-foreground hover:text-foreground shrink-0"
-                  onClick={() => copyToClipboard(apiKey, "API Key")}
-                >
-                  {copiedKey === "API Key" ? (
-                    <Check className="w-3.5 h-3.5 text-purple-500" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Snippets */}
-        <Tabs defaultValue="curl" className="w-full min-w-0">
-          <div className="flex items-center justify-between mb-2">
-            <TabsList className="bg-muted/60 border border-purple-200/30 dark:border-white/10">
-              <TabsTrigger
-                value="curl"
-                className="text-xs gap-1.5 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-              >
-                <Terminal className="w-3.5 h-3.5" /> cURL
-              </TabsTrigger>
-              <TabsTrigger
-                value="js"
-                className="text-xs gap-1.5 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-              >
-                <Code2 className="w-3.5 h-3.5" /> JavaScript
-              </TabsTrigger>
-              <TabsTrigger
-                value="python"
-                className="text-xs gap-1.5 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-              >
-                <Terminal className="w-3.5 h-3.5" /> Python
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="curl" className="mt-0 relative w-full min-w-0">
-            <div className="relative group w-full min-w-0">
-              <pre className="w-full max-w-full bg-muted/70 dark:bg-[#0c0b16] text-foreground dark:text-zinc-200 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
-                {curlSnippet}
-              </pre>
-              <Button
-                variant="outline"
-                size="sm"
-                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-background/80 dark:bg-white/10 border-border dark:border-white/15 hover:bg-background dark:hover:bg-white/20 text-foreground dark:text-white shadow-xs"
-                onClick={() => copyToClipboard(curlSnippet, "cURL snippet")}
-              >
-                {copiedKey === "cURL snippet" ? (
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5 mr-1" />
-                )}
-                Copy
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="js" className="mt-0 relative w-full min-w-0">
-            <div className="relative group w-full min-w-0">
-              <pre className="w-full max-w-full bg-muted/70 dark:bg-[#0c0b16] text-foreground dark:text-zinc-200 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
-                {jsSnippet}
-              </pre>
-              <Button
-                variant="outline"
-                size="sm"
-                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-background/80 dark:bg-white/10 border-border dark:border-white/15 hover:bg-background dark:hover:bg-white/20 text-foreground dark:text-white shadow-xs"
-                onClick={() => copyToClipboard(jsSnippet, "JavaScript snippet")}
-              >
-                {copiedKey === "JavaScript snippet" ? (
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5 mr-1" />
-                )}
-                Copy
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="python" className="mt-0 relative w-full min-w-0">
-            <div className="relative group w-full min-w-0">
-              <pre className="w-full max-w-full bg-muted/70 dark:bg-[#0c0b16] text-foreground dark:text-zinc-200 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 pr-20 text-xs font-mono overflow-x-auto max-h-[220px] leading-relaxed">
-                {pythonSnippet}
-              </pre>
-              <Button
-                variant="outline"
-                size="sm"
-                className="absolute top-2.5 right-2.5 z-10 h-7 px-2.5 text-xs bg-background/80 dark:bg-white/10 border-border dark:border-white/15 hover:bg-background dark:hover:bg-white/20 text-foreground dark:text-white shadow-xs"
-                onClick={() => copyToClipboard(pythonSnippet, "Python snippet")}
-              >
-                {copiedKey === "Python snippet" ? (
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5 mr-1" />
-                )}
-                Copy
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
+      {open && (
+        <DialogContent
+          className="connection-dialog"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            const target = returnFocusTo?.isConnected
+              ? returnFocusTo
+              : document.querySelector<HTMLElement>(".studio-connect-button");
+            target?.focus();
+          }}
+        >
+          <ConnectionPanel key={dbName} dbName={dbName} onClose={() => onOpenChange(false)} />
+        </DialogContent>
+      )}
     </Dialog>
+  );
+}
+
+function ConnectionPanel({ dbName, onClose }: { dbName: string; onClose: () => void }) {
+  const query = useApiKey(dbName);
+  const navigate = useNavigate();
+  const urlLabel = useId();
+  const baseUrl = databaseApiUrl(dbName);
+  const examples = connectionExamples(dbName);
+  const [example, setExample] = useState<ConnectionExampleId>("curl");
+  const [copied, setCopied] = useState<{ target: string; value: string } | null>(null);
+  const [copyError, setCopyError] = useState("");
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const mounted = useRef(true);
+  const operation = useRef(0);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(timer.current);
+    };
+  }, []);
+  const copy = async (text: string, target: string) => {
+    const current = ++operation.current;
+    setCopyError("");
+    try {
+      await navigator.clipboard.writeText(text);
+      if (!mounted.current || current !== operation.current) return;
+      setCopied({ target, value: text });
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setCopied(null), 2000);
+    } catch {
+      if (mounted.current && current === operation.current)
+        setCopyError("Couldn’t copy. Select the text and copy it manually, or try again.");
+    }
+  };
+  const wasCopied = (target: string, text: string) =>
+    copied?.target === target && copied.value === text;
+  const manageKeys = () => {
+    onClose();
+    navigate(`/databases/${encodeURIComponent(dbName)}/apikeys`);
+  };
+  return (
+    <>
+      <DialogHeader className="connection-heading">
+        <DialogTitle>
+          Connect to <span title={dbName}>{dbName}</span>
+        </DialogTitle>
+        <DialogDescription>Use your saved API key from a server or command line.</DialogDescription>
+      </DialogHeader>
+      <div className="connection-body">
+        <section className="connection-endpoint" aria-labelledby={urlLabel}>
+          <h2 id={urlLabel}>Database API URL</h2>
+          <div>
+            <code tabIndex={0} aria-labelledby={urlLabel}>
+              {baseUrl}
+            </code>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => copy(baseUrl, "url")}
+              aria-label={wasCopied("url", baseUrl) ? "API URL copied" : "Copy API URL"}
+            >
+              {wasCopied("url", baseUrl) ? <Check size={15} /> : <Copy size={15} />}
+            </Button>
+          </div>
+        </section>
+        <section className="connection-key" aria-label="API key status">
+          <div>
+            <h2>API key</h2>
+            {query.isPending ? (
+              <p role="status">Loading key details…</p>
+            ) : query.isError ? (
+              <div role="alert" className="connection-key-error">
+                <span>Key status couldn’t be loaded.</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => query.refetch()}
+                  disabled={query.isFetching}
+                >
+                  <RefreshCw
+                    size={12}
+                    className={query.isFetching ? "animate-spin motion-reduce:animate-none" : ""}
+                  />
+                  Retry
+                </Button>
+              </div>
+            ) : query.data ? (
+              <>
+                <p className="connection-key-prefix">
+                  Active key <code>{query.data.key_prefix}</code>
+                </p>
+                <p>Use the secret you saved when this key was created.</p>
+              </>
+            ) : (
+              <p>No API key yet. Create one in API keys to connect your app.</p>
+            )}
+          </div>
+          <Button variant="outline" size="sm" onClick={manageKeys}>
+            Manage API keys <ArrowUpRight size={13} />
+          </Button>
+        </section>
+        <section className="connection-examples" aria-label="Connection examples">
+          <div className="connection-examples-heading">
+            <h2>List your tables</h2>
+            <p>
+              Set <code>NEBULA_API_KEY</code> to your saved secret in your server’s environment.
+            </p>
+          </div>
+          <Tabs
+            value={example}
+            onValueChange={(value) => {
+              setExample(value as ConnectionExampleId);
+              operation.current++;
+              setCopied(null);
+              setCopyError("");
+              clearTimeout(timer.current);
+            }}
+          >
+            <TabsList className="connection-tabs" aria-label="Connection language">
+              {examples.map((item) => (
+                <TabsTrigger key={item.id} value={item.id}>
+                  {item.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {examples.map((item) => (
+              <TabsContent key={item.id} value={item.id} className="connection-example">
+                <div className="connection-example-toolbar">
+                  <p>{item.hint}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copy(item.code, item.id)}
+                    aria-label={
+                      wasCopied(item.id, item.code)
+                        ? `${item.label} example copied`
+                        : `Copy ${item.label} example`
+                    }
+                  >
+                    {wasCopied(item.id, item.code) ? <Check size={14} /> : <Copy size={14} />}
+                    {wasCopied(item.id, item.code) ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+                <pre tabIndex={0} aria-label={`${item.label} connection example`}>
+                  <code>{item.code}</code>
+                </pre>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </section>
+        {copyError && (
+          <p role="alert" className="connection-copy-error">
+            {copyError}
+          </p>
+        )}
+        <span role="status" className="sr-only">
+          {copied ? "Copied to clipboard." : ""}
+        </span>
+      </div>
+    </>
   );
 }

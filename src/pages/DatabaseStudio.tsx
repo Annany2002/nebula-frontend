@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import StudioRail, { StudioTab } from "@/components/Studio/StudioRail";
 import StudioTopBar from "@/components/Studio/StudioTopBar";
 import ProjectOverview from "@/components/Studio/ProjectOverview";
@@ -10,11 +10,13 @@ import ProjectSettings from "@/components/Studio/ProjectSettings";
 import DatabaseSubSidebar, { DatabaseSubTab } from "@/components/Studio/DatabaseSubSidebar";
 import SchemaVisualizer from "@/components/Studio/SchemaVisualizer";
 import DatabaseObjectsView from "@/components/Studio/DatabaseObjectsView";
-import { DatabaseApiKey } from "@/components/Database/DatabaseApiKey";
+import ApiKeys from "@/components/Studio/ApiKeys";
 import CreateTableSchema from "@/components/Table/CreateTableSchema";
 import ConnectModal from "@/components/Studio/ConnectModal";
 import { useTables, useDatabaseDetails } from "@/hooks/queries";
 import { useAuth } from "@/context/auth-context";
+import { Button } from "@/components/ui/button";
+import "@/styles/studio.css";
 
 export default function DatabaseStudio() {
   const params = useParams();
@@ -56,16 +58,29 @@ export default function DatabaseStudio() {
   const [activeTableState, setActiveTableState] = useState<string>("");
   const [createTableOpen, setCreateTableOpen] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
+  const connectionOpener = useRef<HTMLElement | null>(null);
+  const openConnection = () => {
+    connectionOpener.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setConnectOpen(true);
+  };
 
   // Queries
   const {
     data: tables = [],
     isLoading: tablesLoading,
+    isError: tablesError,
     refetch: refetchTables,
   } = useTables(db_name);
 
   const activeTable = table_name || activeTableState || tables[0]?.name || "";
-  const { data: dbDetails } = useDatabaseDetails(db_name);
+  const {
+    data: dbDetails,
+    isError: detailsError,
+    isLoading: detailsLoading,
+    isFetching: detailsFetching,
+    refetch: refetchDetails,
+  } = useDatabaseDetails(db_name);
 
   // Handle primary rail tab change
   const handleTabChange = (tab: StudioTab) => {
@@ -101,7 +116,7 @@ export default function DatabaseStudio() {
   // Handle table switch in editor
   const handleSelectTable = (tblName: string) => {
     setActiveTableState(tblName);
-    navigate(`/databases/${db_name}/tables/${tblName}`);
+    navigate(tblName ? `/databases/${db_name}/tables/${tblName}` : `/databases/${db_name}/tables`);
   };
 
   if (!db_name) {
@@ -115,13 +130,7 @@ export default function DatabaseStudio() {
   const currentUserId = user?.userId || localStorage.getItem("user_id") || "";
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground font-sans antialiased relative">
-      {/* Background ambient cosmic glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-        <div className="absolute top-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[300px] bg-purple-600/10 dark:bg-purple-600/15 rounded-full blur-[140px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[250px] bg-indigo-600/10 dark:bg-indigo-600/10 rounded-full blur-[130px]" />
-      </div>
-
+    <div className="nebula-studio">
       {/* Primary Sidebar Rail (Leftmost) */}
       <StudioRail
         currentTab={currentTab}
@@ -130,94 +139,116 @@ export default function DatabaseStudio() {
         userId={currentUserId}
       />
 
-      {/* Secondary Sub-Sidebar (Active when Database tab is selected) */}
-      {currentTab === "database" && (
-        <DatabaseSubSidebar
-          currentSubTab={databaseSubTab}
-          onSubTabChange={handleSubTabChange}
-          collapsed={subSidebarCollapsed}
-          onToggleCollapse={() => setSubSidebarCollapsed((prev) => !prev)}
-        />
-      )}
-
       {/* Main Studio Area */}
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+      <div className="studio-main">
         {/* Top Header Bar */}
         <StudioTopBar
           dbName={db_name}
           currentTab={currentTab}
-          apiKey={dbDetails?.apiKey || ""}
+          onConnect={openConnection}
           userId={currentUserId}
         />
 
         {/* Tab Content Panes */}
-        <main className="flex-1 flex overflow-hidden relative">
-          {tablesLoading && tables.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center bg-background/50">
-              <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-purple-400" />
-            </div>
-          ) : (
-            <>
-              {currentTab === "overview" && (
-                <ProjectOverview
-                  dbName={db_name}
-                  details={dbDetails}
-                  tables={tables}
-                  onNavigateTab={handleTabChange}
-                  onSelectTable={handleSelectTable}
-                  onOpenCreateTable={() => setCreateTableOpen(true)}
-                  onOpenConnect={() => setConnectOpen(true)}
-                />
-              )}
-
-              {/* Database Tab: Either Schema Visualizer or Database Objects View */}
-              {currentTab === "database" && (
-                <>
-                  {databaseSubTab === "visualizer" ? (
-                    <SchemaVisualizer dbName={db_name} onSelectTable={handleSelectTable} />
-                  ) : (
-                    <DatabaseObjectsView
-                      dbName={db_name}
-                      subView={databaseSubTab}
-                      onSelectTable={handleSelectTable}
-                      onOpenCreateTable={() => setCreateTableOpen(true)}
-                    />
-                  )}
-                </>
-              )}
-
-              {currentTab === "editor" && (
-                <TableEditor
-                  dbName={db_name}
-                  tables={tables}
-                  activeTable={activeTable}
-                  onSelectTable={handleSelectTable}
-                  onOpenCreateTable={() => setCreateTableOpen(true)}
-                  onRefetchTables={refetchTables}
-                />
-              )}
-
-              {currentTab === "sql" && <SqlEditor dbName={db_name} tables={tables} />}
-
-              {currentTab === "apikeys" && (
-                <div className="flex-1 overflow-y-auto p-6">
-                  <div className="max-w-4xl mx-auto">
-                    <DatabaseApiKey databaseName={db_name} />
-                  </div>
-                </div>
-              )}
-
-              {currentTab === "settings" && (
-                <ProjectSettings dbName={db_name} details={dbDetails} tables={tables} />
-              )}
-            </>
+        <div className="studio-workspace">
+          {currentTab === "database" && (
+            <DatabaseSubSidebar
+              currentSubTab={databaseSubTab}
+              onSubTabChange={handleSubTabChange}
+              collapsed={subSidebarCollapsed}
+              onToggleCollapse={() => setSubSidebarCollapsed((previous) => !previous)}
+            />
           )}
-        </main>
+          <main className="studio-content">
+            {tablesLoading && tables.length === 0 ? (
+              <div className="studio-load-state" role="status" aria-label="Loading database">
+                <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-primary" />
+                <p>Loading your database…</p>
+              </div>
+            ) : tablesError && tables.length === 0 ? (
+              <div className="studio-load-state" role="alert">
+                <AlertCircle className="text-primary" />
+                <h1>We couldn’t load this database.</h1>
+                <p>Please try again to load its tables.</p>
+                <Button variant="outline" size="sm" onClick={() => refetchTables()}>
+                  Retry
+                </Button>
+              </div>
+            ) : (
+              <>
+                {currentTab === "overview" && (
+                  <ProjectOverview
+                    key={db_name}
+                    dbName={db_name}
+                    details={dbDetails}
+                    detailsError={detailsError}
+                    onRetryDetails={() => refetchDetails()}
+                    tables={tables}
+                    onNavigateTab={handleTabChange}
+                    onSelectTable={handleSelectTable}
+                    onOpenCreateTable={() => setCreateTableOpen(true)}
+                    onOpenConnect={openConnection}
+                  />
+                )}
+
+                {/* Database Tab: Either Schema Visualizer or Database Objects View */}
+                {currentTab === "database" && (
+                  <>
+                    {databaseSubTab === "visualizer" ? (
+                      <SchemaVisualizer
+                        key={db_name}
+                        dbName={db_name}
+                        onSelectTable={handleSelectTable}
+                        onOpenCreateTable={() => setCreateTableOpen(true)}
+                      />
+                    ) : (
+                      <DatabaseObjectsView
+                        dbName={db_name}
+                        subView={databaseSubTab}
+                        onSelectTable={handleSelectTable}
+                        onOpenCreateTable={() => setCreateTableOpen(true)}
+                      />
+                    )}
+                  </>
+                )}
+
+                {currentTab === "editor" && (
+                  <TableEditor
+                    dbName={db_name}
+                    tables={tables}
+                    activeTable={activeTable}
+                    onSelectTable={handleSelectTable}
+                    onOpenCreateTable={() => setCreateTableOpen(true)}
+                    onRefetchTables={refetchTables}
+                  />
+                )}
+
+                {currentTab === "sql" && <SqlEditor dbName={db_name} tables={tables} />}
+
+                {currentTab === "apikeys" && <ApiKeys key={db_name} dbName={db_name} />}
+
+                {currentTab === "settings" && (
+                  <ProjectSettings
+                    key={db_name}
+                    dbName={db_name}
+                    details={dbDetails}
+                    detailsLoading={detailsLoading}
+                    detailsError={detailsError}
+                    refreshing={detailsFetching}
+                    onRefresh={() => refetchDetails()}
+                    tables={tables}
+                  />
+                )}
+              </>
+            )}
+          </main>
+        </div>
       </div>
 
       {/* Create Table Schema Modal */}
       {createTableOpen && (
         <CreateTableSchema
+          showTrigger={false}
           db_name={db_name}
           openChange={createTableOpen}
           setOpenChange={setCreateTableOpen}
@@ -229,7 +260,7 @@ export default function DatabaseStudio() {
         open={connectOpen}
         onOpenChange={setConnectOpen}
         dbName={db_name}
-        apiKey={dbDetails?.apiKey || ""}
+        returnFocusTo={connectionOpener.current}
       />
     </div>
   );

@@ -19,12 +19,13 @@ export default function CreateDatabase({
   openChange: boolean;
   setOpenChange: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { mutate: createDb, isPending } = useCreateDatabase();
+  const { mutate: createDb, isPending, isError, reset } = useCreateDatabase();
   const [projectName, setProjectName] = useState<string>("");
 
   const createDatabase = (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim()) return;
+    reset();
     createDb(projectName.trim(), {
       onSuccess: () => {
         setProjectName("");
@@ -61,20 +62,28 @@ export default function CreateDatabase({
         <form onSubmit={createDatabase} className="space-y-4 pt-2">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-zinc-300">
-              Database Name
+              <span id="database-name-label">Database Name</span>
             </label>
             <Input
               type="text"
+              aria-labelledby="database-name-label"
+              aria-describedby="database-name-help"
               value={projectName}
               placeholder="e.g. production_db, analytics_store"
               className="rounded-xl border-purple-200/50 dark:border-white/10 bg-white/50 dark:bg-black/40 focus:ring-purple-500 h-10 text-sm font-mono"
               onChange={(e) => setProjectName(e.target.value)}
               autoFocus
             />
-            <p className="text-[11px] text-gray-500 dark:text-zinc-400">
+            <p id="database-name-help" className="text-[11px] text-gray-500 dark:text-zinc-400">
               Alphanumeric characters and underscores recommended.
             </p>
           </div>
+
+          {isError && (
+            <p role="alert" className="text-xs text-destructive">
+              Couldn’t create the database. Check the name and try again.
+            </p>
+          )}
 
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button

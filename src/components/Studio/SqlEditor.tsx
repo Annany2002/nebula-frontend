@@ -1,400 +1,195 @@
-import { useState } from "react";
-import {
-  Play,
-  Terminal,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Copy,
-  Check,
-  ChevronRight,
-  Search,
-  Table2,
-  Columns,
-  Key,
-  PanelLeftClose,
-  PanelLeftOpen,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, PanelRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Table as TableUI,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { TableType, SQLQueryResultType } from "@/types/allType";
+import { TableType } from "@/types/allType";
 import { useExecuteSQL } from "@/hooks/queries";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import SchemaBrowser from "./SQL/SchemaBrowser";
+import QueryResults, { QueryRun } from "./SQL/QueryResults";
+import "@/styles/sql-editor.css";
 
 interface SqlEditorProps {
   dbName: string;
   tables: TableType[];
 }
 
+const selectQuery = (table: string) => `SELECT * FROM "${table.replace(/"/g, '""')}" LIMIT 25;`;
+const tsvCell = (value: unknown) => {
+  const text =
+    value == null ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
+  return /[\t\r\n"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
 export default function SqlEditor({ dbName, tables }: SqlEditorProps) {
-  const [query, setQuery] = useState(
-    tables.length > 0 ? `SELECT * FROM ${tables[0].name} LIMIT 25;` : "SELECT sqlite_version();"
+  const [query, setQuery] = useState(() =>
+    tables.length ? selectQuery(tables[0].name) : "SELECT sqlite_version();"
   );
-  const [lastResult, setLastResult] = useState<SQLQueryResultType | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [run, setRun] = useState<QueryRun | null>(null);
+  const [schemaOpen, setSchemaOpen] = useState(
+    () => window.matchMedia("(min-width: 1100px)").matches
+  );
   const [copied, setCopied] = useState(false);
-
-  // Collapsible Schema Sidebar
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [schemaSearch, setSchemaSearch] = useState("");
-  const [expandedTables, setExpandedTables] = useState<Record<string, boolean>>({});
-
+  const [isCopying, setIsCopying] = useState(false);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
+  const runningRef = useRef(false);
+  const runNumberRef = useRef(0);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    },
+    []
+  );
   const { mutate: executeSQL, isPending } = useExecuteSQL(dbName);
-
-  const toggleTableExpand = (tableName: string) => {
-    setExpandedTables((prev) => ({
-      ...prev,
-      [tableName]: !prev[tableName],
-    }));
-  };
+  const lines = query.split("\n").length;
 
   const handleRunQuery = () => {
-    if (!query.trim()) {
-      toast.error("Please enter a SQL query");
+    if (runningRef.current) return;
+    const submittedQuery = query.trim();
+    if (!submittedQuery) {
+      toast.error("Enter a SQL query first.");
+      editorRef.current?.focus();
       return;
     }
-    setErrorMessage(null);
-    executeSQL(query, {
-      onSuccess: (data) => {
-        setLastResult(data);
-        toast.success("Query executed successfully");
-      },
-      onError: (err) => {
-        setErrorMessage(err.message);
-        toast.error("Query failed");
+    runningRef.current = true;
+    runNumberRef.current += 1;
+    setRun(null);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    setCopied(false);
+    executeSQL(submittedQuery, {
+      onSuccess: (data) => setRun({ kind: "success", query: submittedQuery, data }),
+      onError: (error) => setRun({ kind: "error", query: submittedQuery, message: error.message }),
+      onSettled: () => {
+        runningRef.current = false;
       },
     });
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.preventDefault();
-      handleRunQuery();
+  const handleUseTable = (name: string) => {
+    setQuery(selectQuery(name));
+    editorRef.current?.focus();
+    editorRef.current?.scrollTo(0, 0);
+    if (gutterRef.current) gutterRef.current.scrollTop = 0;
+  };
+  const handleCopy = async () => {
+    if (run?.kind !== "success" || !run.data.rows?.length || isCopying) return;
+    const currentRun = runNumberRef.current;
+    const text = [run.data.columns ?? [], ...run.data.rows]
+      .map((row) => row.map(tsvCell).join("\t"))
+      .join("\n");
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(text);
+      if (currentRun === runNumberRef.current) {
+        if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+        setCopied(true);
+        copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      }
+      toast.success("Results copied as TSV.");
+    } catch {
+      toast.error("Couldn’t copy results. Please try again.");
+    } finally {
+      setIsCopying(false);
     }
   };
-
-  const handleSelectTemplate = (sqlText: string) => {
-    setQuery(sqlText);
-  };
-
-  const handleCopyResult = () => {
-    if (!lastResult?.rows) return;
-    const tsv = [
-      (lastResult.columns || []).join("\t"),
-      ...lastResult.rows.map((row) => row.join("\t")),
-    ].join("\n");
-    navigator.clipboard.writeText(tsv);
-    setCopied(true);
-    toast.success("Results copied to clipboard (TSV)");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const filteredTables = tables.filter((t) => {
-    const q = schemaSearch.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      t.name.toLowerCase().includes(q) || t.columns?.some((c) => c.name.toLowerCase().includes(q))
-    );
-  });
-
   return (
-    <div className="flex-1 flex h-full bg-background text-foreground overflow-hidden">
-      {/* Collapsible Left Schema & Tables Sidebar */}
-      <div
-        className={cn(
-          "flex-shrink-0 bg-card/60 dark:bg-[#0c0b16]/75 backdrop-blur-xl border-r border-purple-200/50 dark:border-purple-500/15 flex flex-col h-full transition-all duration-200",
-          sidebarOpen ? "w-60" : "w-0 border-r-0 overflow-hidden"
-        )}
-      >
-        {/* Sidebar Header */}
-        <div className="p-3 border-b border-purple-200/40 dark:border-white/10 space-y-2 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-mono">
-              Schema ({tables.length})
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(false)}
-              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-              title="Collapse schema sidebar"
-            >
-              <PanelLeftClose className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={schemaSearch}
-              onChange={(e) => setSchemaSearch(e.target.value)}
-              placeholder="Search tables..."
-              className="h-7 pl-7 text-xs bg-muted/40 border-purple-200/40 dark:border-white/10 focus:border-purple-500/50 rounded-md"
-            />
-          </div>
+    <div className="sql-workspace">
+      <header className="sql-page-heading">
+        <div>
+          <h1>SQL editor</h1>
+          <p>Write a query. Explore your data.</p>
         </div>
-
-        {/* Scrollable Tables & Columns Tree */}
-        <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
-          {filteredTables.map((t) => {
-            const isExpanded = !!expandedTables[t.name];
-            return (
-              <div key={t.name} className="rounded-lg group">
-                <div className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-purple-500/10 cursor-pointer text-xs transition-colors">
-                  <div
-                    className="flex items-center space-x-1.5 min-w-0 flex-1"
-                    onClick={() => toggleTableExpand(t.name)}
-                  >
-                    <ChevronRight
-                      className={cn(
-                        "w-3 h-3 text-muted-foreground transition-transform shrink-0",
-                        isExpanded && "rotate-90"
-                      )}
-                    />
-                    <Table2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
-                    <span className="font-mono truncate font-medium text-foreground">{t.name}</span>
-                  </div>
-
-                  <div className="flex items-center space-x-1 shrink-0">
-                    <button
-                      onClick={() => handleSelectTemplate(`SELECT * FROM ${t.name} LIMIT 25;`)}
-                      title={`Run SELECT * FROM ${t.name}`}
-                      className="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-purple-600 dark:text-purple-400 hover:underline px-1"
-                    >
-                      SELECT
-                    </button>
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] px-1 py-0 h-4 font-mono text-muted-foreground border-purple-200/40 dark:border-white/10"
-                    >
-                      {t.rowCount ?? 0}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Expanded Column List */}
-                {isExpanded && t.columns && t.columns.length > 0 && (
-                  <div className="pl-6 pr-2 py-1 space-y-0.5 border-l border-purple-200/30 dark:border-white/5 ml-3 my-0.5">
-                    {t.columns.map((col) => (
-                      <div
-                        key={col.name}
-                        className="flex items-center justify-between py-0.5 px-1.5 rounded text-[11px] font-mono text-muted-foreground select-none"
-                      >
-                        <div className="flex items-center space-x-1.5 truncate">
-                          {col.pk === 1 ? (
-                            <Key className="w-2.5 h-2.5 text-amber-500 shrink-0" />
-                          ) : (
-                            <Columns className="w-2.5 h-2.5 opacity-40 shrink-0" />
-                          )}
-                          <span className="truncate text-foreground/80">{col.name}</span>
-                        </div>
-                        <span className="text-[9px] uppercase opacity-50 shrink-0">{col.type}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {filteredTables.length === 0 && (
-            <div className="p-4 text-center text-xs text-muted-foreground font-mono">
-              No tables found
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main SQL Editor Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Editor Header Toolbar */}
-        <div className="h-14 border-b border-purple-200/40 dark:border-white/10 px-4 flex items-center justify-between bg-card/40 backdrop-blur-md flex-shrink-0">
-          <div className="flex items-center space-x-2.5">
-            {!sidebarOpen && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarOpen(true)}
-                className="h-7 w-7 p-0 mr-0.5 border border-purple-200/40 dark:border-white/10 hover:bg-purple-500/10"
-                title="Show tables sidebar"
-              >
-                <PanelLeftOpen className="w-3.5 h-3.5" />
-              </Button>
+        <div className="sql-page-actions">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSchemaOpen((previous) => !previous)}
+            aria-expanded={schemaOpen}
+            aria-controls="sql-schema-panel"
+            aria-label={schemaOpen ? "Hide schema browser" : "Show schema browser"}
+          >
+            <PanelRight size={15} />
+            <span>Schema</span>
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleRunQuery}
+            disabled={isPending || !query.trim()}
+            aria-label={isPending ? "Running query" : "Run query"}
+          >
+            {isPending ? (
+              <Loader2 size={15} className="animate-spin motion-reduce:animate-none" />
+            ) : (
+              <Play size={14} />
             )}
-
-            <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400">
-              <Terminal className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-semibold text-foreground">SQL Runner</span>
-          </div>
-
-          <div className="flex items-center space-x-2.5">
-            <span className="text-[11px] text-muted-foreground font-mono hidden sm:inline">
-              ⌘ + Enter to execute
-            </span>
-            <Button
-              size="sm"
-              onClick={handleRunQuery}
-              disabled={isPending}
-              className="h-8 px-3.5 text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium gap-1.5 shadow-sm shadow-purple-500/25 rounded-lg"
-            >
-              <Play className="w-3 h-3 fill-current" />
-              <span>{isPending ? "Running..." : "Run Query"}</span>
-            </Button>
-          </div>
+            <span>{isPending ? "Running…" : "Run query"}</span>
+          </Button>
         </div>
-
-        {/* Query Input Area */}
-        <div className="h-44 flex-shrink-0 p-3.5 bg-background border-b border-purple-200/40 dark:border-white/10">
-          <textarea
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter SQL statement (e.g. SELECT * FROM users LIMIT 10;)"
-            spellCheck={false}
-            className="w-full h-full bg-card/60 dark:bg-[#0c0b16]/70 backdrop-blur-md border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-3.5 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/30 resize-none leading-relaxed shadow-sm"
+      </header>
+      <div className="sql-workspace-body">
+        <div className="sql-main-panels">
+          <section className="sql-query-pane" aria-labelledby="sql-query-label">
+            <div className="sql-query-heading">
+              <label id="sql-query-label" htmlFor="sql-query-input">
+                Query
+              </label>
+              <span id="sql-query-shortcut">
+                <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>Enter</kbd> to run
+              </span>
+            </div>
+            <div className="sql-code-editor">
+              <div className="sql-line-numbers" ref={gutterRef} aria-hidden="true">
+                {Array.from({ length: lines }, (_, index) => (
+                  <span key={index}>{index + 1}</span>
+                ))}
+              </div>
+              <textarea
+                id="sql-query-input"
+                ref={editorRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                    event.preventDefault();
+                    if (!event.repeat) handleRunQuery();
+                  }
+                }}
+                onScroll={(event) => {
+                  if (gutterRef.current)
+                    gutterRef.current.scrollTop = event.currentTarget.scrollTop;
+                }}
+                aria-describedby="sql-query-shortcut"
+                placeholder="SELECT * FROM your_table LIMIT 25;"
+                spellCheck={false}
+                autoCapitalize="off"
+                autoCorrect="off"
+                wrap="off"
+              />
+            </div>
+            <div className="sql-query-footer">
+              <span>SQLite</span>
+              <span>
+                {lines} {lines === 1 ? "line" : "lines"}
+              </span>
+            </div>
+          </section>
+          <QueryResults
+            run={run}
+            isRunning={isPending}
+            editorChanged={!!run && run.query !== query.trim()}
+            onCopy={handleCopy}
+            copied={copied}
+            isCopying={isCopying}
           />
         </div>
-
-        {/* Results / Console Output */}
-        <div className="flex-1 flex flex-col min-h-0 bg-background/50">
-          {/* Results Bar */}
-          <div className="h-10 border-b border-purple-200/40 dark:border-white/10 px-4 flex items-center justify-between bg-card/40 backdrop-blur-md flex-shrink-0">
-            <div className="flex items-center space-x-2.5">
-              <span className="text-xs font-semibold text-foreground">Results</span>
-              {lastResult && (
-                <div className="flex items-center space-x-2">
-                  <Badge
-                    variant="outline"
-                    className="bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/20 text-[10px] font-mono h-5 gap-1"
-                  >
-                    <Clock className="w-2.5 h-2.5" />
-                    {lastResult.executionMs}ms
-                  </Badge>
-                  {lastResult.rowCount !== undefined && (
-                    <span className="text-[11px] text-muted-foreground font-mono">
-                      {lastResult.rowCount} rows returned
-                    </span>
-                  )}
-                  {lastResult.rowsAffected > 0 && (
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">
-                      {lastResult.rowsAffected} rows affected
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {lastResult?.rows && lastResult.rows.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyResult}
-                className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-              >
-                {copied ? (
-                  <Check className="w-3 h-3 text-purple-500 mr-1" />
-                ) : (
-                  <Copy className="w-3 h-3 mr-1" />
-                )}
-                Copy Data
-              </Button>
-            )}
-          </div>
-
-          {/* Output View */}
-          <div className="flex-1 overflow-auto p-4">
-            {errorMessage ? (
-              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-700 dark:text-red-300 flex items-start space-x-2.5 text-xs font-mono">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-semibold">Query Execution Error</div>
-                  <div className="mt-1 whitespace-pre-wrap">{errorMessage}</div>
-                </div>
-              </div>
-            ) : lastResult?.columns && lastResult.columns.length > 0 ? (
-              <div className="rounded-xl border border-purple-200/50 dark:border-white/10 overflow-hidden shadow-sm">
-                <TableUI>
-                  <TableHeader className="bg-card/90 dark:bg-[#0f0e20]/90 backdrop-blur-md sticky top-0 z-10 border-b border-purple-200/50 dark:border-purple-500/20">
-                    <TableRow className="border-purple-200/40 dark:border-white/10 hover:bg-transparent">
-                      <TableHead className="w-12 text-center text-muted-foreground font-mono text-[11px]">
-                        #
-                      </TableHead>
-                      {lastResult.columns.map((col, idx) => (
-                        <TableHead
-                          key={idx}
-                          className="text-foreground font-mono text-xs font-medium border-l border-purple-200/30 dark:border-white/10 px-3 py-2"
-                        >
-                          {col}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {lastResult.rows && lastResult.rows.length > 0 ? (
-                      lastResult.rows.map((row, rIdx) => (
-                        <TableRow
-                          key={rIdx}
-                          className="border-purple-200/30 dark:border-white/5 hover:bg-purple-500/5 dark:hover:bg-purple-500/10 transition-colors"
-                        >
-                          <TableCell className="text-center text-muted-foreground font-mono text-[11px]">
-                            {rIdx + 1}
-                          </TableCell>
-                          {row.map((val, cIdx) => (
-                            <TableCell
-                              key={cIdx}
-                              className="font-mono text-xs text-foreground border-l border-purple-200/20 dark:border-white/5 max-w-xs truncate py-2"
-                            >
-                              {val === null ? (
-                                <span className="text-muted-foreground/60 italic text-[11px]">
-                                  NULL
-                                </span>
-                              ) : typeof val === "object" ? (
-                                JSON.stringify(val)
-                              ) : (
-                                String(val)
-                              )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={lastResult.columns.length + 1}
-                          className="text-center py-6 text-xs text-muted-foreground"
-                        >
-                          Query returned 0 rows.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </TableUI>
-              </div>
-            ) : lastResult?.message ? (
-              <div className="p-4 rounded-xl bg-card/60 backdrop-blur-md border border-purple-200/40 dark:border-white/10 text-xs font-mono text-foreground flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>{lastResult.message}</span>
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-xs space-y-2 py-12">
-                <Terminal className="w-8 h-8 text-muted-foreground/40" />
-                <p>Write a query above and hit Run to view database results.</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <aside
+          id="sql-schema-panel"
+          className="sql-schema-panel"
+          aria-label="Database schema"
+          hidden={!schemaOpen}
+        >
+          <SchemaBrowser tables={tables} onUseTable={handleUseTable} />
+        </aside>
       </div>
     </div>
   );

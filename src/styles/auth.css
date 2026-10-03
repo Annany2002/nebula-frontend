@@ -1,0 +1,311 @@
+.nebula-auth {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in oklch, hsl(var(--background)) 97%, hsl(var(--primary)));
+  color: hsl(var(--foreground));
+}
+.auth-header {
+  width: min(1280px, calc(100% - 80px));
+  margin-inline: auto;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.auth-header > div {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.auth-back {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.auth-back:hover {
+  color: hsl(var(--primary));
+}
+.auth-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(1120px, calc(100% - 80px));
+  margin: auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 20px;
+  overflow: hidden;
+  background: hsl(var(--card));
+  min-height: 590px;
+}
+.auth-story {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 44px;
+  overflow: hidden;
+  color: oklch(0.96 0.015 295);
+  background: oklch(0.25 0.065 295);
+}
+.auth-story::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 65% 5%, oklch(0.55 0.24 295 / 0.35), transparent 60%);
+  pointer-events: none;
+}
+.auth-orbits {
+  position: absolute;
+  left: 50%;
+  top: 110px;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 180px;
+}
+.auth-orbits i {
+  position: absolute;
+  inset: 10px 0;
+  border: 1px solid oklch(0.72 0.14 295 / 0.3);
+  border-radius: 50%;
+  transform: rotate(-25deg);
+}
+.auth-orbits i:nth-child(2) {
+  inset: -25px 42px;
+  transform: rotate(35deg);
+}
+.auth-orbits i::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 50px;
+  width: 6px;
+  height: 6px;
+  background: oklch(0.8 0.12 295);
+  border-radius: 50%;
+  box-shadow: 0 0 18px oklch(0.75 0.17 295 / 0.5);
+}
+.auth-orbits > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: oklch(0.82 0.13 295);
+}
+.auth-story-copy,
+.auth-source {
+  position: relative;
+}
+.auth-story-label {
+  font-size: 12px;
+  color: oklch(0.8 0.08 295);
+  margin-bottom: 14px;
+}
+.auth-story h2 {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+.auth-story-copy > p:not(.auth-story-label) {
+  color: oklch(0.8 0.025 295);
+  font-size: 13px;
+  line-height: 1.85;
+  max-width: 330px;
+  margin-top: 20px;
+}
+.auth-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 25px;
+  font-size: 11px;
+  color: oklch(0.86 0.04 295);
+}
+.auth-capabilities span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.auth-source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid oklch(0.7 0.07 295 / 0.2);
+  padding-top: 22px;
+  margin-top: 34px;
+  color: oklch(0.77 0.045 295);
+  font-size: 11px;
+}
+.auth-source:hover {
+  color: oklch(0.95 0.025 295);
+}
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  min-width: 0;
+}
+.auth-form-content {
+  width: 100%;
+  max-width: 350px;
+}
+.auth-form-heading {
+  margin-bottom: 32px;
+}
+.auth-form-heading h1 {
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1.25;
+}
+.auth-form-heading p {
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  line-height: 1.75;
+  margin-top: 10px;
+}
+.auth-form {
+  display: grid;
+  gap: 20px;
+}
+.auth-form label {
+  font-size: 12px;
+}
+.auth-form input {
+  height: 44px;
+  border-radius: 8px;
+  background: hsl(var(--background));
+  font-size: 13px;
+}
+.auth-form input[aria-invalid="true"] {
+  border-color: hsl(var(--destructive));
+}
+.auth-form [id$="-form-item-message"] {
+  font-size: 11px;
+}
+.auth-password {
+  position: relative;
+}
+.auth-password input {
+  padding-right: 46px;
+}
+.auth-password button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 36px;
+  height: 36px;
+  color: hsl(var(--muted-foreground));
+}
+.auth-submit {
+  width: 100%;
+  height: 44px;
+  border-radius: 8px;
+  margin-top: 4px;
+  background: oklch(0.5 0.23 295);
+  color: oklch(0.98 0.005 295);
+  font-size: 13px;
+}
+.auth-submit:hover {
+  background: oklch(0.55 0.23 295);
+}
+.auth-submit > svg:last-child {
+  margin-left: auto;
+}
+.auth-switch {
+  margin-top: 25px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.8;
+}
+.auth-switch a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: hsl(var(--primary));
+  font-weight: 550;
+  margin-left: 3px;
+}
+.auth-switch a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.auth-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: min(1120px, calc(100% - 80px));
+  margin: 28px auto;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.nebula-auth :is(a, button):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 4px;
+  box-shadow: none;
+}
+@media (max-width: 950px) {
+  .auth-story {
+    padding: 30px;
+  }
+  .auth-story h2 {
+    font-size: 29px;
+  }
+  .auth-form-panel {
+    padding: 32px;
+  }
+  .auth-capabilities {
+    gap: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .auth-header {
+    width: calc(100% - 40px);
+    height: 76px;
+  }
+  .auth-back {
+    display: none;
+  }
+  .auth-main {
+    display: block;
+    width: calc(100% - 40px);
+    max-width: 440px;
+    min-height: 0;
+    border-radius: 14px;
+    margin: auto;
+  }
+  .auth-story {
+    display: none;
+  }
+  .auth-form-panel {
+    padding: 36px 28px;
+  }
+  .auth-form-heading h1 {
+    font-size: 24px;
+  }
+  .auth-footer {
+    width: calc(100% - 40px);
+    max-width: 440px;
+    font-size: 10px;
+    margin-top: 24px;
+  }
+  .auth-footer > span:last-child {
+    display: none;
+  }
+}
+@media (max-width: 360px) {
+  .auth-form-panel {
+    padding: 30px 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nebula-auth *,
+  .nebula-auth *::before,
+  .nebula-auth *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

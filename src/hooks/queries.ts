@@ -13,8 +13,11 @@ import {
   SchemaDiagramType,
   DatabaseObjectsType,
   AlterTablePayload,
+  APIKeyMetadataType,
+  ColumnDefinitionType,
 } from "@/types/allType";
 import { toast } from "sonner";
+import { apiKeyPrefix } from "@/lib/apiKey";
 
 export const getToken = () => localStorage.getItem("token");
 
@@ -162,8 +165,25 @@ export const useDeleteDatabase = () => {
       if (!response.ok) throw new Error("Failed to delete database");
     },
     onSuccess: (_, dbName) => {
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) =>
+        old?.filter((database) => database.dbName !== dbName)
+      );
+      queryClient.removeQueries({
+        predicate: ({ queryKey }) =>
+          queryKey[1] === dbName &&
+          [
+            "tables",
+            "records",
+            "schema",
+            "apikey",
+            "databaseDetails",
+            "databaseAnalytics",
+            "schemaDiagram",
+            "databaseObjects",
+          ].includes(String(queryKey[0])),
+      });
       queryClient.invalidateQueries({ queryKey: ["databases"] });
-      toast.success(`Project ${dbName} successfully deleted`);
+      toast.success(`Database ${dbName} deleted`);
     },
     onError: () => toast.error("Error in deleting database"),
   });
@@ -179,11 +199,10 @@ export const useCreateTable = () => {
     }: {
       dbName: string;
       tableName: string;
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      schema: Record<string, unknown> | Array<{ name: string; type: string }> | any;
+      schema: ColumnDefinitionType[];
     }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables`, {
+      const response = await fetch(`${url}/api/v1/databases/${encodeURIComponent(dbName)}/tables`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -191,14 +210,21 @@ export const useCreateTable = () => {
         },
         body: JSON.stringify({ table_name: tableName, schema }),
       });
-      if (!response.ok) throw new Error("Failed to create table");
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(
+          typeof data?.error === "string" ? data.error : "Couldn’t create the table. Try again."
+        );
+      }
       return response.json();
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databaseDetail", variables.dbName] });
+    onSuccess: async (_, variables) => {
+      await Promise.all([
+        ...["tables", "schemaDiagram", "databaseObjects", "databaseDetails"].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key, variables.dbName] })
+        ),
+        queryClient.invalidateQueries({ queryKey: ["databases"] }),
+      ]);
       toast.success("Table created successfully");
     },
     onError: () => toast.error("Failed to create table"),
@@ -210,14 +236,26 @@ export const useDeleteTable = () => {
   return useMutation({
     mutationFn: async ({ dbName, tableName }: { dbName: string; tableName: string }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/tables/${encodeURIComponent(tableName)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (!response.ok) throw new Error("Failed to delete table");
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
+      const { dbName, tableName } = variables;
+      queryClient.setQueryData<TableType[]>(["tables", dbName], (old) =>
+        old?.filter((table) => table.name !== tableName)
+      );
+      queryClient.removeQueries({ queryKey: ["records", dbName, tableName] });
+      queryClient.removeQueries({ queryKey: ["schema", dbName, tableName] });
+      for (const key of ["tables", "schemaDiagram", "databaseObjects", "databaseDetails"]) {
+        queryClient.invalidateQueries({ queryKey: [key, dbName] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["databases"] });
       toast.success(`Table ${variables.tableName} deleted successfully`);
     },
     onError: () => toast.error("Error deleting table"),
@@ -237,35 +275,45 @@ export const useAlterTable = () => {
       payload: AlterTablePayload;
     }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/tables/${tableName}/alter`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/tables/${encodeURIComponent(tableName)}/alter`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to alter table");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          typeof errorData?.error === "string"
+            ? errorData.error
+            : "Couldn’t update the schema. Try again."
+        );
       }
       return response.json();
     },
-    onSuccess: (data, variables) => {
-      const resultingTable = data?.table_name || variables.tableName;
-      queryClient.invalidateQueries({ queryKey: ["tables", variables.dbName] });
-      queryClient.invalidateQueries({
-        queryKey: ["schema", variables.dbName, variables.tableName],
-      });
-      if (resultingTable !== variables.tableName) {
-        queryClient.invalidateQueries({ queryKey: ["schema", variables.dbName, resultingTable] });
-      }
-      queryClient.invalidateQueries({
-        queryKey: ["records", variables.dbName, variables.tableName],
-      });
-      queryClient.invalidateQueries({ queryKey: ["records", variables.dbName, resultingTable] });
-      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", variables.dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databaseObjects", variables.dbName] });
+    onSuccess: async (data, variables) => {
+      const resultingTable =
+        variables.payload.action === "rename_table"
+          ? variables.payload.new_table_name || variables.tableName
+          : data?.table_name || variables.tableName;
+      const refresh = Promise.all([
+        ...["tables", "schemaDiagram", "databaseObjects", "databaseDetails"].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key, variables.dbName] })
+        ),
+        ...Array.from(new Set([variables.tableName, resultingTable])).flatMap((tableName) =>
+          ["schema", "records"].map((key) =>
+            queryClient.invalidateQueries({ queryKey: [key, variables.dbName, tableName] })
+          )
+        ),
+        queryClient.invalidateQueries({ queryKey: ["databases"] }),
+      ]);
+      // Let the dialog navigate before a renamed table disappears from the current view.
+      if (variables.payload.action !== "rename_table") await refresh;
       toast.success(data?.message || "Table schema updated successfully");
     },
     onError: (error: Error) => {
@@ -326,7 +374,7 @@ export const useDeleteRecord = () => {
     }) => {
       const token = getToken();
       const response = await fetch(
-        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${recordId}`,
+        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${encodeURIComponent(String(recordId))}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -360,7 +408,7 @@ export const useUpdateRecord = () => {
     }) => {
       const token = getToken();
       const response = await fetch(
-        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${recordId}`,
+        `${url}/api/v1/databases/${dbName}/tables/${tableName}/records/${encodeURIComponent(String(recordId))}`,
         {
           method: "PUT",
           headers: {
@@ -387,74 +435,93 @@ export const useUpdateRecord = () => {
 export const useApiKey = (dbName: string) => {
   return useQuery({
     queryKey: ["apikey", dbName],
-    queryFn: async (): Promise<string> => {
-      const token = getToken();
-      const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        if (response.status === 404) return "";
-        throw new Error("Failed to fetch API key");
-      }
+    queryFn: async ({ signal }): Promise<APIKeyMetadataType | null> => {
+      const response = await fetch(
+        `${url}/api/v1/account/databases/${encodeURIComponent(dbName)}/apikey`,
+        {
+          signal,
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
+      if (response.status === 404) return null;
+      if (!response.ok) throw new Error("Couldn’t load API key details.");
       const data = await response.json();
-      return data.key || "";
+      if (typeof data?.key_prefix !== "string" || !data.key_prefix) {
+        throw new Error("API key details were incomplete. Try refreshing.");
+      }
+      return {
+        key_prefix: data.key_prefix,
+        created_at: typeof data.created_at === "string" ? data.created_at : "",
+      };
     },
     enabled: !!dbName,
-    retry: false, // Don't retry if 404 (no key)
+    retry: false,
   });
 };
 
 export const useGenerateApiKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (dbName: string) => {
-      const token = getToken();
+    gcTime: 0,
+    onMutate: (dbName: string) => queryClient.cancelQueries({ queryKey: ["apikey", dbName] }),
+    mutationFn: async (dbName: string): Promise<{ api_key: string }> => {
       const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!response.ok) throw new Error("Failed to generate API key");
-      return response.json();
-    },
-    onSuccess: (data: { api_key?: string }, dbName: string) => {
-      const newKey = data?.api_key || "";
-      if (newKey) {
-        queryClient.setQueryData(["apikey", dbName], newKey);
-        queryClient.setQueryData<DataBaseType[]>(["databases"], (old) => {
-          if (!old) return old;
-          return old.map((db) => (db.dbName === dbName ? { ...db, apiKey: newKey } : db));
-        });
+      if (!response.ok) throw new Error("Couldn’t generate a key. Please try again.");
+      const data = await response.json();
+      if (typeof data?.api_key !== "string" || !data.api_key) {
+        throw new Error("The secret wasn’t returned. Refresh the key details before trying again.");
       }
-      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
-      queryClient.invalidateQueries({ queryKey: ["databases"] });
-      toast.success("API key generated successfully");
+      return { api_key: data.api_key };
     },
-    onError: () => toast.error("Failed to generate API key"),
+    onSuccess: (data, dbName) => {
+      const prefix = apiKeyPrefix(data.api_key);
+      queryClient.setQueryData<APIKeyMetadataType>(["apikey", dbName], {
+        key_prefix: prefix,
+        created_at: "",
+      });
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) =>
+        old?.map((db) => (db.dbName === dbName ? { ...db, apiKey: "", apiKeyPrefix: prefix } : db))
+      );
+      queryClient.invalidateQueries({ queryKey: ["databases"] });
+      queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
+      toast.success("API key generated. Copy it before leaving this page.");
+    },
+    onSettled: (_, __, dbName) => {
+      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+    },
+    onError: () => toast.error("Couldn’t generate an API key"),
   });
 };
 
 export const useDeleteApiKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
+    onMutate: (dbName: string) => queryClient.cancelQueries({ queryKey: ["apikey", dbName] }),
     mutationFn: async (dbName: string) => {
-      const token = getToken();
       const response = await fetch(`${url}/api/v1/account/databases/${dbName}/apikey`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
-      if (!response.ok) throw new Error("Failed to delete API key");
+      if (!response.ok) throw new Error("Couldn’t revoke this key. Please try again.");
     },
-    onSuccess: (_, dbName: string) => {
-      queryClient.setQueryData(["apikey", dbName], "");
-      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) => {
-        if (!old) return old;
-        return old.map((db) => (db.dbName === dbName ? { ...db, apiKey: "" } : db));
-      });
-      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+    onSuccess: (_, dbName) => {
+      queryClient.setQueryData(["apikey", dbName], null);
+      queryClient.setQueryData<DataBaseType[]>(["databases"], (old) =>
+        old?.map((db) =>
+          db.dbName === dbName ? { ...db, apiKey: "", apiKeyPrefix: undefined } : db
+        )
+      );
       queryClient.invalidateQueries({ queryKey: ["databases"] });
-      toast.success("API key deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
+      toast.success("API key revoked");
     },
-    onError: () => toast.error("Failed to delete API key"),
+    onSettled: (_, __, dbName) => {
+      queryClient.invalidateQueries({ queryKey: ["apikey", dbName] });
+    },
+    onError: () => toast.error("Couldn’t revoke the API key"),
   });
 };
 
@@ -571,12 +638,16 @@ export const useDatabaseAnalytics = (dbName: string | undefined) => {
 export const useSchemaDiagram = (dbName: string | undefined) => {
   return useQuery({
     queryKey: ["schemaDiagram", dbName],
-    queryFn: async (): Promise<SchemaDiagramType> => {
+    queryFn: async ({ signal }): Promise<SchemaDiagramType> => {
       if (!dbName) throw new Error("Database name required");
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/diagram`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/diagram`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          signal,
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch schema diagram");
       return response.json();
     },
@@ -588,30 +659,39 @@ export const useSchemaDiagram = (dbName: string | undefined) => {
 export const useDatabaseObjects = (dbName: string | undefined) => {
   return useQuery({
     queryKey: ["databaseObjects", dbName],
-    queryFn: async (): Promise<DatabaseObjectsType> => {
+    queryFn: async ({ signal }): Promise<DatabaseObjectsType> => {
       if (!dbName) throw new Error("Database name required");
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/objects`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/objects`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          signal,
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch database objects");
-      return response.json();
+      const data = await response.json();
+      const isNamedObject = (item: unknown) => {
+        if (!item || typeof item !== "object") return false;
+        const object = item as Record<string, unknown>;
+        return (
+          typeof object.name === "string" &&
+          !!object.name &&
+          typeof object.tableName === "string" &&
+          !!object.tableName &&
+          (object.sql == null || typeof object.sql === "string")
+        );
+      };
+      if (
+        !Array.isArray(data?.indexes) ||
+        !Array.isArray(data?.triggers) ||
+        !data.indexes.every(isNamedObject) ||
+        !data.triggers.every(isNamedObject)
+      ) {
+        throw new Error("Database object details were incomplete. Try refreshing.");
+      }
+      return data;
     },
     enabled: !!dbName,
-  });
-};
-
-// Database SQL Export Hook
-export const useExportDatabaseSQL = (dbName: string | undefined) => {
-  return useMutation({
-    mutationFn: async (): Promise<{ sql: string; filename: string }> => {
-      if (!dbName) throw new Error("Database name required");
-      const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/export/sql`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Failed to export database SQL");
-      return response.json();
-    },
   });
 };

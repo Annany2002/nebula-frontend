@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Github, Menu } from "lucide-react";
 import NebulaLogo from "@/assets/nebula-logo";
 import UserDropDown from "./UserDropDown";
@@ -10,9 +10,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui
 import { Separator } from "./ui/separator";
 
 export default function LoginNavBar() {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.header
-      initial={{ opacity: 0, y: -10 }}
+      initial={reduceMotion ? false : { opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className="sticky top-0 z-40 w-full border-b border-purple-200/40 dark:border-white/10 bg-white/50 dark:bg-[#0c0b16]/70 backdrop-blur-xl backdrop-saturate-150 shadow-sm"
     >

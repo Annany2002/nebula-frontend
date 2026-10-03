@@ -1,116 +1,129 @@
-import { motion } from "framer-motion";
+import { Braces, Check, Database, Download, KeyRound, LockKeyhole, Table2 } from "lucide-react";
+import Reveal from "./landing/Reveal";
 
-const features = [
-  {
-    heading: "One file per database",
-    body: "Each project gets its own physical .db file on disk. No shared table spaces, no noisy neighbors, no row-level security hacks. One tenant crashes or locks? The rest don't notice.",
-    code: `data/
-├── usr_4a91/
-│   ├── ecommerce.db      ← 4.8 MB, WAL mode
-│   └── analytics.db      ← 12.1 MB, WAL mode
-├── usr_7f03/
-│   └── crm.db            ← 3.2 MB, WAL mode
-└── metadata.db            ← Platform state`,
-    codeLabel: "ls data/",
-  },
-  {
-    heading: "Zero network hops to storage",
-    body: "Go embeds SQLite through CGO. No TCP handshake, no connection pooler, no socket serialization. The database runs inside the same process as your API server.",
-    code: `// Inside nebula-backend: no network layer between API and storage
-db, err := storage.ConnectUserDB(ctx, "data/usr_4a91/ecommerce.db")
-if err != nil { return err }
-defer db.Close()
-
-rows, err := db.QueryContext(ctx, "SELECT * FROM orders LIMIT ?", 25)
-if err != nil { return err }
-defer rows.Close()`,
-    codeLabel: "internal/storage/user_database_storage.go",
-  },
-  {
-    heading: "Deploy a single binary",
-    body: "No Postgres cluster. No Redis cache. No Docker daemon. No PgBouncer. The entire backend is a single ~28 MB Go binary that starts in under a second and idles at ~32 MB RAM.",
-    code: `$ scp nebula-backend user@vps:~/
-$ ssh user@vps
-
-$ ./nebula-backend
-  Server listening on :8085
-  Storage driver: mattn/go-sqlite3 (CGO)
-  Memory baseline: 32 MB
-  External dependencies: 0`,
-    codeLabel: "terminal",
-  },
-];
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] } },
-};
-
-const Features = () => {
-  return (
-    <section id="features" className="py-24 relative z-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="max-w-2xl mb-20">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-950 dark:text-white">
-            How it works
-          </h2>
-          <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
-            Nebula replaces the traditional API + database + cache stack with a single process that
-            reads and writes directly to SQLite files on your filesystem.
-          </p>
-        </div>
-
-        <div className="space-y-28">
-          {features.map((feature, idx) => {
-            const isReversed = idx % 2 === 1;
-            return (
-              <motion.div
-                key={feature.heading}
-                variants={sectionVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-80px" }}
-                className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-start ${
-                  isReversed ? "lg:direction-rtl" : ""
-                }`}
-                style={isReversed ? { direction: "rtl" } : undefined}
-              >
-                {/* Text */}
-                <div style={{ direction: "ltr" }}>
-                  <span className="text-sm font-mono text-purple-600 dark:text-purple-400">
-                    0{idx + 1}
-                  </span>
-                  <h3 className="mt-2 text-2xl sm:text-3xl font-bold text-gray-950 dark:text-white tracking-tight">
-                    {feature.heading}
-                  </h3>
-                  <p className="mt-4 text-base text-gray-500 dark:text-gray-400 leading-relaxed max-w-lg">
-                    {feature.body}
-                  </p>
-                </div>
-
-                {/* Code */}
-                <div
-                  className="rounded-xl overflow-hidden border border-gray-200 dark:border-white/10"
-                  style={{ direction: "ltr" }}
-                >
-                  <div className="px-4 py-2 bg-gray-50 dark:bg-white/[0.03] border-b border-gray-200 dark:border-white/10">
-                    <span className="text-[12px] font-mono text-gray-400 dark:text-gray-500">
-                      {feature.codeLabel}
-                    </span>
-                  </div>
-                  <div className="p-5 bg-white dark:bg-[#0c0a12] overflow-x-auto">
-                    <pre className="font-mono text-[13px] leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre">
-                      <code>{feature.code}</code>
-                    </pre>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+const Features = () => (
+  <section id="features" className="nbl-section nbl-features" aria-labelledby="features-title">
+    <div className="nbl-container">
+      <Reveal className="nbl-section-heading">
+        <h2 id="features-title">A workspace for your entire backend.</h2>
+      </Reveal>
+      <div className="nbl-feature-layout">
+        <Reveal className="nbl-feature-isolation">
+          <div className="nbl-feature-copy">
+            <span className="nbl-feature-number">01 / ISOLATED STORAGE</span>
+            <h3>Separate by design.</h3>
+            <p>
+              Each project gets an independent SQLite file, with its own tables, schema and
+              credentials.
+            </p>
+          </div>
+          <div className="nbl-file-system" aria-label="Three independent SQLite databases">
+            <div className="nbl-file-branch" aria-hidden="true" />
+            {[
+              { name: "ecommerce.db", label: "Storefront", color: "violet" },
+              { name: "analytics.db", label: "Event analytics", color: "mint" },
+              { name: "sideproject.db", label: "Prototype", color: "peach" },
+            ].map((file) => (
+              <div className={`nbl-db-file ${file.color}`} key={file.name}>
+                <span className="nbl-file-icon">
+                  <Database size={21} />
+                </span>
+                <span>
+                  <strong>{file.name}</strong>
+                  <small>{file.label}</small>
+                </span>
+                <LockKeyhole size={13} />
+              </div>
+            ))}
+            <div className="nbl-file-base">
+              <span />
+              <code>data / your_workspace /</code>
+            </div>
+          </div>
+        </Reveal>
+        <Reveal className="nbl-feature-studio" delay={0.08}>
+          <div className="nbl-mini-editor">
+            <div className="nbl-mini-editor-title">
+              <Table2 size={13} /> users <span>3 records</span>
+            </div>
+            <table>
+              <caption className="sr-only">Example user records in the table editor</caption>
+              <thead>
+                <tr>
+                  <th>id</th>
+                  <th>name</th>
+                  <th>role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Alex Morgan</td>
+                  <td>
+                    <span>admin</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Sam Rivera</td>
+                  <td>member</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Jamie Chen</td>
+                  <td>member</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="nbl-mini-editor-bottom">
+              <Check size={11} /> Changes saved
+            </div>
+          </div>
+          <div className="nbl-feature-copy">
+            <span className="nbl-feature-number">02 / VISUAL STUDIO</span>
+            <h3>Work directly with your data.</h3>
+            <p>
+              Browse records, edit fields, inspect database objects, and run SQL in one workspace.
+            </p>
+          </div>
+        </Reveal>
+        <Reveal className="nbl-feature-tools">
+          <div className="nbl-tools-intro">
+            <span className="nbl-feature-number">03 / BUILT IN</span>
+            <h3>
+              The essentials,
+              <br />
+              already connected.
+            </h3>
+          </div>
+          <div className="nbl-tool-detail">
+            <Braces size={21} />
+            <h4>REST, ready to go</h4>
+            <p>CRUD endpoints with filtering, sorting and pagination.</p>
+            <code>
+              <b>GET</b> /tables/orders/records
+            </code>
+          </div>
+          <div className="nbl-tool-detail">
+            <KeyRound size={21} />
+            <h4>Access with intention</h4>
+            <p>JWT sessions for your account. Scoped API keys for your database.</p>
+            <span className="nbl-detail-note">
+              <Check size={13} /> Hashed API keys
+            </span>
+          </div>
+          <div className="nbl-tool-detail">
+            <Download size={21} />
+            <h4>Your exit is built in</h4>
+            <p>Download a SQLite snapshot or SQL dump whenever you need it.</p>
+            <span className="nbl-detail-note">
+              .db <span> / </span> .sql
+            </span>
+          </div>
+        </Reveal>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default Features;

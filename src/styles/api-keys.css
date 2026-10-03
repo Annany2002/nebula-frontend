@@ -1,0 +1,472 @@
+.api-keys-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.api-keys-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.api-keys-heading h1 {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.api-keys-heading p {
+  margin-top: 5px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  overflow-wrap: anywhere;
+}
+.api-keys-heading p span {
+  color: hsl(var(--foreground));
+}
+.api-keys-heading > button {
+  height: 34px;
+  gap: 7px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.api-keys-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 40px;
+  max-width: 1100px;
+  padding: 32px 24px 48px;
+}
+.api-keys-main {
+  min-width: 0;
+}
+.api-key-manager {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 22px;
+  background: hsl(var(--card));
+  min-width: 0;
+}
+.api-key-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.api-key-section-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.api-key-section-heading svg {
+  color: hsl(var(--primary));
+}
+.api-key-section-heading h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.api-key-state {
+  font-size: 10px;
+  white-space: nowrap;
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+.api-key-state.is-configured {
+  background: hsl(var(--primary) / 0.06);
+  border-color: hsl(var(--primary) / 0.18);
+  color: hsl(var(--primary));
+}
+.api-key-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 28px;
+}
+.api-key-details dt,
+.api-key-guide dt {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.api-key-details dd {
+  margin-top: 7px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.api-key-details code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.api-key-description {
+  margin-top: 22px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.8;
+  max-width: 65ch;
+}
+.api-key-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 18px;
+  margin-top: 20px;
+  border-top: 1px solid hsl(var(--border));
+}
+.api-key-manager button {
+  font-size: 12px;
+  gap: 7px;
+}
+.api-key-manager .api-key-revoke {
+  color: hsl(var(--destructive));
+}
+.api-key-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-block: 32px 12px;
+}
+.api-key-loading > span:not(.sr-only) {
+  width: 72%;
+  height: 14px;
+  border-radius: 3px;
+  background: hsl(var(--muted));
+}
+.api-key-loading > span:nth-child(2) {
+  width: 48%;
+}
+.api-key-load-error {
+  padding-top: 26px;
+}
+.api-key-load-error > svg {
+  color: hsl(var(--primary));
+  margin-bottom: 12px;
+}
+.api-key-load-error h3,
+.api-key-empty h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.api-key-load-error p,
+.api-key-empty p {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.8;
+  margin-block: 8px 18px;
+  overflow-wrap: anywhere;
+}
+.api-key-empty {
+  margin-top: 28px;
+}
+.api-key-refresh-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 18px 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.7;
+}
+.api-key-refresh-error button {
+  flex-shrink: 0;
+}
+.api-key-confirmation {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--muted) / 0.45);
+}
+.api-key-confirmation h3 {
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.api-key-confirmation > p {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--muted-foreground));
+}
+.api-key-confirmation > div {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.api-key-secret {
+  padding-top: 22px;
+  margin-top: 22px;
+  border-top: 1px solid hsl(var(--border));
+}
+.api-key-secret h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.api-key-secret > p {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--muted-foreground));
+}
+.api-key-secret-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid hsl(var(--primary) / 0.25);
+  border-radius: 6px;
+  background: hsl(var(--background));
+}
+.api-key-secret-value code {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.8;
+  user-select: all;
+}
+.api-key-secret-value button {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.api-key-secret-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.api-key-error,
+.api-key-manager .api-key-error {
+  color: hsl(var(--destructive));
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+.api-key-guide {
+  border-left: 1px solid hsl(var(--border));
+  padding-left: 24px;
+}
+.api-key-guide h2 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.api-key-guide dl {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-block: 22px 32px;
+}
+.api-key-guide dd {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.api-key-guide > p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 10px;
+  color: hsl(var(--muted-foreground));
+}
+.api-key-examples {
+  margin-top: 36px;
+}
+.api-key-examples h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.api-key-examples > p:not(.api-key-error) {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.api-key-examples > label {
+  display: block;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  margin-block: 22px 8px;
+}
+.api-key-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--card));
+  padding: 6px 6px 6px 12px;
+}
+.api-key-url code {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.api-key-url button {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.api-key-example-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 22px;
+}
+.api-key-example-toolbar [role="tablist"] {
+  height: 34px;
+  padding: 3px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--muted) / 0.5);
+}
+.api-key-example-toolbar [role="tab"] {
+  font-size: 11px;
+  height: 26px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.api-key-example-toolbar [role="tab"][data-state="active"] {
+  color: hsl(var(--primary));
+  background: hsl(var(--card));
+  box-shadow: none;
+}
+.api-key-example-toolbar > button {
+  height: 32px;
+  gap: 6px;
+  font-size: 11px;
+}
+.api-key-examples pre {
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--muted) / 0.35);
+  font-size: 11px;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+.api-key-examples pre:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+@media (max-width: 1099px) {
+  .api-keys-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 760px;
+    gap: 36px;
+  }
+  .api-key-guide {
+    border-left: 0;
+    border-top: 1px solid hsl(var(--border));
+    padding: 24px 0 0;
+  }
+  .api-key-guide dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .api-key-guide > p {
+    max-width: 65ch;
+  }
+}
+@media (max-width: 600px) {
+  .api-keys-heading {
+    padding: 22px 18px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .api-keys-heading h1 {
+    font-size: 22px;
+  }
+  .api-keys-heading > button {
+    width: 34px;
+    padding: 0;
+    margin-top: 3px;
+  }
+  .api-keys-heading > button > span {
+    display: none;
+  }
+  .api-keys-layout {
+    padding: 24px 18px 36px;
+    gap: 28px;
+  }
+  .api-key-manager {
+    padding: 18px;
+  }
+  .api-key-details {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .api-key-confirmation {
+    padding: 14px;
+  }
+  .api-key-confirmation > div {
+    justify-content: flex-start;
+  }
+  .api-key-confirmation button {
+    white-space: normal;
+    height: auto;
+    min-height: 34px;
+  }
+  .api-key-guide dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .api-key-examples pre {
+    padding: 14px;
+  }
+  .api-key-secret-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .api-key-secret-actions button {
+    width: 100%;
+  }
+  .api-key-example-toolbar > button {
+    padding-inline: 7px;
+  }
+  .api-key-example-toolbar [role="tab"] {
+    padding-inline: 8px;
+  }
+}
+@media (max-width: 370px) {
+  .api-keys-heading {
+    padding-inline: 14px;
+  }
+  .api-keys-layout {
+    padding-inline: 14px;
+  }
+  .api-key-manager {
+    padding: 14px;
+  }
+  .api-key-example-toolbar > button > span {
+    display: none;
+  }
+  .api-key-confirmation > div {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .api-keys-page *,
+  .api-key-manager * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

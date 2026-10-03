@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, Play } from "lucide-react";
+import { FileCode2, Play, Terminal, Check } from "lucide-react";
+import Reveal from "./landing/Reveal";
+import CopyButton from "./landing/CopyButton";
 
 const snippets = [
   {
@@ -94,126 +95,141 @@ func main() {
 
 const CodeDemo = () => {
   const [activeTab, setActiveTab] = useState("ts");
-  const [copied, setCopied] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
-
-  const current = snippets.find((s) => s.id === activeTab) || snippets[0];
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(current.code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleRun = () => {
-    setShowResponse(true);
-  };
-
-  const handleTabChange = (id: string) => {
+  const current = snippets.find((snippet) => snippet.id === activeTab) || snippets[0];
+  const changeTab = (id: string) => {
     setActiveTab(id);
     setShowResponse(false);
   };
 
   return (
-    <section id="code-demo" className="py-24 relative z-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="max-w-2xl mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-950 dark:text-white">
-            Ship in minutes, not months
-          </h2>
-          <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
-            Use the TypeScript SDK or call the REST API directly with cURL or Go. No ORMs, no
-            connection pools, no VPC firewalls.
+    <section
+      id="code-demo"
+      className="nbl-section nbl-developers"
+      aria-labelledby="developers-title"
+    >
+      <div className="nbl-container nbl-code-layout">
+        <Reveal className="nbl-code-intro">
+          <h2 id="developers-title">Connect in a few lines.</h2>
+          <p>
+            Use the TypeScript SDK or standard HTTP. Set NEBULA_BASE_URL and NEBULA_API_KEY to
+            connect to your instance.
           </p>
-        </div>
-
-        {/* Full-width code surface */}
-        <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-lg shadow-black/[0.03] dark:shadow-black/20">
-          {/* Tab bar */}
-          <div className="px-4 py-2.5 bg-gray-50 dark:bg-white/[0.03] border-b border-gray-200 dark:border-white/10 flex flex-wrap gap-3 items-center justify-between">
-            <div className="flex items-center gap-6">
-              {snippets.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => handleTabChange(s.id)}
-                  className={`text-[13px] font-mono py-1 border-b-2 transition-colors ${
-                    s.id === activeTab
-                      ? "border-purple-500 text-gray-900 dark:text-white"
-                      : "border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleRun}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-[12px] font-medium bg-purple-600 text-white hover:bg-purple-500 transition-colors"
-              >
-                <Play className="h-3 w-3 fill-current" />
-                Show response
-              </button>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-[12px] font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-white/10 transition-colors"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-3 w-3 text-purple-500" /> Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3 w-3" /> Copy
-                  </>
-                )}
-              </button>
-            </div>
+          <ol className="nbl-code-steps">
+            <li>
+              <span>1</span> Create your database in Studio.
+            </li>
+            <li>
+              <span>2</span> Add tables and generate an API key.
+            </li>
+            <li>
+              <span>3</span> Connect your app. That's it.
+            </li>
+          </ol>
+          <div className="nbl-install">
+            <Terminal size={14} />
+            <code>npm i nebula-sdk-ts</code>
+            <CopyButton text="npm i nebula-sdk-ts" label="Copy" />
           </div>
-
-          {/* Code content */}
-          <div className="bg-white dark:bg-[#0c0a12]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={current.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+        </Reveal>
+        <Reveal className="nbl-code-workbench" delay={0.08}>
+          <div className="nbl-code-tabs" role="tablist" aria-label="Integration example language">
+            {snippets.map((snippet, index) => (
+              <button
+                type="button"
+                key={snippet.id}
+                id={`code-tab-${snippet.id}`}
+                role="tab"
+                aria-selected={activeTab === snippet.id}
+                aria-controls="code-example-panel"
+                tabIndex={activeTab === snippet.id ? 0 : -1}
+                onClick={() => changeTab(snippet.id)}
+                onKeyDown={(event) => {
+                  const offset =
+                    event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+                  if (!offset) return;
+                  event.preventDefault();
+                  const next = snippets[(index + offset + snippets.length) % snippets.length];
+                  changeTab(next.id);
+                  document.getElementById(`code-tab-${next.id}`)?.focus();
+                }}
               >
-                <div className="p-5 overflow-x-auto">
-                  <pre className="font-mono text-[13px] leading-relaxed text-gray-800 dark:text-gray-300 whitespace-pre">
-                    <code>{current.code}</code>
-                  </pre>
-                </div>
-
-                {/* Response (slides down when Run is clicked) */}
-                <AnimatePresence>
-                  {showResponse && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: [0.25, 0.1, 0, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="border-t border-gray-200 dark:border-white/10 p-5 bg-gray-50 dark:bg-white/[0.02]">
-                        <div className="flex items-center gap-2 mb-3 text-[12px] font-mono text-gray-400 dark:text-gray-500">
-                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                          Example response
-                        </div>
-                        <pre className="font-mono text-[13px] leading-relaxed text-gray-600 dark:text-gray-400 whitespace-pre overflow-x-auto">
-                          <code>{current.response}</code>
-                        </pre>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </AnimatePresence>
+                {snippet.label}
+              </button>
+            ))}
           </div>
-        </div>
+          <div className="nbl-code-filebar">
+            <span>
+              <FileCode2 size={12} />
+              {current.filename}
+            </span>
+            <CopyButton text={current.code} />
+          </div>
+          <div
+            key={activeTab}
+            id="code-example-panel"
+            role="tabpanel"
+            aria-labelledby={`code-tab-${activeTab}`}
+          >
+            <div className="nbl-code-scroll">
+              <pre>
+                <code>
+                  {current.code.split("\n").map((line, index) => (
+                    <span key={`${current.id}-${index}`} className="nbl-code-line">
+                      <span className="nbl-line-number" aria-hidden="true">
+                        {index + 1}
+                      </span>
+                      {line
+                        .split(
+                          /("(?:[^"\\]|\\.)*"|'[^']*'|\/\/.*|\b(?:import|from|const|await|package|func|if|defer|return)\b)/g
+                        )
+                        .map((token, i) => (
+                          <span
+                            key={i}
+                            className={
+                              /^["']/.test(token)
+                                ? "nbl-token-string"
+                                : token.startsWith("//")
+                                  ? "nbl-token-comment"
+                                  : /^(import|from|const|await|package|func|if|defer|return)$/.test(
+                                        token
+                                      )
+                                    ? "nbl-token-keyword"
+                                    : undefined
+                            }
+                          >
+                            {token || " "}
+                          </span>
+                        ))}
+                    </span>
+                  ))}
+                </code>
+              </pre>
+            </div>
+            <div className="nbl-code-bottom">
+              <span>
+                <Check size={12} /> SDK + standard REST
+              </span>
+              <button
+                type="button"
+                aria-expanded={showResponse}
+                aria-controls="code-example-response"
+                onClick={() => setShowResponse((show) => !show)}
+              >
+                <Play size={11} />
+                {showResponse ? "Hide example response" : "Show example response"}
+              </button>
+            </div>
+            {showResponse && (
+              <div id="code-example-response" className="nbl-code-response">
+                <span>EXAMPLE RESPONSE · SAMPLE DATA</span>
+                <pre>
+                  <code>{current.response}</code>
+                </pre>
+              </div>
+            )}
+          </div>
+        </Reveal>
       </div>
     </section>
   );
