@@ -189,7 +189,12 @@ export default function DatabaseStudio() {
                 {currentTab === "database" && (
                   <>
                     {databaseSubTab === "visualizer" ? (
-                      <SchemaVisualizer dbName={db_name} onSelectTable={handleSelectTable} />
+                      <SchemaVisualizer
+                        key={db_name}
+                        dbName={db_name}
+                        onSelectTable={handleSelectTable}
+                        onOpenCreateTable={() => setCreateTableOpen(true)}
+                      />
                     ) : (
                       <DatabaseObjectsView
                         dbName={db_name}

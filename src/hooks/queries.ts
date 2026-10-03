@@ -606,12 +606,16 @@ export const useDatabaseAnalytics = (dbName: string | undefined) => {
 export const useSchemaDiagram = (dbName: string | undefined) => {
   return useQuery({
     queryKey: ["schemaDiagram", dbName],
-    queryFn: async (): Promise<SchemaDiagramType> => {
+    queryFn: async ({ signal }): Promise<SchemaDiagramType> => {
       if (!dbName) throw new Error("Database name required");
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/databases/${dbName}/diagram`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${url}/api/v1/databases/${encodeURIComponent(dbName)}/diagram`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          signal,
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch schema diagram");
       return response.json();
     },
