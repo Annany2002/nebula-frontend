@@ -1,8 +1,6 @@
-# Nebula Studio
+# Nebula Frontend
 
-The React and TypeScript interface for [Nebula](https://github.com/Annany2002/nebula-backend), an open-source Backend-as-a-Service built with Go and SQLite. Studio brings database management, a table editor, SQL execution, and schema visualization into one workspace.
-
-![Nebula landing page and interactive Studio preview](docs/images/landing.png)
+The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an open-source Backend-as-a-Service built with Go and SQLite. Built with React and TypeScript, it provides the interface for managing databases, schemas, records, and application connections.
 
 ## Features
 
@@ -17,27 +15,13 @@ The React and TypeScript interface for [Nebula](https://github.com/Annany2002/ne
 - **Account and keys:** signup/login, profile editing, and database API key generation, rotation, and revocation.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
-Studio's record search operates on the current page. The backend separately supports column equality filters through the records API. The Exports page does not provide scheduled backups or a restore workflow.
+Record search operates on the current page. The backend separately supports column equality filters through the records API. The Exports page does not provide scheduled backups or a restore workflow.
 
-## Screenshots
+### Schema relationships
 
-These captures use synthetic demo data, rather than a live account. They show both light and dark themes.
+Explore foreign-key relationships, move tables to clarify the layout, and inspect their columns without leaving the database workspace.
 
-### Projects
-
-![Projects dashboard with database cards and connection quickstart](docs/images/projects.png)
-
-### Table editor
-
-![Table editor with the table browser, records, sorting, and pagination](docs/images/table-editor.png)
-
-### Schema visualizer
-
-![Schema visualizer showing commerce tables and foreign-key relationships](docs/images/schema-visualizer.png)
-
-### SQL editor
-
-![SQL editor showing an aggregate query, results, and schema browser](docs/images/sql-editor.png)
+![Tables and foreign-key relationships in Nebula](docs/images/schema-workspace.png)
 
 ## Local setup
 
@@ -51,7 +35,7 @@ printf 'VITE_BACKEND_URL=http://localhost:8080\n' > .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Sign up, log in, create a database, and open it in Studio.
+Open [http://localhost:3000](http://localhost:3000). Sign up, log in, create a database, and open its database workspace.
 
 ### Configuration
 
@@ -59,9 +43,9 @@ Open [http://localhost:3000](http://localhost:3000). Sign up, log in, create a d
 | ------------------ | --------------------------------- | ----------------------- |
 | `VITE_BACKEND_URL` | Backend origin, without `/api/v1` | `http://localhost:8080` |
 
-Restart Vite after changing environment variables. Configure backend `ALLOWED_ORIGINS` to include the Studio origin. Vite environment variables are public client configuration; do not put passwords or private server secrets in them.
+Restart Vite after changing environment variables. Configure backend `ALLOWED_ORIGINS` to include the frontend origin. Vite environment variables are public client configuration; do not put passwords or private server secrets in them.
 
-Studio uses JWT Bearer authentication for account and database operations. Generating, rotating, or revoking an API key also uses the account JWT; database keys are intended for your application connections.
+The frontend uses JWT Bearer authentication for account and database operations. Generating, rotating, or revoking an API key also uses the account JWT; database keys are intended for your application connections.
 
 ## Development
 
@@ -81,7 +65,7 @@ Verify UI changes in both themes and at desktop and mobile widths. Check keyboar
 
 Set `VITE_BACKEND_URL` for your deployment in `.env.production.local` or the hosting provider's build environment, then run `npm run build` when preparing a release. The bundle is written to `dist/`.
 
-Configure SPA fallback so direct links to Studio routes serve `index.html`. The repository includes `vercel.json` for Vercel routing.
+Configure SPA fallback so direct links to application routes serve `index.html`. The repository includes `vercel.json` for Vercel routing.
 
 ## Application structure
 
@@ -91,18 +75,18 @@ src/
 ├── context/             # Account session
 ├── hooks/queries.ts     # TanStack Query API hooks
 ├── lib/                 # Configuration and shared helpers
-├── pages/               # Landing, authentication, Projects, Studio, profile, 404
+├── pages/               # Landing, authentication, Projects, database workspace, profile, 404
 ├── components/
 │   ├── Studio/          # Navigation, SQL, visualizer, records, objects, exports
 │   ├── Table/           # Table creation and schema editing
 │   ├── Database/        # Database cards and dialogs
 │   └── ui/              # Shared Radix-based UI components
-└── styles/              # Landing and Studio styles
+└── styles/              # Landing and database workspace styles
 ```
 
-## Studio routes
+## Routes
 
-Studio and profile routes require login.
+Database, project, and profile routes require login.
 
 | Route                                    | View                   |
 | ---------------------------------------- | ---------------------- |
@@ -121,7 +105,7 @@ Studio and profile routes require login.
 | `/databases/:db_name/apikeys`            | API keys               |
 | `/databases/:db_name/settings`           | Database settings      |
 
-The exports route retains the `backups` URL segment. Derive active Studio tabs from route segments, so `/databases/...` does not accidentally match every database tab.
+The exports route retains the `backups` URL segment. Derive active workspace tabs from route segments, so `/databases/...` does not accidentally match every database tab.
 
 ## Stack
 
