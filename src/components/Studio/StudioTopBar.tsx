@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ChevronDown, Database, Globe, Check } from "lucide-react";
 import {
@@ -12,13 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDatabases } from "@/hooks/queries";
 import UserDropDown from "@/components/UserDropDown";
-import ConnectModal from "./ConnectModal";
 import { StudioTab } from "./StudioRail";
 
 interface StudioTopBarProps {
   dbName: string;
   currentTab?: StudioTab;
-  apiKey: string;
+  onConnect: () => void;
   userId?: string;
 }
 const tabLabels: Record<StudioTab, string> = {
@@ -32,12 +30,11 @@ const tabLabels: Record<StudioTab, string> = {
 export default function StudioTopBar({
   dbName,
   currentTab = "overview",
-  apiKey,
+  onConnect,
   userId,
 }: StudioTopBarProps) {
   const navigate = useNavigate();
   const { data: databases = [], isLoading, isError, refetch } = useDatabases();
-  const [connectOpen, setConnectOpen] = useState(false);
   const resolvedUserId = userId || localStorage.getItem("user_id") || "";
   const dashboardLink = resolvedUserId ? `/dashboard/${resolvedUserId}` : "/";
   return (
@@ -104,7 +101,7 @@ export default function StudioTopBar({
             size="sm"
             variant="outline"
             className="studio-connect-button"
-            onClick={() => setConnectOpen(true)}
+            onClick={onConnect}
             aria-label="Connect to database"
           >
             <Globe size={15} />
@@ -113,12 +110,6 @@ export default function StudioTopBar({
           <UserDropDown />
         </div>
       </header>
-      <ConnectModal
-        open={connectOpen}
-        onOpenChange={setConnectOpen}
-        dbName={dbName}
-        apiKey={apiKey}
-      />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Loader2, AlertCircle } from "lucide-react";
 import StudioRail, { StudioTab } from "@/components/Studio/StudioRail";
@@ -58,6 +58,12 @@ export default function DatabaseStudio() {
   const [activeTableState, setActiveTableState] = useState<string>("");
   const [createTableOpen, setCreateTableOpen] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
+  const connectionOpener = useRef<HTMLElement | null>(null);
+  const openConnection = () => {
+    connectionOpener.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setConnectOpen(true);
+  };
 
   // Queries
   const {
@@ -139,7 +145,7 @@ export default function DatabaseStudio() {
         <StudioTopBar
           dbName={db_name}
           currentTab={currentTab}
-          apiKey={dbDetails?.apiKey || ""}
+          onConnect={openConnection}
           userId={currentUserId}
         />
 
@@ -181,7 +187,7 @@ export default function DatabaseStudio() {
                     onNavigateTab={handleTabChange}
                     onSelectTable={handleSelectTable}
                     onOpenCreateTable={() => setCreateTableOpen(true)}
-                    onOpenConnect={() => setConnectOpen(true)}
+                    onOpenConnect={openConnection}
                   />
                 )}
 
@@ -253,7 +259,7 @@ export default function DatabaseStudio() {
         open={connectOpen}
         onOpenChange={setConnectOpen}
         dbName={db_name}
-        apiKey={dbDetails?.apiKey || ""}
+        returnFocusTo={connectionOpener.current}
       />
     </div>
   );
