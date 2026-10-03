@@ -29,7 +29,7 @@ const questions = [
   },
 ];
 
-const FAQ = () => (
+const Faq = () => (
   <section id="faq" className="nbl-section nbl-faq" aria-labelledby="faq-title">
     <div className="nbl-container nbl-faq-grid">
       <Reveal className="nbl-faq-heading">
@@ -57,4 +57,4 @@ const FAQ = () => (
   </section>
 );
 
-export default FAQ;
+export default Faq;
