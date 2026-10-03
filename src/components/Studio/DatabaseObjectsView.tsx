@@ -1,4 +1,4 @@
-import DatabaseIndexes from "@/components/Studio/DatabaseIndexes";
+import DatabaseSqlObjects from "@/components/Studio/DatabaseSqlObjects";
 import DatabaseTables from "@/components/Studio/DatabaseTables";
 import DatabaseObjectDetails from "@/components/Studio/DatabaseObjectDetails";
 export type DatabaseSubView = "tables" | "indexes" | "triggers" | "backups";
@@ -21,9 +21,14 @@ export default function DatabaseObjectsView({
       onSelectTable={onSelectTable}
       onOpenCreateTable={onOpenCreateTable}
     />
-  ) : subView === "indexes" ? (
-    <DatabaseIndexes key={dbName} dbName={dbName} onSelectTable={onSelectTable} />
+  ) : subView === "indexes" || subView === "triggers" ? (
+    <DatabaseSqlObjects
+      key={`${dbName}:${subView}`}
+      category={subView}
+      dbName={dbName}
+      onSelectTable={onSelectTable}
+    />
   ) : (
-    <DatabaseObjectDetails key={`${dbName}:${subView}`} dbName={dbName} subView={subView} />
+    <DatabaseObjectDetails key={`${dbName}:${subView}`} dbName={dbName} />
   );
 }
