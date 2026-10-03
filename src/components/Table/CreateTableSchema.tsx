@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { Plus, Trash2, Table2, Link2, X } from "lucide-react";
-import { Button } from "../ui/button";
+import { Dispatch, SetStateAction, useId, useRef, useState } from "react";
+import { Plus, Trash2, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogTrigger,
@@ -8,447 +8,418 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from "../ui/dialog";
-import { toast } from "sonner";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useCreateTable, useTables } from "@/hooks/queries";
+import { ColumnDefinitionType } from "@/types/allType";
+import { COLUMN_TYPES, DELETE_ACTIONS, columnNameError, tableNameError } from "@/lib/schemaForm";
+import SchemaSelect from "./SchemaSelect";
+import "@/styles/schema-dialog.css";
 
-interface ForeignKeyConfig {
-  target_table: string;
-  target_column: string;
-  on_delete?: string;
-}
-
-interface ColumnDefinition {
-  name: string;
-  type: string;
-  foreign_key?: ForeignKeyConfig;
-}
+type DraftColumn = ColumnDefinitionType & { draftId: string };
+const newColumn = (): DraftColumn => ({ draftId: crypto.randomUUID(), name: "", type: "TEXT" });
 
 export default function CreateTableSchema({
   db_name,
   openChange,
   setOpenChange,
+  showTrigger = true,
 }: {
   db_name: string;
   openChange: boolean;
   setOpenChange: Dispatch<SetStateAction<boolean>>;
+  showTrigger?: boolean;
 }) {
-  const { mutate: createTable, isPending } = useCreateTable();
-  const { data: existingTables = [] } = useTables(db_name);
+  const mutation = useCreateTable();
+  const tablesQuery = useTables(db_name);
+  const tables = tablesQuery.data ?? [];
   const [tableName, setTableName] = useState("");
-  const [columns, setColumns] = useState<ColumnDefinition[]>([{ name: "", type: "TEXT" }]);
-
-  const handleAddColumn = () => {
-    setColumns([...columns, { name: "", type: "TEXT" }]);
+  const [columns, setColumns] = useState<DraftColumn[]>(() => [newColumn()]);
+  const [error, setError] = useState<{ message: string; field?: string } | null>(null);
+  const busy = useRef(false);
+  const opener = useRef(document.activeElement as HTMLElement | null);
+  const formId = useId();
+  const tableNameId = `${formId}-table-name`;
+  const errorId = `${formId}-error`;
+  const pending = mutation.isPending;
+  const reset = () => {
+    setTableName("");
+    setColumns([newColumn()]);
+    setError(null);
+    mutation.reset();
   };
-
-  const handleRemoveColumn = (index: number) => {
-    if (columns.length <= 1) return;
-
-    const newColumns = [...columns];
-    newColumns.splice(index, 1);
-    setColumns(newColumns);
+  const changeOpen = (open: boolean) => {
+    if (busy.current) return;
+    if (open) opener.current = document.activeElement as HTMLElement;
+    else reset();
+    setOpenChange(open);
   };
-
-  const handleColumnChange = (index: number, field: "name" | "type", value: string) => {
-    const newColumns = [...columns];
-    newColumns[index][field] = value;
-    setColumns(newColumns);
-  };
-
-  const handleToggleForeignKey = (index: number) => {
-    const newColumns = [...columns];
-    if (newColumns[index].foreign_key) {
-      delete newColumns[index].foreign_key;
-    } else {
-      const defaultTable = existingTables[0]?.tbl_name || existingTables[0]?.name || "";
-      newColumns[index].foreign_key = {
-        target_table: defaultTable,
-        target_column: "id",
-        on_delete: "CASCADE",
-      };
-    }
-    setColumns(newColumns);
-  };
-
-  const handleForeignKeyChange = (index: number, field: keyof ForeignKeyConfig, value: string) => {
-    const newColumns = [...columns];
-    if (!newColumns[index].foreign_key) return;
-
-    newColumns[index].foreign_key = {
-      ...newColumns[index].foreign_key!,
-      [field]: value,
-    };
-
-    // Reset target column if target table changed
-    if (field === "target_table") {
-      newColumns[index].foreign_key!.target_column = "id";
-    }
-
-    setColumns(newColumns);
-  };
-
-  const getTargetTableColumns = (targetTableName: string): string[] => {
-    const table = existingTables.find((t) => (t.tbl_name || t.name) === targetTableName);
-    if (!table || !table.columns || table.columns.length === 0) {
-      return ["id"];
-    }
-    const cols = table.columns.map((c) => c.name);
-    if (!cols.includes("id")) {
-      return ["id", ...cols];
-    }
-    return cols;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const trimmedTableName = tableName.trim();
-    if (!trimmedTableName) {
-      toast.error("Table name is required");
-      return;
-    }
-
-    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmedTableName)) {
-      toast.error(
-        "Table name must contain only letters, numbers, and underscores (cannot start with a number)"
-      );
-      return;
-    }
-
-    const validColumns = columns.filter((col) => col.name.trim() !== "");
-
-    if (validColumns.length === 0) {
-      toast.error("At least one custom column is required");
-      return;
-    }
-
-    // Check for reserved column names
-    const hasReservedId = validColumns.some((col) => col.name.trim().toLowerCase() === "id");
-    if (hasReservedId) {
-      toast.error("Column 'id' is reserved for primary key and auto-generated by Nebula.");
-      return;
-    }
-
-    const hasReservedCreatedAt = validColumns.some(
-      (col) => col.name.trim().toLowerCase() === "created_at"
+  const update = (draftId: string, patch: Partial<DraftColumn>) => {
+    setColumns((previous) =>
+      previous.map((column) => (column.draftId === draftId ? { ...column, ...patch } : column))
     );
-    if (hasReservedCreatedAt) {
-      toast.error("Column 'created_at' is reserved and auto-generated by Nebula.");
-      return;
-    }
-
-    // Check for duplicate column names
-    const namesSet = new Set<string>();
-    for (const col of validColumns) {
-      const lower = col.name.trim().toLowerCase();
-      if (namesSet.has(lower)) {
-        toast.error(`Duplicate column name '${col.name.trim()}'.`);
-        return;
+    setError(null);
+    mutation.reset();
+  };
+  const reject = (message: string, field?: string) => {
+    setError({ message, field });
+    if (field) document.getElementById(field)?.focus();
+  };
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (busy.current) return;
+    const tableError = tableNameError(
+      tableName,
+      tables.map((table) => table.name || table.tbl_name)
+    );
+    if (tableError) return reject(tableError, tableNameId);
+    const names: string[] = [];
+    for (const column of columns) {
+      const field = `${formId}-${column.draftId}-name`;
+      const nameError = columnNameError(column.name, names);
+      if (nameError) return reject(nameError, field);
+      names.push(column.name.trim());
+      if (column.foreign_key) {
+        const target = tables.find(
+          (table) => (table.name || table.tbl_name) === column.foreign_key!.target_table
+        );
+        if (!target?.columns?.some((item) => item.name === column.foreign_key!.target_column))
+          return reject(
+            `Choose an existing reference table and column for ${column.name.trim()}.`,
+            `${formId}-${column.draftId}-target`
+          );
       }
-      namesSet.add(lower);
-
-      // Validate foreign key if present
-      if (col.foreign_key) {
-        if (!col.foreign_key.target_table) {
-          toast.error(`Select a target table for foreign key on '${col.name}'.`);
-          return;
-        }
-        if (!col.foreign_key.target_column) {
-          toast.error(`Select a target column for foreign key on '${col.name}'.`);
-          return;
-        }
-      }
     }
-
-    createTable(
+    setError(null);
+    busy.current = true;
+    mutation.mutate(
       {
         dbName: db_name,
-        tableName: trimmedTableName,
-        schema: validColumns.map((c) => ({
-          name: c.name.trim(),
-          type: c.type,
-          ...(c.foreign_key && c.foreign_key.target_table && c.foreign_key.target_column
-            ? {
-                foreign_key: {
-                  target_table: c.foreign_key.target_table,
-                  target_column: c.foreign_key.target_column,
-                  on_delete: c.foreign_key.on_delete || "CASCADE",
-                },
-              }
-            : {}),
+        tableName: tableName.trim(),
+        schema: columns.map(({ name, type, foreign_key }) => ({
+          name: name.trim(),
+          type,
+          ...(foreign_key ? { foreign_key } : {}),
         })),
       },
       {
         onSuccess: () => {
-          setTableName("");
-          setColumns([{ name: "", type: "TEXT" }]);
+          busy.current = false;
+          reset();
           setOpenChange(false);
+        },
+        onSettled: () => {
+          busy.current = false;
         },
       }
     );
   };
-
+  const addColumn = () => {
+    const column = newColumn();
+    setColumns((previous) => [...previous, column]);
+    requestAnimationFrame(() =>
+      document.getElementById(`${formId}-${column.draftId}-name`)?.focus()
+    );
+  };
   return (
-    <Dialog open={openChange} onOpenChange={setOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="h-9 px-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/25 transition-all text-xs">
-          <Plus className="h-4 w-4 mr-1.5" /> Add Table
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-xl rounded-2xl border border-purple-200/50 dark:border-white/10 bg-white/95 dark:bg-[#0e0d15]/95 backdrop-blur-2xl shadow-2xl p-6">
-        <DialogHeader>
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-              <Table2 className="h-4 w-4" />
-            </div>
-            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
-              Create Table Schema
-            </DialogTitle>
-          </div>
-          <DialogDescription className="text-xs text-gray-500 dark:text-zinc-400">
-            Define a new table schema for project{" "}
-            <span className="font-mono text-purple-600 dark:text-purple-400 font-medium">
-              {db_name}
-            </span>
-            .
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="tableName"
-              className="text-xs font-medium text-gray-700 dark:text-zinc-300"
-            >
-              Table Name
-            </Label>
-            <Input
-              id="tableName"
-              value={tableName}
-              onChange={(e) => setTableName(e.target.value)}
-              placeholder="e.g. users, products, orders"
-              autoComplete="off"
-              disabled={isPending}
-              className="h-9 rounded-xl border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 font-mono text-xs focus:ring-purple-500"
-            />
-          </div>
-
-          {/* Auto-included system columns info */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-500/5 dark:bg-purple-500/10 border border-purple-200/40 dark:border-purple-500/20 text-xs text-purple-700 dark:text-purple-300">
-            <span className="font-semibold text-[11px]">Auto-included:</span>
-            <div className="flex items-center gap-1.5 font-mono text-[11px]">
-              <span className="px-1.5 py-0.5 rounded-md bg-purple-500/10 dark:bg-white/10 font-medium">
-                id (INTEGER PK)
-              </span>
-              <span className="text-gray-400 dark:text-zinc-500">•</span>
-              <span className="px-1.5 py-0.5 rounded-md bg-purple-500/10 dark:bg-white/10 font-medium">
-                created_at (TIMESTAMP)
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium text-gray-700 dark:text-zinc-300">
-                Custom Columns & Relationships
-              </Label>
-              <span className="text-[11px] text-gray-400 font-mono">
-                {columns.length} {columns.length === 1 ? "column" : "columns"}
-              </span>
-            </div>
-
-            <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-              {columns.map((column, index) => (
-                <div
-                  key={index}
-                  className="rounded-xl border border-purple-200/40 dark:border-white/[0.06] bg-purple-500/[0.02] dark:bg-white/[0.02] p-2 space-y-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={column.name}
-                      onChange={(e) => handleColumnChange(index, "name", e.target.value)}
-                      placeholder="e.g. user_id, status, price"
-                      className="flex-1 h-8 rounded-lg border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 font-mono text-xs"
-                    />
-                    <select
-                      value={column.type}
-                      onChange={(e) => handleColumnChange(index, "type", e.target.value)}
-                      className="h-8 rounded-lg border border-purple-200/50 dark:border-white/10 bg-white/60 dark:bg-black/30 px-2.5 py-1 text-xs font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
-                    >
-                      <option value="TEXT">TEXT</option>
-                      <option value="INTEGER">INTEGER</option>
-                      <option value="BOOLEAN">BOOLEAN</option>
-                      <option value="DECIMAL">DECIMAL</option>
-                      <option value="UUID">UUID</option>
-                      <option value="TIMESTAMP">TIMESTAMP</option>
-                      <option value="BLOB">BLOB</option>
-                      <option value="REAL">REAL</option>
-                    </select>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      title={
-                        column.foreign_key
-                          ? "Remove Foreign Key relation"
-                          : existingTables.length === 0
-                            ? "No tables to reference yet"
-                            : "Add Foreign Key relation"
-                      }
-                      className={`h-8 w-8 rounded-lg transition-colors shrink-0 ${
-                        column.foreign_key
-                          ? "text-purple-600 dark:text-purple-400 bg-purple-500/15 border border-purple-500/30"
-                          : "text-gray-400 hover:text-purple-500 hover:bg-purple-500/10"
-                      }`}
-                      onClick={() => handleToggleForeignKey(index)}
-                      disabled={isPending}
-                    >
-                      <Link2 className="h-3.5 w-3.5" />
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 shrink-0"
-                      onClick={() => handleRemoveColumn(index)}
-                      disabled={columns.length <= 1 || isPending}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-
-                  {/* Inline Foreign Key Relationship Selector */}
-                  {column.foreign_key && (
-                    <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 rounded-lg bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 text-xs">
-                      <div className="flex items-center gap-1 text-[11px] font-medium text-purple-600 dark:text-purple-400 shrink-0">
-                        <Link2 className="h-3 w-3" />
-                        <span>References</span>
-                      </div>
-
-                      {existingTables.length > 0 ? (
-                        <>
-                          {/* Target Table */}
-                          <select
-                            value={column.foreign_key.target_table}
-                            onChange={(e) =>
-                              handleForeignKeyChange(index, "target_table", e.target.value)
-                            }
-                            className="h-7 rounded-md border border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-2 text-[11px] font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
-                          >
-                            {existingTables.map((t) => {
-                              const tName = t.tbl_name || t.name;
-                              return (
-                                <option key={tName} value={tName}>
-                                  {tName}
-                                </option>
-                              );
-                            })}
-                          </select>
-
-                          <span className="text-gray-400 text-xs">(</span>
-
-                          {/* Target Column */}
-                          <select
-                            value={column.foreign_key.target_column}
-                            onChange={(e) =>
-                              handleForeignKeyChange(index, "target_column", e.target.value)
-                            }
-                            className="h-7 rounded-md border border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-2 text-[11px] font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
-                          >
-                            {getTargetTableColumns(column.foreign_key.target_table).map((col) => (
-                              <option key={col} value={col}>
-                                {col}
-                              </option>
-                            ))}
-                          </select>
-
-                          <span className="text-gray-400 text-xs">)</span>
-
-                          {/* On Delete action */}
-                          <div className="flex items-center gap-1 ml-auto">
-                            <span className="text-[10px] text-gray-400 uppercase font-mono">
-                              On Delete:
-                            </span>
-                            <select
-                              value={column.foreign_key.on_delete || "CASCADE"}
-                              onChange={(e) =>
-                                handleForeignKeyChange(index, "on_delete", e.target.value)
-                              }
-                              className="h-7 rounded-md border border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-1.5 text-[11px] font-mono text-gray-800 dark:text-zinc-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500"
-                            >
-                              <option value="CASCADE">CASCADE</option>
-                              <option value="SET NULL">SET NULL</option>
-                              <option value="RESTRICT">RESTRICT</option>
-                              <option value="NO ACTION">NO ACTION</option>
-                            </select>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
-                          <span>Target table name:</span>
-                          <Input
-                            value={column.foreign_key.target_table}
-                            onChange={(e) =>
-                              handleForeignKeyChange(index, "target_table", e.target.value)
-                            }
-                            placeholder="table_name"
-                            className="h-7 w-28 rounded-md border-purple-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 px-2 text-[11px] font-mono"
-                          />
-                        </div>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleForeignKey(index)}
-                        title="Remove relation"
-                        className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  )}
+    <Dialog open={openChange} onOpenChange={changeOpen}>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button size="sm">
+            <Plus size={15} />
+            New table
+          </Button>
+        </DialogTrigger>
+      )}
+      {openChange && (
+        <DialogContent
+          className="schema-dialog"
+          closeDisabled={pending}
+          onEscapeKeyDown={(event) => {
+            if (busy.current) event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (busy.current) event.preventDefault();
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (opener.current?.isConnected) opener.current.focus();
+          }}
+        >
+          <DialogHeader className="schema-dialog-heading">
+            <DialogTitle>Create table</DialogTitle>
+            <DialogDescription>
+              Define columns and relationships in <strong>{db_name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submit} className="schema-form" noValidate aria-busy={pending}>
+            <div className="schema-body">
+              <fieldset disabled={pending}>
+                <div className="schema-field">
+                  <Label htmlFor={tableNameId}>Table name</Label>
+                  <Input
+                    id={tableNameId}
+                    value={tableName}
+                    onChange={(event) => {
+                      setTableName(event.target.value);
+                      setError(null);
+                      mutation.reset();
+                    }}
+                    placeholder="e.g. orders"
+                    autoComplete="off"
+                    aria-invalid={error?.field === tableNameId}
+                    aria-describedby={error?.field === tableNameId ? errorId : undefined}
+                  />
+                  <p className="schema-hint">
+                    Letters, numbers, and underscores. Up to 64 characters.
+                  </p>
                 </div>
-              ))}
+                <div className="schema-system-columns">
+                  <span>Added automatically</span>
+                  <code>
+                    id <small>INTEGER · Primary key</small>
+                  </code>
+                  <code>
+                    created_at <small>TIMESTAMP</small>
+                  </code>
+                </div>
+                <div className="schema-section-title">
+                  <h2>Columns</h2>
+                  <span>
+                    {columns.length} custom {columns.length === 1 ? "column" : "columns"}
+                  </span>
+                </div>
+                <div className="schema-draft-columns">
+                  {columns.map((column, index) => {
+                    const id = `${formId}-${column.draftId}`;
+                    const reference = column.foreign_key;
+                    const target = tables.find(
+                      (table) => (table.name || table.tbl_name) === reference?.target_table
+                    );
+                    return (
+                      <div className="schema-draft-row" key={column.draftId}>
+                        <div className="schema-draft-fields">
+                          <span className="schema-column-number" aria-hidden="true">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          <div className="schema-field">
+                            <Label htmlFor={`${id}-name`}>Column name</Label>
+                            <Input
+                              id={`${id}-name`}
+                              value={column.name}
+                              onChange={(event) =>
+                                update(column.draftId, { name: event.target.value })
+                              }
+                              placeholder="e.g. customer_id"
+                              autoComplete="off"
+                              aria-invalid={error?.field === `${id}-name`}
+                              aria-describedby={error?.field === `${id}-name` ? errorId : undefined}
+                            />
+                          </div>
+                          <div className="schema-field schema-type">
+                            <Label htmlFor={`${id}-type`}>Type</Label>
+                            <SchemaSelect
+                              id={`${id}-type`}
+                              value={column.type}
+                              onChange={(event) =>
+                                update(column.draftId, { type: event.target.value })
+                              }
+                            >
+                              {COLUMN_TYPES.map((type) => (
+                                <option key={type}>{type}</option>
+                              ))}
+                            </SchemaSelect>
+                          </div>
+                          <div className="schema-row-actions">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`${reference ? "Remove" : "Add"} relationship for column ${index + 1}`}
+                              aria-pressed={!!reference}
+                              disabled={
+                                !reference && !tables.some((table) => table.columns?.length)
+                              }
+                              onClick={() => {
+                                const table = tables.find((item) => item.columns?.length);
+                                const targetColumn =
+                                  table?.columns.find((item) => item.pk > 0) ?? table?.columns[0];
+                                update(column.draftId, {
+                                  foreign_key: reference
+                                    ? undefined
+                                    : {
+                                        target_table: table?.name || table?.tbl_name || "",
+                                        target_column: targetColumn?.name || "",
+                                        on_delete: "CASCADE",
+                                      },
+                                });
+                              }}
+                            >
+                              <Link2 size={15} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Remove column ${index + 1}`}
+                              disabled={columns.length === 1}
+                              onClick={() => {
+                                setColumns((previous) =>
+                                  previous.filter((item) => item.draftId !== column.draftId)
+                                );
+                                setError(null);
+                                requestAnimationFrame(() =>
+                                  document
+                                    .getElementById(
+                                      `${formId}-${columns[index - 1]?.draftId ?? columns[index + 1]?.draftId}-name`
+                                    )
+                                    ?.focus()
+                                );
+                              }}
+                            >
+                              <Trash2 size={15} />
+                            </Button>
+                          </div>
+                        </div>
+                        {reference && (
+                          <div className="schema-reference">
+                            <div className="schema-field">
+                              <Label htmlFor={`${id}-target`}>References table</Label>
+                              <SchemaSelect
+                                id={`${id}-target`}
+                                value={reference.target_table}
+                                onChange={(event) => {
+                                  const selected = tables.find(
+                                    (table) => (table.name || table.tbl_name) === event.target.value
+                                  );
+                                  const primary =
+                                    selected?.columns?.find((item) => item.pk > 0) ??
+                                    selected?.columns?.[0];
+                                  update(column.draftId, {
+                                    foreign_key: {
+                                      ...reference,
+                                      target_table: event.target.value,
+                                      target_column: primary?.name ?? "",
+                                    },
+                                  });
+                                }}
+                              >
+                                {tables.map((table) => (
+                                  <option
+                                    key={table.name || table.tbl_name}
+                                    value={table.name || table.tbl_name}
+                                  >
+                                    {table.name || table.tbl_name}
+                                  </option>
+                                ))}
+                              </SchemaSelect>
+                            </div>
+                            <div className="schema-field">
+                              <Label htmlFor={`${id}-target-column`}>Reference column</Label>
+                              <SchemaSelect
+                                id={`${id}-target-column`}
+                                value={reference.target_column}
+                                disabled={!target?.columns?.length}
+                                onChange={(event) =>
+                                  update(column.draftId, {
+                                    foreign_key: {
+                                      ...reference,
+                                      target_column: event.target.value,
+                                    },
+                                  })
+                                }
+                              >
+                                {!target?.columns?.length && (
+                                  <option value="">No columns available</option>
+                                )}
+                                {target?.columns?.map((item) => (
+                                  <option key={item.name} value={item.name}>
+                                    {item.name}
+                                    {item.pk > 0 ? " (primary key)" : ""}
+                                  </option>
+                                ))}
+                              </SchemaSelect>
+                            </div>
+                            <div className="schema-field">
+                              <Label htmlFor={`${id}-delete`}>On delete</Label>
+                              <SchemaSelect
+                                id={`${id}-delete`}
+                                value={reference.on_delete}
+                                onChange={(event) =>
+                                  update(column.draftId, {
+                                    foreign_key: { ...reference, on_delete: event.target.value },
+                                  })
+                                }
+                              >
+                                {DELETE_ACTIONS.map((action) => (
+                                  <option key={action}>{action}</option>
+                                ))}
+                              </SchemaSelect>
+                            </div>
+                            <p className="schema-hint">
+                              Reference a primary key or a unique column.
+                              {reference.on_delete === "CASCADE"
+                                ? " Deleting the referenced row also deletes related rows in this table."
+                                : ""}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="schema-add-column"
+                  onClick={addColumn}
+                >
+                  <Plus size={14} />
+                  Add column
+                </Button>
+                {tablesQuery.isError && (
+                  <p className="schema-hint">
+                    Reference tables couldn’t be refreshed.{" "}
+                    <button type="button" onClick={() => tablesQuery.refetch()}>
+                      Try again
+                    </button>
+                  </p>
+                )}
+                {!tables.length && !tablesQuery.isPending && !tablesQuery.isError && (
+                  <p className="schema-hint">
+                    Relationships become available after you create your first table.
+                  </p>
+                )}
+              </fieldset>
             </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddColumn}
-              className="w-full h-8 rounded-xl border-dashed border-purple-300/60 dark:border-white/15 text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 dark:hover:bg-white/5 font-medium"
-              disabled={isPending}
-            >
-              <Plus className="mr-1.5 h-3.5 w-3.5" />
-              Add Column
-            </Button>
-          </div>
-
-          <DialogFooter className="pt-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpenChange(false)}
-              disabled={isPending}
-              className="rounded-xl h-9 px-4 text-xs border-purple-200/50 dark:border-white/10 hover:bg-purple-500/10 dark:hover:bg-white/5"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="rounded-xl h-9 px-4 text-xs font-medium bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-500/20"
-            >
-              {isPending ? "Creating..." : "Create Table"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+            <footer className="schema-footer">
+              {(error || mutation.isError) && (
+                <p id={errorId} role="alert" className="schema-error">
+                  {error?.message || mutation.error?.message}
+                </p>
+              )}
+              <span>
+                {pending ? "Creating your table…" : "At least one custom column is required."}
+              </span>
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => changeOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={pending}>
+                  {pending ? "Creating…" : "Create table"}
+                </Button>
+              </div>
+            </footer>
+          </form>
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

@@ -248,6 +248,7 @@ export default function DatabaseStudio() {
       {/* Create Table Schema Modal */}
       {createTableOpen && (
         <CreateTableSchema
+          showTrigger={false}
           db_name={db_name}
           openChange={createTableOpen}
           setOpenChange={setCreateTableOpen}
