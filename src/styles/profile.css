@@ -175,9 +175,10 @@
   font-size: 13px;
   color: hsl(var(--muted-foreground));
 }
-.nebula-profile :is(a, button, input):focus-visible {
+.nebula-profile :is(a, button):focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 3px;
+  box-shadow: none;
 }
 @media (max-width: 800px) {
   .profile-layout {

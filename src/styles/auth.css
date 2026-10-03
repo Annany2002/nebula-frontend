@@ -242,9 +242,10 @@
   font-size: 11px;
   color: hsl(var(--muted-foreground));
 }
-.nebula-auth :is(a, button, input):focus-visible {
+.nebula-auth :is(a, button):focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 4px;
+  box-shadow: none;
 }
 @media (max-width: 950px) {
   .auth-story {

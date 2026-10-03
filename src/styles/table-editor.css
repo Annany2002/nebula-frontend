@@ -55,8 +55,9 @@
 }
 .record-table-search:focus-within,
 .record-search:focus-within {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
 }
 .record-table-search input,
 .record-search input {
@@ -580,11 +581,16 @@
     color 160ms ease,
     border-color 160ms ease;
 }
-.table-editor button:focus-visible,
-.table-editor select:focus-visible,
-.table-record-field select:focus-visible {
+.table-editor button:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+  box-shadow: none;
+}
+.table-editor select:focus-visible,
+.table-record-field select:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
 }
 @media (max-width: 1099px) {
   .table-editor {

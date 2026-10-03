@@ -468,8 +468,9 @@
   box-shadow: none;
 }
 .studio-table-search:focus-within {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
 }
 .studio-table-search input:focus-visible {
   outline: none;
@@ -746,9 +747,10 @@
   font-size: 12px;
   color: hsl(var(--muted-foreground));
 }
-.nebula-studio :is(a, button, input):focus-visible {
+.nebula-studio :is(a, button):focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 3px;
+  box-shadow: none;
 }
 @media (max-width: 1100px) {
   .studio-overview-layout {
