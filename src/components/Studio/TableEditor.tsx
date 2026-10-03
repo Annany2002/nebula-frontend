@@ -3,6 +3,7 @@ import {
   AlertCircle,
   ArrowDown,
   ArrowUp,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Columns3,
@@ -309,21 +310,27 @@ function TableRecords({
         </div>
         <div className="record-sort">
           <label htmlFor="record-sort-column">Sort by</label>
-          <select
-            id="record-sort-column"
-            value={effectiveSort}
-            aria-label="Sort records by"
-            onChange={(event) => {
-              setSortColumn(event.target.value);
-              setPage(0);
-            }}
-          >
-            {table.columns.map((column) => (
-              <option key={column.name} value={column.name}>
-                {column.name}
-              </option>
-            ))}
-          </select>
+          <span className="record-sort-control">
+            <span className="record-sort-value" aria-hidden="true">
+              {effectiveSort}
+            </span>
+            <select
+              id="record-sort-column"
+              value={effectiveSort}
+              aria-label="Sort records by"
+              onChange={(event) => {
+                setSortColumn(event.target.value);
+                setPage(0);
+              }}
+            >
+              {table.columns.map((column) => (
+                <option key={column.name} value={column.name}>
+                  {column.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={14} aria-hidden="true" />
+          </span>
         </div>
         <Button
           variant="outline"

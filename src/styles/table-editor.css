@@ -206,6 +206,34 @@
   gap: 8px;
   font-size: 11px;
   color: hsl(var(--muted-foreground));
+  min-width: 0;
+}
+.record-sort label {
+  flex-shrink: 0;
+}
+.record-sort-control {
+  position: relative;
+  min-width: 0;
+  max-width: 220px;
+}
+.record-sort-value {
+  display: block;
+  visibility: hidden;
+  height: 34px;
+  border: 1px solid transparent;
+  padding: 0 32px 0 10px;
+  font-family: monospace;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.record-sort-control > svg {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: hsl(var(--muted-foreground));
 }
 .record-sort select,
 .record-pagination select,
@@ -217,10 +245,20 @@
   padding: 7px 8px;
 }
 .record-sort select {
-  width: 128px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  padding: 0 32px 0 10px;
   height: 34px;
   font-family: monospace;
   font-size: 11px;
+}
+.table-editor .record-sort select:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
 }
 .record-toolbar > button {
   width: 34px;
@@ -587,11 +625,6 @@
   }
   .record-sort {
     flex: 1;
-  }
-  .record-sort select {
-    flex: 1;
-    min-width: 0;
-    width: 70px;
   }
   .record-pagination {
     padding: 12px 18px;
