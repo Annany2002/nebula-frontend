@@ -39,12 +39,12 @@ Open [http://localhost:3000](http://localhost:3000). Sign up, log in, create a d
 
 ### Configuration
 
-| Variable           | Purpose                                                    | Default                         |
-| ------------------ | ---------------------------------------------------------- | ------------------------------- |
-| `VITE_BACKEND_URL` | Backend origin, without `/api/v1`                          | `http://localhost:8080`         |
-| `VITE_DOCS_URL`    | Public documentation URL, including the desired entry page | Backend API reference on GitHub |
+| Variable           | Purpose                                                    | Default                                                    |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------- |
+| `VITE_BACKEND_URL` | Backend origin, without `/api/v1`                          | `http://localhost:8080`                                    |
+| `VITE_DOCS_URL`    | Public documentation URL, including the desired entry page | `https://kaizer-0109.mintlify.site/api-reference/overview` |
 
-Set `VITE_DOCS_URL` to the published documentation's API overview URL in `.env.local` for local development and in your hosting provider's build environment for production. The desktop navbar, mobile menu, and footer use the same URL. Until it is configured, they open the API reference files on GitHub.
+The desktop navbar, mobile menu, and footer open the published [API reference](https://kaizer-0109.mintlify.site/api-reference/overview) by default. To use another documentation site or a local preview, override `VITE_DOCS_URL` in `.env.local` or your hosting provider's build environment.
 
 The documentation source and Mintlify publishing instructions live in the [backend docs directory](https://github.com/Annany2002/nebula-backend/tree/main/docs). Mintlify hosts the documentation independently of the API and frontend.
 
@@ -68,7 +68,7 @@ Verify UI changes in both themes and at desktop and mobile widths. Check keyboar
 
 ### Production build
 
-Set `VITE_BACKEND_URL` and `VITE_DOCS_URL` for your deployment in `.env.production.local` or the hosting provider's build environment, then run `npm run build` when preparing a release. The bundle is written to `dist/`.
+Set `VITE_BACKEND_URL` for your deployment in `.env.production.local` or the hosting provider's build environment. Set `VITE_DOCS_URL` only if you want to override the public documentation URL, then run `npm run build` when preparing a release. The bundle is written to `dist/`.
 
 Configure SPA fallback so direct links to application routes serve `index.html`. The repository includes `vercel.json` for Vercel routing.
 
