@@ -39,9 +39,14 @@ Open [http://localhost:3000](http://localhost:3000). Sign up, log in, create a d
 
 ### Configuration
 
-| Variable           | Purpose                           | Default                 |
-| ------------------ | --------------------------------- | ----------------------- |
-| `VITE_BACKEND_URL` | Backend origin, without `/api/v1` | `http://localhost:8080` |
+| Variable           | Purpose                                                    | Default                         |
+| ------------------ | ---------------------------------------------------------- | ------------------------------- |
+| `VITE_BACKEND_URL` | Backend origin, without `/api/v1`                          | `http://localhost:8080`         |
+| `VITE_DOCS_URL`    | Public documentation URL, including the desired entry page | Backend API reference on GitHub |
+
+Set `VITE_DOCS_URL` to the published documentation's API overview URL in `.env.local` for local development and in your hosting provider's build environment for production. The desktop navbar, mobile menu, and footer use the same URL. Until it is configured, they open the API reference files on GitHub.
+
+The documentation source and Mintlify publishing instructions live in the [backend docs directory](https://github.com/Annany2002/nebula-backend/tree/main/docs). Mintlify hosts the documentation independently of the API and frontend.
 
 Restart Vite after changing environment variables. Configure backend `ALLOWED_ORIGINS` to include the frontend origin. Vite environment variables are public client configuration; do not put passwords or private server secrets in them.
 
@@ -63,7 +68,7 @@ Verify UI changes in both themes and at desktop and mobile widths. Check keyboar
 
 ### Production build
 
-Set `VITE_BACKEND_URL` for your deployment in `.env.production.local` or the hosting provider's build environment, then run `npm run build` when preparing a release. The bundle is written to `dist/`.
+Set `VITE_BACKEND_URL` and `VITE_DOCS_URL` for your deployment in `.env.production.local` or the hosting provider's build environment, then run `npm run build` when preparing a release. The bundle is written to `dist/`.
 
 Configure SPA fallback so direct links to application routes serve `index.html`. The repository includes `vercel.json` for Vercel routing.
 
