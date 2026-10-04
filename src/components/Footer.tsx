@@ -1,4 +1,4 @@
-import nebulaLogo from "@/assets/download.jpeg";
+import NebulaLogo from "@/assets/nebula-logo";
 import { Link } from "react-router-dom";
 
 const Footer = () => (
@@ -6,7 +6,7 @@ const Footer = () => (
     <div className="nbl-container nbl-footer-meta">
       <div className="nbl-footer-legal">
         <Link to="/" aria-label="Nebula home">
-          <img src={nebulaLogo} alt="" width="28" height="28" />
+          <NebulaLogo showText={false} />
         </Link>
         <span>© {new Date().getFullYear()} · MIT licensed.</span>
       </div>
