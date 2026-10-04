@@ -140,7 +140,6 @@
   color: var(--nbl-ink);
 }
 .nbl-brand img {
-  border-radius: 50%;
   filter: drop-shadow(0 0 6px color-mix(in oklch, var(--nbl-violet) 35%, transparent));
 }
 .nbl-brand > span {
@@ -1463,9 +1462,6 @@
   gap: 16px;
   color: var(--nbl-muted);
   font-size: 11px;
-}
-.nbl-footer-legal img {
-  border-radius: 50%;
 }
 .nbl-footer-legal > span {
   border-left: 1px solid var(--nbl-line);

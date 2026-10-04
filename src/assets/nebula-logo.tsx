@@ -1,5 +1,5 @@
 import React from "react";
-import nebulaLogo from "./download.jpeg";
+import nebulaLogo from "./nebula-mark.png";
 import { cn } from "@/lib/utils";
 
 interface NebulaLogoProps {
@@ -17,9 +17,11 @@ export const NebulaLogo: React.FC<NebulaLogoProps> = ({
     <div className={cn("inline-flex items-center gap-2 shrink-0", className)}>
       <img
         src={nebulaLogo}
-        alt="nebula-logo"
+        alt={showText ? "" : "Nebula"}
+        width={showText ? 32 : 28}
+        height={showText ? 32 : 28}
         className={cn(
-          "rounded-full aspect-square object-cover shrink-0 select-none",
+          "aspect-square object-contain shrink-0 select-none",
           showText ? "w-8 h-8" : "w-7 h-7",
           imgClassName
         )}
