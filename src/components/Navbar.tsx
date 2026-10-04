@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/context/auth-context";
 import UserDropDown from "./UserDropDown";
 import LandingBrand from "./landing/LandingBrand";
+import { docsUrl } from "@/lib/config";
 
 const navLinks = [
   { label: "Product", href: "#features" },
@@ -47,11 +48,7 @@ const Navbar = () => {
               {item.label}
             </a>
           ))}
-          <a
-            href="https://github.com/Annany2002/nebula-backend#readme"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href={docsUrl} target="_blank" rel="noopener noreferrer">
             Docs <ArrowUpRight size={12} />
           </a>
         </nav>
@@ -122,6 +119,15 @@ const Navbar = () => {
                 <ArrowUpRight size={15} />
               </a>
             ))}
+            <a
+              href={docsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Docs
+              <ArrowUpRight size={15} />
+            </a>
             <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
               FAQ
               <ArrowUpRight size={15} />

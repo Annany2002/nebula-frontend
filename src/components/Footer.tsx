@@ -1,5 +1,6 @@
 import NebulaLogo from "@/assets/nebula-logo";
 import { Link } from "react-router-dom";
+import { docsUrl } from "@/lib/config";
 
 const Footer = () => (
   <footer className="nbl-footer">
@@ -13,6 +14,9 @@ const Footer = () => (
       <nav className="nbl-footer-links" aria-label="Footer navigation">
         <a href="#features">Product</a>
         <a href="#code-demo">Developers</a>
+        <a href={docsUrl} target="_blank" rel="noopener noreferrer">
+          Docs
+        </a>
         <a href="https://github.com/Annany2002/nebula-backend" target="_blank" rel="noreferrer">
           GitHub
         </a>
