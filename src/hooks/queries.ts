@@ -610,6 +610,8 @@ export const useExecuteSQL = (dbName: string | undefined) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tables", dbName] });
       queryClient.invalidateQueries({ queryKey: ["records", dbName] });
+      queryClient.invalidateQueries({ queryKey: ["databaseObjects", dbName] });
+      queryClient.invalidateQueries({ queryKey: ["schemaDiagram", dbName] });
       queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
       queryClient.invalidateQueries({ queryKey: ["databaseAnalytics", dbName] });
     },
