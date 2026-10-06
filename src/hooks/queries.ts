@@ -12,6 +12,9 @@ import {
   DatabaseAnalyticsType,
   SchemaDiagramType,
   DatabaseObjectsType,
+  CreateIndexPayload,
+  CreateIndexResponse,
+  DropIndexResponse,
   AlterTablePayload,
   APIKeyMetadataType,
   ColumnDefinitionType,
@@ -695,5 +698,60 @@ export const useDatabaseObjects = (dbName: string | undefined) => {
       return data;
     },
     enabled: !!dbName,
+  });
+};
+
+// Index writes are never retried automatically: a lost response may have already committed.
+async function indexRequest<T>(
+  dbName: string,
+  method: "POST" | "DELETE",
+  payload?: CreateIndexPayload,
+  indexName?: string
+): Promise<T> {
+  const token = getToken();
+  if (!token) throw new Error("Sign in again to manage indexes.");
+  const endpoint = `${url}/api/v1/databases/${encodeURIComponent(dbName)}/indexes${indexName === undefined ? "" : `/${encodeURIComponent(indexName)}`}`;
+  const response = await fetch(endpoint, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: payload ? JSON.stringify(payload) : undefined,
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok)
+    throw new Error(
+      typeof data?.error === "string"
+        ? data.error
+        : `Couldn’t ${method === "POST" ? "create" : "drop"} the index. Refresh the catalog before trying again.`
+    );
+  return data as T;
+}
+
+function useIndexInvalidation(dbName: string) {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all(
+      ["databaseObjects", "tables", "databaseDetails", "schemaDiagram", "databaseAnalytics"].map(
+        (key) => queryClient.invalidateQueries({ queryKey: [key, dbName] })
+      )
+    );
+}
+
+export const useCreateIndex = (dbName: string) => {
+  const invalidate = useIndexInvalidation(dbName);
+  return useMutation({
+    mutationFn: (payload: CreateIndexPayload) =>
+      indexRequest<CreateIndexResponse>(dbName, "POST", payload),
+    retry: false,
+    onSuccess: invalidate,
+  });
+};
+
+export const useDropIndex = (dbName: string) => {
+  const invalidate = useIndexInvalidation(dbName);
+  return useMutation({
+    mutationFn: (name: string) =>
+      indexRequest<DropIndexResponse>(dbName, "DELETE", undefined, name),
+    retry: false,
+    onSuccess: invalidate,
   });
 };
