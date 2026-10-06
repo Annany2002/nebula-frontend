@@ -10,12 +10,17 @@ import {
   RefreshCw,
   Search,
   Terminal,
+  Plus,
+  Trash2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IndexInfo, TriggerInfo } from "@/types/allType";
 import { useDatabaseObjects, useTables } from "@/hooks/queries";
+import CreateIndexForm from "./Indexes/CreateIndexForm";
+import { isProtectedIndexTarget } from "./Indexes/indexManagement";
+import DropIndexDialog from "./Indexes/DropIndexDialog";
 import "@/styles/database-sql-objects.css";
 
 const uniqueOf = (object: IndexInfo | TriggerInfo) =>
@@ -46,6 +51,13 @@ export default function DatabaseSqlObjects({
   const navigate = useNavigate();
   const id = useId();
   const objects = useMemo(() => query.data?.[category] ?? [], [query.data, category]);
+  const [creatingDatabase, setCreatingDatabase] = useState<string | null>(null);
+  const creating = creatingDatabase === dbName;
+  const [dropping, setDropping] = useState<{ dbName: string; index: IndexInfo } | null>(null);
+  const closeCreate = () => {
+    setCreatingDatabase(null);
+    requestAnimationFrame(() => document.getElementById("index-create-trigger")?.focus());
+  };
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("all");
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -112,7 +124,7 @@ export default function DatabaseSqlObjects({
       </span>
     );
   return (
-    <section className="db-objects-page">
+    <section className="db-objects-page" data-indexes={isIndexCatalog}>
       <header className="db-objects-heading">
         <div>
           <h1>{title}</h1>
@@ -134,13 +146,31 @@ export default function DatabaseSqlObjects({
             />
             Refresh
           </Button>
-          <Button size="sm" onClick={openSql}>
+          <Button variant={isIndexCatalog ? "outline" : "default"} size="sm" onClick={openSql}>
             <Terminal size={14} />
             Open SQL runner
           </Button>
+          {isIndexCatalog && (
+            <Button
+              id="index-create-trigger"
+              size="sm"
+              disabled={creating}
+              aria-expanded={creating}
+              aria-controls={creating ? `${id}-create` : undefined}
+              onClick={() => setCreatingDatabase(dbName)}
+            >
+              <Plus size={14} />
+              Create index
+            </Button>
+          )}
         </div>
       </header>
       <div className="db-objects-body">
+        {isIndexCatalog && creating && (
+          <div id={`${id}-create`}>
+            <CreateIndexForm key={dbName} dbName={dbName} onClose={closeCreate} />
+          </div>
+        )}
         {copyError && (
           <p role="alert" className="db-objects-alert">
             {copyError}
@@ -222,12 +252,17 @@ export default function DatabaseSqlObjects({
             <h2>{isIndexCatalog ? "No custom indexes yet" : "No triggers yet"}</h2>
             <p>
               {isIndexCatalog
-                ? "Create an index in the SQL runner for columns you frequently search or sort."
+                ? "Add an index for columns you frequently search, filter or sort."
                 : "Create a trigger in the SQL runner to run statements automatically when database events occur."}
             </p>
-            <Button variant="outline" size="sm" onClick={openSql}>
-              <Terminal size={14} />
-              Open SQL runner
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isIndexCatalog && creating}
+              onClick={isIndexCatalog ? () => setCreatingDatabase(dbName) : openSql}
+            >
+              {isIndexCatalog ? <Plus size={14} /> : <Terminal size={14} />}
+              {isIndexCatalog ? "Create index" : "Open SQL runner"}
             </Button>
           </div>
         ) : !filtered.length ? (
@@ -267,7 +302,9 @@ export default function DatabaseSqlObjects({
                     </th>
                   )}
                   <th scope="col">
-                    <span className="sr-only">SQL actions</span>
+                    <span className="sr-only">
+                      {isIndexCatalog ? "Index actions" : "SQL actions"}
+                    </span>
                   </th>
                 </tr>
               </thead>
@@ -326,6 +363,21 @@ export default function DatabaseSqlObjects({
                             >
                               SQL{open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                             </Button>
+                            {isIndexCatalog && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Drop index ${object.name}`}
+                                disabled={
+                                  !hasSql ||
+                                  isProtectedIndexTarget(object.name) ||
+                                  isProtectedIndexTarget(object.tableName)
+                                }
+                                onClick={() => setDropping({ dbName, index: object as IndexInfo })}
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -361,7 +413,7 @@ export default function DatabaseSqlObjects({
         {query.data && (
           <p className="db-objects-note">
             {isIndexCatalog
-              ? "SQLite’s automatic indexes for PRIMARY KEY and UNIQUE constraints are not included here. Manage custom indexes in the SQL runner."
+              ? "SQLite’s automatic indexes for PRIMARY KEY and UNIQUE constraints are not included here. For expression or partial indexes, use the SQL runner."
               : "Inspect the CREATE statement for each trigger’s timing, conditions and actions. Manage triggers in the SQL runner."}
           </p>
         )}
@@ -369,6 +421,15 @@ export default function DatabaseSqlObjects({
           {copied ? `${title} SQL copied to clipboard` : ""}
         </span>
       </div>
+      {isIndexCatalog && dropping?.dbName === dbName && (
+        <DropIndexDialog
+          key={`${dbName}-${dropping.index.name}`}
+          dbName={dbName}
+          index={dropping.index}
+          onClose={() => setDropping(null)}
+          onRefresh={() => query.refetch()}
+        />
+      )}
     </section>
   );
 }
