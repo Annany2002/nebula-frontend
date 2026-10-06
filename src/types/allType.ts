@@ -148,6 +148,25 @@ export interface IndexInfo {
   sql: string;
 }
 
+export interface CreateIndexPayload {
+  name: string;
+  table_name: string;
+  columns: string[];
+  unique?: boolean;
+}
+
+export interface CreateIndexResponse {
+  message: string;
+  db_name: string;
+  index: IndexInfo;
+}
+
+export interface DropIndexResponse {
+  message: string;
+  db_name: string;
+  index_name: string;
+}
+
 export interface TriggerInfo {
   name: string;
   tableName: string;
