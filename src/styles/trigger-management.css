@@ -1,0 +1,187 @@
+.trigger-create-form {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 12px;
+}
+.trigger-create-heading {
+  margin-bottom: 20px;
+}
+.trigger-create-heading h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.trigger-create-form p {
+  margin-top: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  line-height: 1.7;
+}
+.trigger-create-form .db-objects-alert {
+  color: hsl(var(--destructive));
+}
+.trigger-create-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+.trigger-create-fields {
+  min-width: 0;
+}
+.trigger-create-basics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 16px;
+}
+.trigger-create-form label,
+.trigger-update-columns legend {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.trigger-create-form label > span,
+.trigger-update-columns legend > span {
+  margin-left: 5px;
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+  font-weight: 400;
+}
+.trigger-create-basics input,
+.trigger-create-basics button {
+  height: 36px;
+  min-width: 0;
+  font-size: 12px;
+}
+.trigger-create-basics button > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trigger-create-basics button > svg {
+  flex-shrink: 0;
+}
+.trigger-create-form input:focus-visible,
+.trigger-create-form textarea:focus-visible,
+.trigger-create-form [role="combobox"]:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+.trigger-create-condition,
+.trigger-create-body,
+.trigger-update-columns {
+  margin-top: 20px;
+}
+.trigger-create-condition textarea,
+.trigger-create-body textarea {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.8;
+  resize: vertical;
+}
+.trigger-create-condition textarea {
+  min-height: 66px;
+}
+.trigger-create-body textarea {
+  min-height: 175px;
+}
+.trigger-update-columns legend {
+  margin-bottom: 0;
+}
+.trigger-update-columns .index-column-options label {
+  display: flex;
+  margin-bottom: 0;
+}
+.trigger-update-columns .index-column-options label > span {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: hsl(var(--foreground));
+}
+.trigger-create-preview {
+  min-width: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  overflow: hidden;
+  background: hsl(var(--muted) / 0.2);
+}
+.trigger-create-preview h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+.trigger-create-preview pre {
+  min-height: 180px;
+  max-height: 380px;
+  padding: 16px;
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.9;
+}
+.trigger-create-preview p {
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid hsl(var(--border));
+}
+.trigger-column-reference {
+  margin-top: 12px;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+}
+.trigger-column-reference summary {
+  cursor: pointer;
+  width: fit-content;
+}
+.trigger-column-reference ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  margin-top: 12px;
+}
+.trigger-column-reference li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.trigger-column-reference code {
+  color: hsl(var(--foreground));
+  overflow-wrap: anywhere;
+}
+.trigger-column-reference li > span {
+  font-size: 10px;
+}
+.trigger-create-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+.trigger-create-footer button {
+  gap: 6px;
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .trigger-create-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .trigger-create-preview pre {
+    min-height: 120px;
+  }
+}
+@media (max-width: 640px) {
+  .trigger-create-basics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .trigger-column-reference ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

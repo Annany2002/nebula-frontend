@@ -391,7 +391,7 @@
   }
 }
 
-.db-objects-page[data-indexes="true"] .db-objects-catalog th:last-child {
+.db-objects-page .db-objects-catalog th:last-child {
   width: 140px;
 }
 .index-create-form {
@@ -526,13 +526,13 @@
   font-size: 12px;
 }
 @media (max-width: 900px) {
-  .db-objects-page[data-indexes="true"] .db-objects-row,
-  .db-objects-page[data-indexes="true"] .db-objects-catalog thead tr {
+  .db-objects-page .db-objects-row,
+  .db-objects-page .db-objects-catalog thead tr {
     grid-template-columns: minmax(0, 1fr) 140px;
   }
 }
 @media (max-width: 640px) {
-  .db-objects-page[data-indexes="true"] .db-objects-heading > div:last-child {
+  .db-objects-page .db-objects-heading > div:last-child {
     max-width: 100%;
     flex-wrap: wrap;
   }
@@ -540,11 +540,11 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
-  .db-objects-page[data-indexes="true"] .db-objects-row,
-  .db-objects-page[data-indexes="true"] .db-objects-catalog thead tr {
+  .db-objects-page .db-objects-row,
+  .db-objects-page .db-objects-catalog thead tr {
     grid-template-columns: minmax(0, 1fr) 120px;
   }
-  .db-objects-page[data-indexes="true"] .db-objects-catalog th:last-child {
+  .db-objects-page .db-objects-catalog th:last-child {
     width: 120px;
   }
 }

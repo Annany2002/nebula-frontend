@@ -21,6 +21,9 @@ import { useDatabaseObjects, useTables } from "@/hooks/queries";
 import CreateIndexForm from "./Indexes/CreateIndexForm";
 import { isProtectedIndexTarget } from "./Indexes/indexManagement";
 import DropIndexDialog from "./Indexes/DropIndexDialog";
+import CreateTriggerForm from "./Triggers/CreateTriggerForm";
+import DropTriggerDialog from "./Triggers/DropTriggerDialog";
+import { isReservedTriggerName, isVirtualTriggerTarget } from "./Triggers/triggerManagement";
 import "@/styles/database-sql-objects.css";
 
 const uniqueOf = (object: IndexInfo | TriggerInfo) =>
@@ -53,10 +56,19 @@ export default function DatabaseSqlObjects({
   const objects = useMemo(() => query.data?.[category] ?? [], [query.data, category]);
   const [creatingDatabase, setCreatingDatabase] = useState<string | null>(null);
   const creating = creatingDatabase === dbName;
+  const [droppingTrigger, setDroppingTrigger] = useState<{
+    dbName: string;
+    trigger: TriggerInfo;
+  } | null>(null);
+  const triggerDropOpener = useRef<HTMLElement | null>(null);
   const [dropping, setDropping] = useState<{ dbName: string; index: IndexInfo } | null>(null);
   const closeCreate = () => {
     setCreatingDatabase(null);
-    requestAnimationFrame(() => document.getElementById("index-create-trigger")?.focus());
+    requestAnimationFrame(() =>
+      document
+        .getElementById(isIndexCatalog ? "index-create-trigger" : "trigger-create-trigger")
+        ?.focus()
+    );
   };
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("all");
@@ -146,29 +158,36 @@ export default function DatabaseSqlObjects({
             />
             Refresh
           </Button>
-          <Button variant={isIndexCatalog ? "outline" : "default"} size="sm" onClick={openSql}>
+          <Button variant="outline" size="sm" onClick={openSql}>
             <Terminal size={14} />
             Open SQL runner
           </Button>
-          {isIndexCatalog && (
-            <Button
-              id="index-create-trigger"
-              size="sm"
-              disabled={creating}
-              aria-expanded={creating}
-              aria-controls={creating ? `${id}-create` : undefined}
-              onClick={() => setCreatingDatabase(dbName)}
-            >
-              <Plus size={14} />
-              Create index
-            </Button>
-          )}
+          <Button
+            id={isIndexCatalog ? "index-create-trigger" : "trigger-create-trigger"}
+            size="sm"
+            disabled={creating}
+            aria-expanded={creating}
+            aria-controls={creating ? `${id}-create` : undefined}
+            onClick={() => setCreatingDatabase(dbName)}
+          >
+            <Plus size={14} />
+            Create {singular}
+          </Button>
         </div>
       </header>
       <div className="db-objects-body">
-        {isIndexCatalog && creating && (
+        {creating && (
           <div id={`${id}-create`}>
-            <CreateIndexForm key={dbName} dbName={dbName} onClose={closeCreate} />
+            {isIndexCatalog ? (
+              <CreateIndexForm key={dbName} dbName={dbName} onClose={closeCreate} />
+            ) : (
+              <CreateTriggerForm
+                key={dbName}
+                dbName={dbName}
+                onClose={closeCreate}
+                onRefresh={() => query.refetch()}
+              />
+            )}
           </div>
         )}
         {copyError && (
@@ -253,16 +272,16 @@ export default function DatabaseSqlObjects({
             <p>
               {isIndexCatalog
                 ? "Add an index for columns you frequently search, filter or sort."
-                : "Create a trigger in the SQL runner to run statements automatically when database events occur."}
+                : "Add a trigger to automate validation, audit logging or other SQL actions when rows change."}
             </p>
             <Button
               variant="outline"
               size="sm"
-              disabled={isIndexCatalog && creating}
-              onClick={isIndexCatalog ? () => setCreatingDatabase(dbName) : openSql}
+              disabled={creating}
+              onClick={() => setCreatingDatabase(dbName)}
             >
-              {isIndexCatalog ? <Plus size={14} /> : <Terminal size={14} />}
-              {isIndexCatalog ? "Create index" : "Open SQL runner"}
+              <Plus size={14} />
+              Create {singular}
             </Button>
           </div>
         ) : !filtered.length ? (
@@ -303,7 +322,7 @@ export default function DatabaseSqlObjects({
                   )}
                   <th scope="col">
                     <span className="sr-only">
-                      {isIndexCatalog ? "Index actions" : "SQL actions"}
+                      {isIndexCatalog ? "Index actions" : "Trigger actions"}
                     </span>
                   </th>
                 </tr>
@@ -363,6 +382,25 @@ export default function DatabaseSqlObjects({
                             >
                               SQL{open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                             </Button>
+                            {!isIndexCatalog && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Drop trigger ${object.name}`}
+                                disabled={
+                                  !hasSql ||
+                                  isReservedTriggerName(object.name) ||
+                                  isReservedTriggerName(object.tableName) ||
+                                  isVirtualTriggerTarget(object.tableName, tables.data ?? [])
+                                }
+                                onClick={(e) => {
+                                  triggerDropOpener.current = e.currentTarget;
+                                  setDroppingTrigger({ dbName, trigger: object as TriggerInfo });
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            )}
                             {isIndexCatalog && (
                               <Button
                                 variant="ghost"
@@ -414,13 +452,23 @@ export default function DatabaseSqlObjects({
           <p className="db-objects-note">
             {isIndexCatalog
               ? "SQLite’s automatic indexes for PRIMARY KEY and UNIQUE constraints are not included here. For expression or partial indexes, use the SQL runner."
-              : "Inspect the CREATE statement for each trigger’s timing, conditions and actions. Manage triggers in the SQL runner."}
+              : "Create table triggers here. Inspect each definition for its conditions and actions; use the SQL runner to create view triggers or edit existing definitions."}
           </p>
         )}
         <span className="sr-only" role="status">
           {copied ? `${title} SQL copied to clipboard` : ""}
         </span>
       </div>
+      {!isIndexCatalog && droppingTrigger?.dbName === dbName && (
+        <DropTriggerDialog
+          key={`${dbName}-${droppingTrigger.trigger.name}`}
+          dbName={dbName}
+          trigger={droppingTrigger.trigger}
+          onClose={() => setDroppingTrigger(null)}
+          onRefresh={() => query.refetch()}
+          returnFocusTo={triggerDropOpener.current}
+        />
+      )}
       {isIndexCatalog && dropping?.dbName === dbName && (
         <DropIndexDialog
           key={`${dbName}-${dropping.index.name}`}
