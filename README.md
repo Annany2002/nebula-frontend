@@ -9,7 +9,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **Schema management:** create tables with foreign keys, add/rename/drop columns, and rename tables.
 - **Schema visualizer:** draggable table cards, foreign-key connections, pan/zoom, fit view, automatic layout, search, and a list view.
 - **SQL editor:** run SQL with Ctrl/Cmd + Enter, browse table columns, inspect results and execution time, and copy results as TSV.
-- **Database objects:** browse tables, indexes, triggers, and SQL definitions.
+- **Database objects:** inspect SQL definitions, create/drop custom indexes, and create/drop table triggers with conditions, selected update columns and SQL preview. Trigger management requires the backend trigger API.
 - **Database exports:** download a SQLite snapshot or SQL dump, preview SQL, and copy it.
 - **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
 - **Account and keys:** signup/login, profile editing, and database API key generation, rotation, and revocation.
