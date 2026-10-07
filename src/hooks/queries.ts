@@ -15,6 +15,9 @@ import {
   CreateIndexPayload,
   CreateIndexResponse,
   DropIndexResponse,
+  CreateTriggerPayload,
+  CreateTriggerResponse,
+  DropTriggerResponse,
   AlterTablePayload,
   APIKeyMetadataType,
   ColumnDefinitionType,
@@ -726,7 +729,7 @@ async function indexRequest<T>(
   return data as T;
 }
 
-function useIndexInvalidation(dbName: string) {
+function useObjectInvalidation(dbName: string) {
   const queryClient = useQueryClient();
   return () =>
     Promise.all(
@@ -737,7 +740,7 @@ function useIndexInvalidation(dbName: string) {
 }
 
 export const useCreateIndex = (dbName: string) => {
-  const invalidate = useIndexInvalidation(dbName);
+  const invalidate = useObjectInvalidation(dbName);
   return useMutation({
     mutationFn: (payload: CreateIndexPayload) =>
       indexRequest<CreateIndexResponse>(dbName, "POST", payload),
@@ -747,10 +750,75 @@ export const useCreateIndex = (dbName: string) => {
 };
 
 export const useDropIndex = (dbName: string) => {
-  const invalidate = useIndexInvalidation(dbName);
+  const invalidate = useObjectInvalidation(dbName);
   return useMutation({
     mutationFn: (name: string) =>
       indexRequest<DropIndexResponse>(dbName, "DELETE", undefined, name),
+    retry: false,
+    onSuccess: invalidate,
+  });
+};
+
+// Trigger mutations use a single request; failures can follow a committed write.
+async function triggerRequest(
+  dbName: string,
+  method: "POST" | "DELETE",
+  payload?: CreateTriggerPayload,
+  triggerName?: string
+): Promise<CreateTriggerResponse | DropTriggerResponse> {
+  const token = getToken();
+  if (!token) throw new Error("Sign in again to manage triggers.");
+  const endpoint = `${url}/api/v1/databases/${encodeURIComponent(dbName)}/triggers${triggerName === undefined ? "" : `/${encodeURIComponent(triggerName)}`}`;
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: payload ? JSON.stringify(payload) : undefined,
+    });
+  } catch {
+    throw new Error(
+      "The trigger request couldn’t be confirmed. Refresh the catalog before trying again."
+    );
+  }
+  const data = await response.json().catch(() => null);
+  if (!response.ok)
+    throw new Error(
+      typeof data?.error === "string"
+        ? data.error
+        : `Couldn’t ${method === "POST" ? "create" : "drop"} the trigger. Refresh the catalog before trying again.`
+    );
+  const valid =
+    data?.db_name === dbName &&
+    typeof data?.message === "string" &&
+    (method === "POST"
+      ? data?.trigger?.name === payload?.name &&
+        typeof data?.trigger?.tableName === "string" &&
+        data.trigger.tableName.toLowerCase() === payload?.table_name.toLowerCase() &&
+        typeof data?.trigger?.sql === "string" &&
+        !!data.trigger.sql.trim()
+      : typeof data?.trigger_name === "string" &&
+        data.trigger_name.toLowerCase() === triggerName?.toLowerCase());
+  if (!valid)
+    throw new Error(
+      "The trigger response was incomplete. Refresh the catalog before trying again."
+    );
+  return data;
+}
+
+export const useCreateTrigger = (dbName: string) => {
+  const invalidate = useObjectInvalidation(dbName);
+  return useMutation({
+    mutationFn: (payload: CreateTriggerPayload) => triggerRequest(dbName, "POST", payload),
+    retry: false,
+    onSuccess: invalidate,
+  });
+};
+
+export const useDropTrigger = (dbName: string) => {
+  const invalidate = useObjectInvalidation(dbName);
+  return useMutation({
+    mutationFn: (name: string) => triggerRequest(dbName, "DELETE", undefined, name),
     retry: false,
     onSuccess: invalidate,
   });
