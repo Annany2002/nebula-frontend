@@ -173,6 +173,31 @@ export interface TriggerInfo {
   sql: string;
 }
 
+export type TriggerEvent = "INSERT" | "UPDATE" | "DELETE";
+export type TriggerTiming = "AFTER" | "BEFORE";
+
+export interface CreateTriggerPayload {
+  name: string;
+  table_name: string;
+  event: TriggerEvent;
+  timing?: TriggerTiming;
+  update_of?: string[];
+  when?: string;
+  body: string;
+}
+
+export interface CreateTriggerResponse {
+  message: string;
+  db_name: string;
+  trigger: TriggerInfo;
+}
+
+export interface DropTriggerResponse {
+  message: string;
+  db_name: string;
+  trigger_name: string;
+}
+
 export interface DatabaseObjectsType {
   indexes: IndexInfo[];
   triggers: TriggerInfo[];
