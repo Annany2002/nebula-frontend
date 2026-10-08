@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Database,
   LayoutGrid,
@@ -9,10 +9,12 @@ import {
   ArrowUpDown,
   Table2,
   AlertCircle,
+  Upload,
 } from "lucide-react";
 import { useDatabases } from "@/hooks/queries";
 import LoginNavBar from "@/components/LoginNavbar";
 import CreateDatabase from "@/components/Database/CreateDatabase";
+import ImportDatabase from "@/components/Database/ImportDatabase";
 import { EnhancedDatabaseCard } from "@/components/Database/EnhancedDatabaseCard";
 import DatabaseQuickstart from "@/components/Dashboard/DatabaseQuickstart";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +38,14 @@ const Dashboard = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("date");
+  const [importOpen, setImportOpen] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
+  const importTrigger = useRef<HTMLButtonElement>(null);
+
+  const closeImport = () => {
+    setImportOpen(false);
+    requestAnimationFrame(() => importTrigger.current?.focus());
+  };
 
   const filteredDatabases = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -58,8 +68,31 @@ const Dashboard = () => {
             <h1>Projects</h1>
             <p className="db-page-description">Build, explore, and connect your databases.</p>
           </div>
-          <CreateDatabase openChange={openChange} setOpenChange={setOpenChange} />
+          <div className="db-page-actions">
+            <Button
+              ref={importTrigger}
+              variant="outline"
+              className="db-import-toggle"
+              disabled={importBusy}
+              aria-expanded={importOpen}
+              aria-controls={importOpen ? "database-import" : undefined}
+              onClick={() => (importOpen ? closeImport() : setImportOpen(true))}
+            >
+              <Upload size={16} aria-hidden="true" />
+              Import snapshot
+            </Button>
+            <CreateDatabase openChange={openChange} setOpenChange={setOpenChange} />
+          </div>
         </header>
+
+        {importOpen && (
+          <ImportDatabase
+            existingNames={databases.map((database) => database.dbName)}
+            onClose={closeImport}
+            onBusyChange={setImportBusy}
+            onRefresh={async () => !(await refetch()).isError}
+          />
+        )}
 
         <section aria-labelledby="databases-heading" className="db-projects-section">
           <div className="db-section-heading">
