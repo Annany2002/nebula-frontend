@@ -34,7 +34,7 @@
   font-size: 14px;
   margin-top: 9px;
 }
-.db-page-header > button {
+.db-page-actions > button:not(.db-import-toggle) {
   height: 40px;
   border-radius: 8px;
   font-size: 13px;
@@ -42,7 +42,7 @@
   box-shadow: 0 2px 5px oklch(0.35 0.1 295 / 0.12);
   transform: none;
 }
-.db-page-header > button:hover {
+.db-page-actions > button:not(.db-import-toggle):hover {
   background: oklch(0.55 0.23 295);
   transform: none;
 }

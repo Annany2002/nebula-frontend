@@ -1,0 +1,296 @@
+.db-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.db-import-toggle {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 13px;
+  gap: 8px;
+  background: hsl(var(--card));
+}
+.db-import-toggle[aria-expanded="true"] {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.4);
+}
+.db-import-panel {
+  margin-bottom: 32px;
+  padding: 24px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  background: hsl(var(--card));
+}
+.db-import-heading,
+.db-import-footer,
+.db-import-footer > div,
+.db-import-success,
+.db-import-request-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.db-import-heading {
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.db-import-heading h2 {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.db-import-heading p,
+.db-import-success p {
+  margin-top: 6px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+}
+.db-import-heading > button {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.db-import-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 28px;
+}
+.db-import-fields > div {
+  min-width: 0;
+}
+.db-import-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 550;
+  margin-bottom: 10px;
+}
+.db-import-dropzone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 86px;
+  padding: 16px;
+  border: 1px dashed hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--muted) / 0.35);
+  transition:
+    border-color 150ms ease-out,
+    background 150ms ease-out;
+}
+.db-import-dropzone.is-dragging {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--secondary));
+}
+.db-import-dropzone.is-invalid,
+.db-import-name input[aria-invalid="true"] {
+  border-color: hsl(var(--destructive));
+}
+.db-import-dropzone > svg {
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+}
+.db-import-file-info {
+  min-width: 0;
+  flex: 1;
+}
+.db-import-file-info strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 550;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.db-import-file-info span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.db-import-dropzone > button {
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+.db-import-dropzone > button[aria-label] {
+  width: 28px;
+  height: 28px;
+}
+.db-import-help {
+  font-size: 12px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+  margin-top: 8px;
+}
+.db-import-name input {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: "Geist Mono", monospace;
+}
+.db-import-name input:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+.db-import-field-error {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: hsl(var(--destructive));
+}
+.dark .db-import-field-error {
+  color: oklch(0.78 0.12 25);
+}
+.db-import-footer {
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid hsl(var(--border));
+}
+.db-import-footer > p {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.6;
+}
+.db-import-footer > p > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.db-import-footer > div {
+  flex-shrink: 0;
+  gap: 8px;
+}
+.db-import-footer button,
+.db-import-success button {
+  height: 36px;
+  font-size: 13px;
+  border-radius: 8px;
+  gap: 8px;
+}
+.db-import-progress {
+  margin-top: 24px;
+}
+.db-import-progress > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  margin-bottom: 9px;
+}
+.db-import-progress > div > span:last-child {
+  color: hsl(var(--muted-foreground));
+}
+.db-import-progress progress {
+  display: block;
+  width: 100%;
+  height: 5px;
+  border-radius: 4px;
+  accent-color: hsl(var(--primary));
+}
+.db-import-progress progress::-webkit-progress-bar {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+.db-import-progress progress::-webkit-progress-value {
+  background: hsl(var(--primary));
+  border-radius: 4px;
+}
+.db-import-progress progress:indeterminate::-webkit-progress-value {
+  width: 100%;
+  opacity: 0.5;
+}
+.db-import-request-error {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  border-radius: 8px;
+  background: hsl(var(--destructive) / 0.04);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.db-import-request-error > svg {
+  flex-shrink: 0;
+  color: hsl(var(--destructive));
+}
+.dark .db-import-request-error > svg {
+  color: oklch(0.78 0.12 25);
+}
+.db-import-request-error > p {
+  flex: 1;
+}
+.db-import-request-error > button {
+  flex-shrink: 0;
+}
+.db-import-success > svg {
+  flex-shrink: 0;
+  color: hsl(var(--primary));
+}
+.db-import-success > div {
+  flex: 1;
+  min-width: 0;
+}
+.db-import-success strong {
+  font-size: 14px;
+  font-family: "Geist Mono", monospace;
+  overflow-wrap: anywhere;
+}
+.db-import-success:focus,
+.db-import-request-error:focus {
+  outline: 2px solid hsl(var(--primary) / 0.35);
+  outline-offset: 4px;
+}
+@media (max-width: 800px) {
+  .db-import-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .db-import-footer {
+    flex-wrap: wrap;
+  }
+  .db-import-footer > div {
+    margin-left: auto;
+  }
+}
+@media (max-width: 480px) {
+  .db-page-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .db-page-actions > button {
+    flex: 1;
+  }
+  .db-import-panel {
+    padding: 18px;
+  }
+  .db-import-dropzone {
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+  .db-import-file-info {
+    flex-basis: calc(100% - 46px);
+  }
+  .db-import-success,
+  .db-import-request-error {
+    flex-wrap: wrap;
+  }
+  .db-import-success button {
+    width: 100%;
+    margin-top: 8px;
+  }
+  .db-import-request-error > p {
+    min-width: calc(100% - 32px);
+  }
+  .db-import-request-error > button {
+    margin-left: 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-import-dropzone {
+    transition: none;
+  }
+}
