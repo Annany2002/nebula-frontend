@@ -5,6 +5,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 ## Features
 
 - **Projects:** create and delete databases, search and sort projects, switch between grid and list views, and copy connection examples.
+- **SQLite import:** upload or drop a standalone snapshot into a new database from Projects, with file/name validation, upload progress, processing feedback and preserved input on errors. Requires the backend SQLite import endpoint.
 - **Table editor:** insert, edit, and delete records; paginate and sort; search the loaded page; choose visible columns; inspect and edit the schema.
 - **Schema management:** create tables with foreign keys, add/rename/drop columns, and rename tables.
 - **Schema visualizer:** draggable table cards, foreign-key connections, pan/zoom, fit view, automatic layout, search, and a list view.
@@ -15,7 +16,9 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **Account and keys:** signup/login, profile editing, and database API key generation, rotation, and revocation.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
-Record search operates on the current page. The backend separately supports column equality filters through the records API. The Exports page does not provide scheduled backups or a restore workflow.
+Record search operates on the current page. The backend separately supports column equality filters through the records API. SQLite import creates a new database and accepts snapshots up to 64 MiB; SQL-dump import, scheduled backups and restoring over an existing database are not implemented. Import requires an owner JWT; database API keys cannot provision a new database.
+
+Use a consistent SQLite snapshot, such as Nebula's SQLite export, rather than copying an active `.db` file that may depend on a separate WAL. Interrupted or unconfirmed imports prompt you to check your database list before retrying; writes are never retried automatically.
 
 ### Schema relationships
 
