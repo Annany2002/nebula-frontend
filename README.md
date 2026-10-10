@@ -12,6 +12,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **SQL editor:** run SQL with Ctrl/Cmd + Enter, browse table columns, inspect results and execution time, and copy results as TSV.
 - **Database objects:** inspect SQL definitions, create/drop custom indexes, and create/drop table triggers with conditions, selected update columns and SQL preview. Trigger management requires the backend trigger API.
 - **Database exports:** download a SQLite snapshot or SQL dump, preview SQL, and copy it.
+- **Saved backups:** create and browse retained snapshots, download them with integrity checks, delete saved copies, and restore into a new database. Account history remains accessible after source deletion. Requires the backend managed-backup endpoints and an owner JWT.
 - **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
 - **Account and keys:** signup/login, profile editing, and database API key generation, rotation, and revocation.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
@@ -19,6 +20,8 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 Record search operates on the current page. The backend separately supports column equality filters through the records API. SQLite import creates a new database and accepts snapshots up to 64 MiB; SQL-dump import, scheduled backups and restoring over an existing database are not implemented. Import requires an owner JWT; database API keys cannot provision a new database.
 
 Use a consistent SQLite snapshot, such as Nebula's SQLite export, rather than copying an active `.db` file that may depend on a separate WAL. Interrupted or unconfirmed imports prompt you to check your database list before retrying; writes are never retried automatically.
+
+Saved backups stay on the backend server and do not protect against host or disk loss. Download a copy to independent storage. Backup creation keeps its request ID across reloads; unconfirmed restores require a fresh database check before retrying. The server limits snapshots to 64 MiB and retained backups to 20 per account within 256 MiB of storage. Deploy the managed-backup backend before enabling this flow; older servers retain the on-demand export tools.
 
 ### Schema relationships
 
@@ -101,6 +104,7 @@ Database, project, and profile routes require login.
 | `/`                                      | Landing page           |
 | `/sign-in`, `/sign-up`                   | Account authentication |
 | `/dashboard/:userId`                     | Projects               |
+| `/backups`                               | Account backup history |
 | `/profile`                               | Account profile        |
 | `/databases/:db_name/overview`           | Database overview      |
 | `/databases/:db_name/tables/:table_name` | Table editor           |
@@ -109,11 +113,11 @@ Database, project, and profile routes require login.
 | `/databases/:db_name/database/tables`    | Table inventory        |
 | `/databases/:db_name/database/indexes`   | Indexes                |
 | `/databases/:db_name/database/triggers`  | Triggers               |
-| `/databases/:db_name/database/backups`   | Exports                |
+| `/databases/:db_name/database/backups`   | Backups and exports    |
 | `/databases/:db_name/apikeys`            | API keys               |
 | `/databases/:db_name/settings`           | Database settings      |
 
-The exports route retains the `backups` URL segment. Derive active workspace tabs from route segments, so `/databases/...` does not accidentally match every database tab.
+Derive active workspace tabs from route segments, so `/databases/...` does not accidentally match every database tab. Backup history is independent of live schema loading, allowing recovery when the source no longer exists.
 
 ## Stack
 
