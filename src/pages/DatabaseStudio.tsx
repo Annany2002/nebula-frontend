@@ -53,6 +53,9 @@ export default function DatabaseStudio() {
     }
     return "visualizer";
   }, [location.pathname]);
+  // Retained backup history remains useful after a source database is deleted
+  // or its table query fails. It must not depend on the live schema loading.
+  const viewingBackups = currentTab === "database" && databaseSubTab === "backups";
 
   const [subSidebarCollapsed, setSubSidebarCollapsed] = useState(false);
   const [activeTableState, setActiveTableState] = useState<string>("");
@@ -160,12 +163,12 @@ export default function DatabaseStudio() {
             />
           )}
           <main className="studio-content">
-            {tablesLoading && tables.length === 0 ? (
+            {!viewingBackups && tablesLoading && tables.length === 0 ? (
               <div className="studio-load-state" role="status" aria-label="Loading database">
                 <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-primary" />
                 <p>Loading your database…</p>
               </div>
-            ) : tablesError && tables.length === 0 ? (
+            ) : !viewingBackups && tablesError && tables.length === 0 ? (
               <div className="studio-load-state" role="alert">
                 <AlertCircle className="text-primary" />
                 <h1>We couldn’t load this database.</h1>

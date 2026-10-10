@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Database,
   LayoutGrid,
@@ -10,6 +11,7 @@ import {
   Table2,
   AlertCircle,
   Upload,
+  Archive,
 } from "lucide-react";
 import { useDatabases } from "@/hooks/queries";
 import LoginNavBar from "@/components/LoginNavbar";
@@ -69,6 +71,12 @@ const Dashboard = () => {
             <p className="db-page-description">Build, explore, and connect your databases.</p>
           </div>
           <div className="db-page-actions">
+            <Button asChild variant="outline">
+              <Link to="/backups">
+                <Archive size={16} aria-hidden="true" />
+                Saved backups
+              </Link>
+            </Button>
             <Button
               ref={importTrigger}
               variant="outline"
