@@ -1,0 +1,213 @@
+.db-backups {
+  margin-bottom: 32px;
+  min-width: 0;
+}
+.db-backups-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.db-backups-heading h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.db-backups-heading p,
+.db-backups-policy {
+  font-size: 12px;
+  line-height: 1.8;
+  color: hsl(var(--muted-foreground));
+}
+.db-backups-heading p {
+  margin-top: 4px;
+}
+.db-backups-policy {
+  max-width: 75ch;
+  margin: 12px 0 18px;
+}
+.db-backups-list {
+  border-block: 1px solid hsl(var(--border));
+}
+.db-backups-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 0;
+}
+.db-backups-list li + li {
+  border-top: 1px solid hsl(var(--border));
+}
+.db-backups-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.db-backups-details time {
+  font-size: 13px;
+  font-weight: 500;
+}
+.db-backups-details span,
+.db-backups-checksum {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.db-backups-state {
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 4px 7px;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+.db-backups-state.is-ready {
+  background: hsl(var(--primary) / 0.08);
+  color: hsl(var(--primary));
+}
+.db-backups-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 34px 18px;
+  text-align: center;
+  border: 1px dashed hsl(var(--border));
+  border-radius: 8px;
+}
+.db-backups-empty svg {
+  color: hsl(var(--muted-foreground));
+}
+.db-backups-empty h3 {
+  font-size: 13px;
+  font-weight: 500;
+}
+.db-backups-empty p {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  max-width: 65ch;
+  line-height: 1.8;
+}
+.db-backups-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+.db-backups-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+.db-backups-progress button {
+  margin-left: auto;
+}
+.db-backups-recovery {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--muted) / 0.4);
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+.db-backups-recovery strong {
+  font-weight: 500;
+}
+.db-backups-recovery p {
+  margin-top: 5px;
+  color: hsl(var(--muted-foreground));
+  overflow-wrap: anywhere;
+}
+.db-backups-destination {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: hsl(var(--primary));
+  margin: 8px 0 14px;
+  overflow-wrap: anywhere;
+}
+.db-backups-destination:hover {
+  text-decoration: underline;
+}
+.db-backups-restore {
+  padding: 18px;
+  margin: 18px 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--muted) / 0.25);
+}
+.db-backups-restore h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.db-backups-restore > p {
+  margin-top: 10px;
+  max-width: 65ch;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.8;
+}
+.db-backups-restore > label {
+  display: block;
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.db-backups-restore-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.db-backups-restore-controls input {
+  flex: 1;
+  min-width: 150px;
+  height: 34px;
+  font-size: 12px;
+}
+.db-backups-restore > .db-export-error {
+  color: hsl(var(--destructive));
+  margin-bottom: 0;
+}
+.db-backups-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 0;
+}
+.db-backups-skeleton div {
+  height: 56px;
+  border-radius: 4px;
+  background: hsl(var(--muted) / 0.5);
+}
+@media (max-width: 1100px) {
+  .db-backups-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .db-backups-list .db-export-actions {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .db-backups-restore {
+    padding: 14px;
+  }
+  .db-backups-restore-controls > button {
+    width: 100%;
+  }
+  .db-backups-list .db-export-actions button {
+    min-height: 40px;
+  }
+}

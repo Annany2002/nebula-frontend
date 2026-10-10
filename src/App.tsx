@@ -12,6 +12,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 // Lazy load pages
 const AllTables = lazy(() => import("./pages/AllTables"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Backups = lazy(() => import("./pages/Backups"));
 const DatabaseStudio = lazy(() => import("./pages/DatabaseStudio"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -56,6 +57,7 @@ const App = () => {
 
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>
+                    <Route path="/backups" element={<Backups />} />
                     <Route path="/dashboard/:userId" element={<Dashboard />} />
                     <Route path="/databases/:db_name/*" element={<DatabaseStudio />} />
                     <Route path="/databases/:db_name" element={<DatabaseStudio />} />

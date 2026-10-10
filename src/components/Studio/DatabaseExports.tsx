@@ -3,6 +3,7 @@ import { Check, Code2, Copy, Database, Download, Loader2, X } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { downloadExport, fetchSqlExport, fetchSqliteExport, SqlExport } from "@/lib/databaseExport";
 import "@/styles/database-exports.css";
+import ManagedBackups from "@/components/Studio/ManagedBackups";
 
 type ExportAction = "sqlite" | "sql" | "preview";
 type Preview = SqlExport & { generatedAt: Date; size: number };
@@ -113,10 +114,11 @@ export default function DatabaseExports({ dbName }: { dbName: string }) {
       <header className="db-export-heading">
         <h1>Backups &amp; export</h1>
         <p>
-          Download a snapshot of <span>{dbName}</span>.
+          Save, restore or download snapshots of <span>{dbName}</span>.
         </p>
       </header>
       <div className="db-export-body">
+        <ManagedBackups key={dbName} dbName={dbName} />
         {error && (
           <p role="alert" className="db-export-error">
             {error}
@@ -253,7 +255,7 @@ export default function DatabaseExports({ dbName }: { dbName: string }) {
           <h2>Keep a copy</h2>
           <p>
             Exports are generated on demand. Store your downloaded files in your own backup storage,
-            and use a SQLite client to restore them.
+            or import a downloaded SQLite snapshot from your Projects page.
           </p>
         </aside>
       </div>
