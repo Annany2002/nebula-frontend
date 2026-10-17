@@ -14,7 +14,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **Database exports:** download a SQLite snapshot or SQL dump, preview SQL, and copy it.
 - **Saved backups:** create and browse retained snapshots, download them with integrity checks, delete saved copies, and restore into a new database. Account history remains accessible after source deletion. Requires the backend managed-backup endpoints and an owner JWT.
 - **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
-- **Account and keys:** signup/login, email verification and resend recovery, profile editing with confirmed email changes, and database API key generation, rotation, and revocation.
+- **Account and keys:** signup/login, email verification and resend, forgot/reset password, profile editing with confirmed email changes, and database API key generation, rotation, and revocation.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
 Record search operates on the current page. The backend separately supports column equality filters through the records API. SQLite import creates a new database and accepts snapshots up to 64 MiB; SQL-dump import, scheduled backups and restoring over an existing database are not implemented. Import requires an owner JWT; database API keys cannot provision a new database.
@@ -36,6 +36,14 @@ These screens require the updated backend profile-role, account-summary, admin-u
 Explore foreign-key relationships, move tables to clarify the layout, and inspect their columns without leaving the database workspace.
 
 ![Tables and foreign-key relationships in Nebula](docs/images/schema-workspace.png)
+
+### Password recovery
+
+Open **Forgot password?** on the sign-in page, or visit `/forgot-password`. The request acknowledgement does not disclose whether an account exists. Email links open `/reset-password#token=...`; the fragment is removed before analytics mount and the token is held only in memory. Enter and confirm a new password to submit the reset. Reloading the cleaned page requires reopening the email link.
+
+Deploy the matching backend before enabling `PASSWORD_RESET_ENABLED=true` with authenticated SMTP. Recovery is independent of `EMAIL_VERIFICATION_ENABLED`. A confirmed reset clears the frontend session and requires a fresh sign-in; verification and suspension rules still apply. Invalid or expired links offer a new request. If completion is uncertain after a connection failure, the form prevents a blind retry and directs users to sign in or obtain a new link.
+
+For local testing, run `./scripts/dev-email.sh` from the backend, then start this frontend on port 3000. The workspace's `./dev.sh --email` starts both applications and the capture inbox. Read mail at `http://localhost:8025`; the runner uses isolated accounts and never sends external mail.
 
 ## Local setup
 
@@ -68,16 +76,16 @@ The frontend uses JWT Bearer authentication for account and database operations.
 
 ## Development
 
-| Command                 | Purpose                                                      |
-| ----------------------- | ------------------------------------------------------------ |
-| `npm run dev`           | Start Vite on port 3000                                      |
-| `npm test`              | Run account, management contract and verification-link tests |
-| `npm run check`         | Run type checking, ESLint, and Prettier checks               |
-| `npm run typecheck`     | Check application TypeScript without emitting files          |
-| `npm run typecheck:all` | Check application and Vite configuration projects            |
-| `npm run lint`          | Run ESLint                                                   |
-| `npm run format:check`  | Check formatting                                             |
-| `npm run preview`       | Preview an existing production bundle                        |
+| Command                 | Purpose                                                          |
+| ----------------------- | ---------------------------------------------------------------- |
+| `npm run dev`           | Start Vite on port 3000                                          |
+| `npm test`              | Run account/recovery, management and account-link contract tests |
+| `npm run check`         | Run type checking, ESLint, and Prettier checks                   |
+| `npm run typecheck`     | Check application TypeScript without emitting files              |
+| `npm run typecheck:all` | Check application and Vite configuration projects                |
+| `npm run lint`          | Run ESLint                                                       |
+| `npm run format:check`  | Check formatting                                                 |
+| `npm run preview`       | Preview an existing production bundle                            |
 
 Verify UI changes in both themes and at desktop and mobile widths. Check keyboard navigation, loading/error/empty states, and reduced motion. Use `npm run check` for development verification.
 
@@ -95,7 +103,7 @@ src/
 ├── context/             # Account session
 ├── hooks/queries.ts     # TanStack Query API hooks
 ├── lib/                 # Configuration and shared helpers
-├── pages/               # Landing, authentication, Projects, database workspace, profile, 404
+├── pages/               # Landing, account recovery, Projects, administration, database workspace, profile, 404
 ├── components/
 │   ├── Studio/          # Navigation, SQL, visualizer, records, objects, exports
 │   ├── Table/           # Table creation and schema editing
@@ -108,23 +116,26 @@ src/
 
 Database, project, and profile routes require login.
 
-| Route                                    | View                   |
-| ---------------------------------------- | ---------------------- |
-| `/`                                      | Landing page           |
-| `/sign-in`, `/sign-up`                   | Account authentication |
-| `/dashboard/:userId`                     | Projects               |
-| `/backups`                               | Account backup history |
-| `/profile`                               | Account profile        |
-| `/databases/:db_name/overview`           | Database overview      |
-| `/databases/:db_name/tables/:table_name` | Table editor           |
-| `/databases/:db_name/sql`                | SQL editor             |
-| `/databases/:db_name/visualizer`         | Schema visualizer      |
-| `/databases/:db_name/database/tables`    | Table inventory        |
-| `/databases/:db_name/database/indexes`   | Indexes                |
-| `/databases/:db_name/database/triggers`  | Triggers               |
-| `/databases/:db_name/database/backups`   | Backups and exports    |
-| `/databases/:db_name/apikeys`            | API keys               |
-| `/databases/:db_name/settings`           | Database settings      |
+| Route                                    | View                                      |
+| ---------------------------------------- | ----------------------------------------- |
+| `/`                                      | Landing page                              |
+| `/sign-in`, `/sign-up`                   | Account authentication                    |
+| `/verify-email`                          | Email confirmation and resend             |
+| `/forgot-password`, `/reset-password`    | Password recovery                         |
+| `/admin/users`, `/admin/audit`           | Administrator accounts and access history |
+| `/dashboard/:userId`                     | Projects                                  |
+| `/backups`                               | Account backup history                    |
+| `/profile`                               | Account profile                           |
+| `/databases/:db_name/overview`           | Database overview                         |
+| `/databases/:db_name/tables/:table_name` | Table editor                              |
+| `/databases/:db_name/sql`                | SQL editor                                |
+| `/databases/:db_name/visualizer`         | Schema visualizer                         |
+| `/databases/:db_name/database/tables`    | Table inventory                           |
+| `/databases/:db_name/database/indexes`   | Indexes                                   |
+| `/databases/:db_name/database/triggers`  | Triggers                                  |
+| `/databases/:db_name/database/backups`   | Backups and exports                       |
+| `/databases/:db_name/apikeys`            | API keys                                  |
+| `/databases/:db_name/settings`           | Database settings                         |
 
 Derive active workspace tabs from route segments, so `/databases/...` does not accidentally match every database tab. Backup history is independent of live schema loading, allowing recovery when the source no longer exists.
 

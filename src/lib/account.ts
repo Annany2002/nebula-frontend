@@ -7,6 +7,15 @@ export const accountEmailSchema = z
   .max(254, "Email addresses must be at most 254 characters")
   .regex(/^[\x20-\x7e]+$/, "Use a plain email address without a display name");
 
+export const accountPasswordSchema = z
+  .string()
+  .refine((value) => Array.from(value).length >= 8, "Password must be at least 8 characters")
+  .refine((value) => !/[\uD800-\uDFFF]/u.test(value), "Use valid Unicode characters")
+  .refine(
+    (value) => new TextEncoder().encode(value).length <= 72,
+    "Password must be at most 72 UTF-8 bytes"
+  );
+
 const profileSchema = z.object({
   userId: z.string().min(1),
   username: z.string(),
@@ -40,6 +49,15 @@ export class AccountError extends Error {
 }
 
 const messages: Record<string, string> = {
+  password_reset_disabled:
+    "Password recovery is not available on this server. Contact the platform operator.",
+  password_reset_busy: "Password recovery is busy. Wait a moment and try again.",
+  password_reset_rate_limited: "Too many recovery requests. Wait before trying again.",
+  password_reset_unavailable:
+    "The reset response could not be confirmed. Try signing in with your new password before requesting another link.",
+  invalid_password_reset_token:
+    "This reset link is invalid, expired, or already used. Request a new link.",
+  invalid_password: "Use at least 8 characters and at most 72 UTF-8 bytes for your password.",
   email_verification_required: "Verify your email before signing in.",
   invalid_verification_token:
     "This link is invalid, expired, or already used. Request another email or try signing in.",
@@ -83,6 +101,7 @@ async function request<T>(
       ...options,
       signal: controller.signal,
       credentials: "omit",
+      redirect: "error",
       cache: "no-store",
       headers: {
         ...(options.body ? { "Content-Type": "application/json" } : {}),
@@ -96,7 +115,12 @@ async function request<T>(
       const message =
         messages[code] ||
         (response.status === 404
-          ? path === "/auth/verify-email" || path === "/auth/resend-verification"
+          ? [
+              "/auth/verify-email",
+              "/auth/resend-verification",
+              "/auth/forgot-password",
+              "/auth/reset-password",
+            ].includes(path)
             ? "This feature requires an updated Nebula server."
             : "Check your credentials or sign in again."
           : response.status === 429
@@ -254,5 +278,20 @@ export function resendAccountVerification(email: string) {
     "/auth/resend-verification",
     { method: "POST", body: JSON.stringify({ email }) },
     (response) => parse(response, messageSchema, true, 202)
+  );
+}
+
+export function requestPasswordReset(email: string) {
+  return request(
+    "/auth/forgot-password",
+    { method: "POST", body: JSON.stringify({ email }) },
+    (response) => parse(response, messageSchema, true, 202)
+  );
+}
+export function resetAccountPassword(token: string, password: string) {
+  return request(
+    "/auth/reset-password",
+    { method: "POST", body: JSON.stringify({ token, password }) },
+    (response) => parse(response, messageSchema, true)
   );
 }

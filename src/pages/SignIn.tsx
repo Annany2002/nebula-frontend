@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -83,6 +84,9 @@ const SignIn = () => {
               </FormItem>
             )}
           />
+          <Link to="/forgot-password" className="auth-recovery-link">
+            Forgot password?
+          </Link>
           <Button type="submit" className="auth-submit" disabled={isLoading}>
             {isLoading ? (
               <>

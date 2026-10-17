@@ -77,7 +77,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error instanceof AccountError && [401, 403, 404].includes(error.status)) {
         clearSession();
         // Leave public email links usable even if a stored JWT has expired or was revoked.
-        if (!window.location.pathname.startsWith("/verify-email")) {
+        if (
+          !["/verify-email", "/forgot-password", "/reset-password"].includes(
+            window.location.pathname.replace(/\/$/, "")
+          )
+        ) {
           if (error.code === "email_verification_required")
             navigateRef.current("/verify-email", { replace: true });
           else navigateRef.current("/sign-in", { replace: true });
@@ -102,9 +106,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event.key !== null && event.key !== "token" && event.key !== "user_id") return;
       const token = localStorage.getItem("token");
       const id = localStorage.getItem("user_id");
-      const publicPage = ["/verify-email", "/sign-in", "/sign-up", "/"].includes(
-        window.location.pathname
-      );
+      const publicPage = [
+        "/verify-email",
+        "/forgot-password",
+        "/reset-password",
+        "/sign-in",
+        "/sign-up",
+        "/",
+      ].includes(window.location.pathname);
       if (!token || !id) {
         clearSession();
         if (!publicPage) navigateRef.current("/sign-in", { replace: true });
