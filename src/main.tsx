@@ -1,4 +1,5 @@
 import "./lib/verificationLink";
+import "./lib/passwordResetLink";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
