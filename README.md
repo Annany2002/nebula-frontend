@@ -4,7 +4,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 
 ## Features
 
-- **Projects:** create and delete databases, search and sort projects, switch between grid and list views, and copy connection examples.
+- **Projects:** create and delete databases, search and sort projects, switch between grid and list views, and copy connection examples. Account totals show owned databases, API keys and ready backups from metadata.
 - **SQLite import:** upload or drop a standalone snapshot into a new database from Projects, with file/name validation, upload progress, processing feedback and preserved input on errors. Requires the backend SQLite import endpoint.
 - **Table editor:** insert, edit, and delete records; paginate and sort; search the loaded page; choose visible columns; inspect and edit the schema.
 - **Schema management:** create tables with foreign keys, add/rename/drop columns, and rename tables.
@@ -24,6 +24,12 @@ Use a consistent SQLite snapshot, such as Nebula's SQLite export, rather than co
 Saved backups stay on the backend server and do not protect against host or disk loss. Download a copy to independent storage. Backup creation keeps its request ID across reloads; unconfirmed restores require a fresh database check before retrying. The server limits snapshots to 64 MiB and retained backups to 20 per account within 256 MiB of storage. Deploy the managed-backup backend before enabling this flow; older servers retain the on-demand export tools.
 
 Email verification requires the backend verification endpoints and configured SMTP. Deploy this frontend before enabling `EMAIL_VERIFICATION_ENABLED` on the backend. When enabled, new accounts confirm an email link before login; email changes retain the old address until confirmation and then require signing in again. The frontend supports verification-disabled servers and immediate legacy email updates. Verification links use `/verify-email#token=...`; tokens are removed from the URL before analytics, kept only in memory, and submitted only after explicit confirmation.
+
+### Platform administration
+
+Platform administrators can open **Administration** from the account menu, or visit `/admin/users`. Membership comes from the current profile, and the backend checks permissions for every request. Search accounts, filter by role or status, inspect safe account details, suspend/reactivate ordinary accounts, and review filtered access history at `/admin/audit`. Administrator accounts remain protected; membership changes require the backend operator CLI.
+
+These screens require the updated backend profile-role, account-summary, admin-user and audit APIs. Older servers keep ordinary account access, but cannot expose administration. A missing or failed response is shown as unavailable rather than a zero count. Audit history covers suspension and activation, not every platform operation. The frontend never grants membership or reads other users’ tenant data.
 
 ### Schema relationships
 
@@ -62,16 +68,16 @@ The frontend uses JWT Bearer authentication for account and database operations.
 
 ## Development
 
-| Command                 | Purpose                                             |
-| ----------------------- | --------------------------------------------------- |
-| `npm run dev`           | Start Vite on port 3000                             |
-| `npm test`              | Run account contract and verification-link tests    |
-| `npm run check`         | Run type checking, ESLint, and Prettier checks      |
-| `npm run typecheck`     | Check application TypeScript without emitting files |
-| `npm run typecheck:all` | Check application and Vite configuration projects   |
-| `npm run lint`          | Run ESLint                                          |
-| `npm run format:check`  | Check formatting                                    |
-| `npm run preview`       | Preview an existing production bundle               |
+| Command                 | Purpose                                                      |
+| ----------------------- | ------------------------------------------------------------ |
+| `npm run dev`           | Start Vite on port 3000                                      |
+| `npm test`              | Run account, management contract and verification-link tests |
+| `npm run check`         | Run type checking, ESLint, and Prettier checks               |
+| `npm run typecheck`     | Check application TypeScript without emitting files          |
+| `npm run typecheck:all` | Check application and Vite configuration projects            |
+| `npm run lint`          | Run ESLint                                                   |
+| `npm run format:check`  | Check formatting                                             |
+| `npm run preview`       | Preview an existing production bundle                        |
 
 Verify UI changes in both themes and at desktop and mobile widths. Check keyboard navigation, loading/error/empty states, and reduced motion. Use `npm run check` for development verification.
 

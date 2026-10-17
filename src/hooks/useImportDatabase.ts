@@ -21,6 +21,7 @@ export function useImportDatabase() {
     // have committed the new database before the response was lost.
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["databases"] });
+      void queryClient.invalidateQueries({ queryKey: ["accountSummary"] });
     },
   });
 }

@@ -15,6 +15,7 @@ const profileSchema = z.object({
   email_verified: z.boolean().optional(),
   verification_required: z.boolean().optional(),
   pending_email: z.string().optional(),
+  role: z.enum(["user", "admin"]).optional(),
 });
 export type AccountProfile = z.infer<typeof profileSchema>;
 export interface LoginCredentials {
@@ -52,6 +53,7 @@ const messages: Record<string, string> = {
     "Your current password is required to change your email. Please check it and try again.",
   email_conflict: "That email address is already in use. Your current email remains unchanged.",
   session_revoked: "Your sign-in details changed. Sign in again to continue.",
+  account_suspended: "This account is suspended. Contact the platform operator.",
   invalid_email_change: "Update your username and email separately.",
   request_too_large: "These account details are too long. Check your entries and try again.",
   invalid_auth_request: "Check your account details and try again.",
