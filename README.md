@@ -14,7 +14,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **Database exports:** download a SQLite snapshot or SQL dump, preview SQL, and copy it.
 - **Saved backups:** create and browse retained snapshots, download them with integrity checks, delete saved copies, and restore into a new database. Account history remains accessible after source deletion. Requires the backend managed-backup endpoints and an owner JWT.
 - **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
-- **Account and keys:** signup/login, profile editing, and database API key generation, rotation, and revocation.
+- **Account and keys:** signup/login, email verification and resend recovery, profile editing with confirmed email changes, and database API key generation, rotation, and revocation.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
 Record search operates on the current page. The backend separately supports column equality filters through the records API. SQLite import creates a new database and accepts snapshots up to 64 MiB; SQL-dump import, scheduled backups and restoring over an existing database are not implemented. Import requires an owner JWT; database API keys cannot provision a new database.
@@ -22,6 +22,8 @@ Record search operates on the current page. The backend separately supports colu
 Use a consistent SQLite snapshot, such as Nebula's SQLite export, rather than copying an active `.db` file that may depend on a separate WAL. Interrupted or unconfirmed imports prompt you to check your database list before retrying; writes are never retried automatically.
 
 Saved backups stay on the backend server and do not protect against host or disk loss. Download a copy to independent storage. Backup creation keeps its request ID across reloads; unconfirmed restores require a fresh database check before retrying. The server limits snapshots to 64 MiB and retained backups to 20 per account within 256 MiB of storage. Deploy the managed-backup backend before enabling this flow; older servers retain the on-demand export tools.
+
+Email verification requires the backend verification endpoints and configured SMTP. Deploy this frontend before enabling `EMAIL_VERIFICATION_ENABLED` on the backend. When enabled, new accounts confirm an email link before login; email changes retain the old address until confirmation and then require signing in again. The frontend supports verification-disabled servers and immediate legacy email updates. Verification links use `/verify-email#token=...`; tokens are removed from the URL before analytics, kept only in memory, and submitted only after explicit confirmation.
 
 ### Schema relationships
 
@@ -63,6 +65,7 @@ The frontend uses JWT Bearer authentication for account and database operations.
 | Command                 | Purpose                                             |
 | ----------------------- | --------------------------------------------------- |
 | `npm run dev`           | Start Vite on port 3000                             |
+| `npm test`              | Run account contract and verification-link tests    |
 | `npm run check`         | Run type checking, ESLint, and Prettier checks      |
 | `npm run typecheck`     | Check application TypeScript without emitting files |
 | `npm run typecheck:all` | Check application and Vite configuration projects   |
