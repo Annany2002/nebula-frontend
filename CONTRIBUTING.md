@@ -1,103 +1,37 @@
-# 🙌 Contributing to Nebula Frontend
+# Contributing to Nebula Frontend
 
-First off, thanks for taking the time to contribute to Nebula! 🎉  
-This document outlines how you can effectively contribute to the project.
+This repository contains the React/TypeScript web interface for [Nebula](https://github.com/Annany2002/nebula-backend). Keep changes focused, preserve existing behavior and update public documentation when workflows or backend requirements change.
 
----
+## Local development
 
-## 📦 Repository Overview
-
-This is the **Nebula Frontend**, a modern TypeScript + React web application built with Vite, Tailwind CSS, and Shadcn UI. It interacts with the [Nebula BaaS Backend](https://github.com/Annany2002/nebula-backend) to manage databases, tables, and API keys.
-
----
-
-## 🛠️ Getting Started
-
-1. **Fork** the repository
-2. **Clone** your fork
+Use Node.js/npm and a running backend. Install the locked dependencies and configure the backend origin:
 
 ```bash
-git clone https://github.com/<your-username>/nebula-frontend.git
-cd nebula-frontend
-```
-
-3. **Install dependencies**
-
-```bash
-npm install
-# or
-yarn install
-```
-
-4. **Configure Environment**
-
-```bash
+npm ci
 cp .env.example .env.local
-# Set your backend URL inside .env.local
-```
-
-5. **Run locally**
-
-```bash
+# Set VITE_BACKEND_URL=http://localhost:8080.
 npm run dev
 ```
 
----
+Open `http://localhost:3000`. Frontend environment variables are public; do not include SMTP credentials, JWT signing secrets or npm tokens. For account email testing, use the backend's `./scripts/dev-email.sh` runner and local inbox at `http://localhost:8025`.
 
-## 🐛 Reporting Bugs or Suggesting Features
-
-- For bugs, [open a bug report](../../issues/new?template=bug_report.yaml)
-- For features, [submit a feature request](../../issues/new?template=feature_request.yaml)
-
-Please **check existing issues** before creating a new one.
-
----
-
-## 🧑‍💻 Submitting a Pull Request
-
-1. Create a branch:
+## Verification
 
 ```bash
-git checkout -b fix/login-bug
+npm test
+npm run check
 ```
 
-2. Make your changes.
+Use type, lint and formatting checks during development. Check changed pages in light/dark themes and at mobile/desktop widths. Verify keyboard access, focus, input validation, loading/empty/error states and reduced motion. Authentication changes also need live backend coverage for expired sessions, invalid links, throttling and uncertain write outcomes. Keep recovery tokens and passwords out of URLs, storage, analytics, query caches and diagnostic output.
 
-3. **Test your changes** thoroughly.
+Use existing UI components and theme tokens. Derive database workspace tabs from exact route segments instead of synchronizing URL state through effects. Do not change unrelated shared layout to address a focused UI issue.
 
-4. Commit using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/):
+## Pull requests
 
-```bash
-git commit -m "fix(auth): resolve login error on invalid token"
-```
+Create a focused branch from current `origin/main`. Use conventional commit messages and describe the user-visible change, tests and any backend deployment dependency. Use the [PR template](.github/ISSUE_TEMPLATE/PULL_REQUEST_TEMPLATE.md). Report bugs and proposals through [GitHub issues](https://github.com/Annany2002/nebula-frontend/issues).
 
-5. Push and open a Pull Request. GitHub will auto-fill the [PR Template](./.github/PULL_REQUEST_TEMPLATE.md).
+Keep backend contracts and SDK examples aligned. An opt-in server feature should remain disabled until compatible frontend routes are deployed. Update [README.md](README.md) for configuration, route or feature changes. Do not include runtime data or credentials in the pull request.
 
----
+## License
 
-## ✅ Code Standards
-
-- Use **TypeScript** and **React best practices**
-- Use `npm run lint` to check for code style issues
-- Follow accessibility and semantic HTML principles
-- Use Tailwind CSS for UI styling (avoid inline styles)
-
----
-
-## 🧪 Testing
-
-- Manual UI testing is expected for visual/UI changes
-- Unit and integration tests (if applicable) must be updated or added
-
----
-
-## 🧾 Licensing
-
-By contributing, you agree that your contributions will be licensed under the [MIT License](./LICENSE).
-
----
-
-## 🙏 Thank You!
-
-We’re excited to see what you’ll build or improve 🚀
-If you have any questions, feel free to open a discussion or issue.
+Contributions are licensed under [MIT](LICENSE).
