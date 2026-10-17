@@ -24,6 +24,9 @@ jobs:
       - name: Run TypeScript typecheck
         run: npm run typecheck:all
 
+      - name: Run account contract tests
+        run: npm test
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

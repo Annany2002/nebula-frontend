@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import "@/styles/auth.css";
 
 interface AuthLayoutProps {
+  icon?: ReactNode;
   title: string;
   description: string;
   children: ReactNode;
@@ -15,6 +16,7 @@ interface AuthLayoutProps {
 }
 
 const AuthLayout = ({
+  icon,
   title,
   description,
   children,
@@ -81,7 +83,16 @@ const AuthLayout = ({
       </aside>
       <section className="auth-form-panel" aria-labelledby="auth-heading">
         <div className="auth-form-content">
-          <div className="auth-form-heading">
+          <div
+            className={
+              icon ? "auth-form-heading auth-form-heading-verification" : "auth-form-heading"
+            }
+          >
+            {icon && (
+              <div className="auth-verification-icon" aria-hidden="true">
+                {icon}
+              </div>
+            )}
             <h1 id="auth-heading">{title}</h1>
             <p>{description}</p>
           </div>

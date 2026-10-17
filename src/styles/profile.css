@@ -141,6 +141,80 @@
 .profile-form label {
   font-size: 12px;
 }
+.profile-email {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+.profile-email-value {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 100%;
+}
+.profile-email-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 5px;
+  padding: 3px 7px;
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+}
+.profile-email-pending {
+  width: 100%;
+  border-left: 2px solid hsl(var(--primary) / 0.5);
+  padding: 10px 14px;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted) / 0.4);
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.profile-email-pending strong {
+  color: hsl(var(--foreground));
+  font-weight: 500;
+}
+.profile-email-form {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+}
+.profile-email-form label {
+  font-size: 12px;
+}
+.profile-email-form input {
+  margin-top: 8px;
+  height: 44px;
+}
+.profile-email-form > p {
+  font-size: 12px;
+  line-height: 1.75;
+  color: hsl(var(--muted-foreground));
+}
+.profile-email-form .profile-form-actions {
+  flex-wrap: wrap;
+}
+.profile-email-form .profile-form-actions button {
+  min-height: 44px;
+  white-space: normal;
+}
+.profile-email-form .auth-password {
+  position: relative;
+}
+.profile-email-form .auth-password input {
+  padding-right: 46px;
+}
+.profile-email-form .auth-password button {
+  position: absolute;
+  right: 4px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
+  color: hsl(var(--muted-foreground));
+}
 .profile-form input {
   height: 42px;
   background: hsl(var(--background));
