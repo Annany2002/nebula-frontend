@@ -18,6 +18,7 @@ const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const SingleTable = lazy(() => import("./pages/SingleTable"));
 const Profile = lazy(() => import("./pages/Profile"));
 
@@ -54,6 +55,7 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/sign-in" element={<SignIn />} />
                   <Route path="/sign-up" element={<SignUp />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
 
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>

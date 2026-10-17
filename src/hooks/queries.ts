@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { url } from "@/lib/config";
+import { getAccountProfile, updateAccountProfile } from "@/lib/account";
 import {
   DataBaseType,
   TableType,
   RecordSchemaType,
   RecordsResponse,
   RecordsQueryParams,
-  UserProfileType,
   DatabaseDetailType,
   SQLQueryResultType,
   DatabaseAnalyticsType,
@@ -535,13 +535,9 @@ export const useDeleteApiKey = () => {
 export const useCurrentUser = () => {
   return useQuery({
     queryKey: ["currentUser"],
-    queryFn: async (): Promise<UserProfileType> => {
+    queryFn: async ({ signal }) => {
       const token = getToken();
-      const response = await fetch(`${url}/api/v1/account/user/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Failed to fetch user profile");
-      return response.json();
+      return getAccountProfile(token, signal);
     },
     enabled: !!getToken(),
   });
@@ -550,22 +546,7 @@ export const useCurrentUser = () => {
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { username?: string; email?: string }) => {
-      const token = getToken();
-      const response = await fetch(`${url}/api/v1/account/user/me`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update profile");
-      }
-      return response.json();
-    },
+    mutationFn: (data: { username?: string }) => updateAccountProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       toast.success("Profile updated successfully");

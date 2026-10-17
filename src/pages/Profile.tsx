@@ -20,10 +20,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/formatDate";
 import "@/styles/profile.css";
+import AccountEmail from "@/components/auth/AccountEmail";
 
 const editSchema = z.object({
   username: z.string().min(6, "Username must be at least 6 characters"),
-  email: z.string().email("Please enter a valid email address"),
 });
 type EditFormValues = z.infer<typeof editSchema>;
 
@@ -34,12 +34,11 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const form = useForm<EditFormValues>({
     resolver: zodResolver(editSchema),
-    values: { username: profile?.username ?? "", email: profile?.email ?? "" },
+    values: { username: profile?.username ?? "" },
   });
   const onSubmit = (data: EditFormValues) => {
-    const changes: { username?: string; email?: string } = {};
+    const changes: { username?: string } = {};
     if (data.username !== profile?.username) changes.username = data.username;
-    if (data.email !== profile?.email) changes.email = data.email;
     if (!Object.keys(changes).length) {
       setIsEditing(false);
       return;
@@ -144,24 +143,6 @@ const Profile = () => {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="email"
-                              autoComplete="email"
-                              disabled={updateProfile.isPending}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     {updateProfile.isError && (
                       <p role="alert" className="text-sm text-destructive">
                         {updateProfile.error.message}
@@ -206,7 +187,9 @@ const Profile = () => {
                       <Mail size={16} />
                       Email address
                     </dt>
-                    <dd>{profile.email}</dd>
+                    <dd>
+                      <AccountEmail profile={profile} onUpdated={refreshUser} />
+                    </dd>
                   </div>
                 </dl>
               )}

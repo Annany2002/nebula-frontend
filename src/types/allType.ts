@@ -59,6 +59,9 @@ export interface UserProfileType {
   username: string;
   email: string;
   createdAt: string;
+  email_verified?: boolean;
+  verification_required?: boolean;
+  pending_email?: string;
 }
 
 export interface DatabaseDetailType {

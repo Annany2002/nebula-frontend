@@ -15,11 +15,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import AuthLayout from "@/layout/AuthLayout";
 import { useAuth } from "@/context/auth-context";
+import { accountEmailSchema } from "@/lib/account";
 
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: accountEmailSchema,
   username: z.string().min(6, "Username must be at least 6 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .refine(
+      (value) => new TextEncoder().encode(value).length <= 72,
+      "Password must be at most 72 UTF-8 bytes"
+    ),
 });
 
 type FormValues = z.infer<typeof formSchema>;
