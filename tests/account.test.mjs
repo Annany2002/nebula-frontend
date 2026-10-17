@@ -269,3 +269,95 @@ test("same-tab links survive paired popstate and hashchange events", async () =>
   assert.equal(updates, 2);
   unsubscribe();
 });
+
+test("recovery requests omit authentication, preserve password bytes, and project acknowledgements", async () => {
+  const token = "A".repeat(43);
+  globalThis.localStorage = { getItem: () => "must-not-send" };
+  let calls = 0;
+  globalThis.fetch = async (endpoint, options) => {
+    calls++;
+    assert.equal(options.headers.Authorization, undefined);
+    assert.equal(options.credentials, "omit");
+    assert.equal(options.redirect, "error");
+    assert.equal(options.cache, "no-store");
+    if (endpoint.endsWith("forgot-password")) {
+      assert.deepEqual(JSON.parse(options.body), { email: "owner@example.test" });
+      return json({ message: "Accepted", token: "must-not-escape" }, 202);
+    }
+    assert.equal(endpoint, "http://localhost:8080/auth/reset-password");
+    assert.deepEqual(JSON.parse(options.body), { token, password: "é".repeat(36) });
+    return json({ message: "Updated", token: "must-not-escape" });
+  };
+  assert.deepEqual(await account.requestPasswordReset("owner@example.test"), {
+    message: "Accepted",
+  });
+  assert.deepEqual(await account.resetAccountPassword(token, "é".repeat(36)), {
+    message: "Updated",
+  });
+  assert.equal(calls, 2);
+});
+
+test("recovery failures retain actionable codes and uncertain writes are never replayed", async () => {
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return json({ error: "secret internal error", code: "invalid_password_reset_token" }, 400);
+  };
+  await assert.rejects(account.resetAccountPassword("A".repeat(43), "new-password"), {
+    code: "invalid_password_reset_token",
+    outcomeUnknown: false,
+  });
+  assert.equal(calls, 1);
+  globalThis.fetch = async () =>
+    json({ error: "busy", code: "password_reset_rate_limited" }, 429, { "Retry-After": "60" });
+  await assert.rejects(account.requestPasswordReset("owner@example.test"), {
+    retryAfter: 60,
+    outcomeUnknown: false,
+  });
+  globalThis.fetch = async () => json({ message: "unexpected" }, 200);
+  await assert.rejects(account.requestPasswordReset("owner@example.test"), {
+    code: "invalid_response",
+    outcomeUnknown: true,
+  });
+  globalThis.fetch = async () => {
+    throw new TypeError("connection lost");
+  };
+  await assert.rejects(account.resetAccountPassword("A".repeat(43), "new-password"), {
+    outcomeUnknown: true,
+  });
+});
+
+test("recovery bootstrap strips reset secrets and rejects query or duplicate tokens", async () => {
+  const token = "A".repeat(43);
+  for (const [index, hash, search, expected, invalid] of [
+    [0, `#token=${token}`, "", token, false],
+    [1, `#token=${token}&token=${token}`, "", "", true],
+    [2, `#token=${token}`, `?token=${token}`, "", true],
+    [3, "", `?token=${token}`, "", true],
+  ]) {
+    let cleanURL;
+    globalThis.window = {
+      location: { pathname: "/reset-password", hash, search },
+      history: {
+        state: null,
+        replaceState(_state, _unused, value) {
+          cleanURL = value;
+        },
+      },
+      addEventListener() {},
+      removeEventListener() {},
+    };
+    const store = await server.ssrLoadModule(`/src/lib/passwordResetLink.ts?recovery=${index}`);
+    assert.deepEqual(store.getPasswordResetLink(), { token: expected, invalid });
+    assert.equal(cleanURL, "/reset-password");
+    store.forgetPasswordResetLink();
+    assert.deepEqual(store.getPasswordResetLink(), { token: "", invalid: false });
+  }
+});
+
+test("new-password policy agrees with the server's Unicode character and UTF-8 byte limits", () => {
+  for (const value of ["é".repeat(36), "😀".repeat(8), " ".repeat(8)])
+    assert.equal(account.accountPasswordSchema.safeParse(value).success, true);
+  for (const value of ["short", "é".repeat(37), "😀".repeat(7), "😀".repeat(19)])
+    assert.equal(account.accountPasswordSchema.safeParse(value).success, false);
+});
