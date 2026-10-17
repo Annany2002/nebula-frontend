@@ -70,6 +70,7 @@ export function useBackups(dbName: string | undefined, offset: number) {
   const refresh = () => {
     void client.invalidateQueries({ queryKey: ["backups", owner] });
     void client.invalidateQueries({ queryKey: ["databases"] });
+    void client.invalidateQueries({ queryKey: ["accountSummary"] });
   };
   const saveIntent = (next: Intent | null) => {
     // Persist before sending a write. A remount must not silently replace an

@@ -154,6 +154,7 @@ export const useCreateDatabase = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["databases"] });
+      queryClient.invalidateQueries({ queryKey: ["accountSummary"] });
     },
   });
 };
@@ -189,6 +190,7 @@ export const useDeleteDatabase = () => {
           ].includes(String(queryKey[0])),
       });
       queryClient.invalidateQueries({ queryKey: ["databases"] });
+      queryClient.invalidateQueries({ queryKey: ["accountSummary"] });
       toast.success(`Database ${dbName} deleted`);
     },
     onError: () => toast.error("Error in deleting database"),
@@ -492,6 +494,7 @@ export const useGenerateApiKey = () => {
         old?.map((db) => (db.dbName === dbName ? { ...db, apiKey: "", apiKeyPrefix: prefix } : db))
       );
       queryClient.invalidateQueries({ queryKey: ["databases"] });
+      queryClient.invalidateQueries({ queryKey: ["accountSummary"] });
       queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
       toast.success("API key generated. Copy it before leaving this page.");
     },
@@ -521,6 +524,7 @@ export const useDeleteApiKey = () => {
         )
       );
       queryClient.invalidateQueries({ queryKey: ["databases"] });
+      queryClient.invalidateQueries({ queryKey: ["accountSummary"] });
       queryClient.invalidateQueries({ queryKey: ["databaseDetails", dbName] });
       toast.success("API key revoked");
     },

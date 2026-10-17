@@ -168,6 +168,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       hasSession.current = true;
       toast.success("Signed in successfully.");
       navigate(`/dashboard/${result.user.userId}`);
+      // Login intentionally omits platform membership; load it from the profile endpoint.
+      void refreshUser();
     } catch (error) {
       if (generation.current !== currentGeneration) return;
       if (error instanceof AccountError && error.code === "email_verification_required") {
