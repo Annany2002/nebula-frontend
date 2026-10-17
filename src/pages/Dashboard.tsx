@@ -19,6 +19,7 @@ import CreateDatabase from "@/components/Database/CreateDatabase";
 import ImportDatabase from "@/components/Database/ImportDatabase";
 import { EnhancedDatabaseCard } from "@/components/Database/EnhancedDatabaseCard";
 import DatabaseQuickstart from "@/components/Dashboard/DatabaseQuickstart";
+import AccountSummary from "@/components/Dashboard/AccountSummary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -92,6 +93,8 @@ const Dashboard = () => {
             <CreateDatabase openChange={openChange} setOpenChange={setOpenChange} />
           </div>
         </header>
+
+        <AccountSummary />
 
         {importOpen && (
           <ImportDatabase

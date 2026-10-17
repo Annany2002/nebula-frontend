@@ -21,6 +21,7 @@ const SignUp = lazy(() => import("./pages/SignUp"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const SingleTable = lazy(() => import("./pages/SingleTable"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Administration = lazy(() => import("./pages/Administration"));
 
 export { url } from "@/lib/config";
 
@@ -64,6 +65,7 @@ const App = () => {
                     <Route path="/databases/:db_name/*" element={<DatabaseStudio />} />
                     <Route path="/databases/:db_name" element={<DatabaseStudio />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/admin/*" element={<Administration />} />
                   </Route>
 
                   {/* Catch-all 404 */}

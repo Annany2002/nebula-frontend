@@ -67,6 +67,13 @@ export default function UserDropDown() {
           )}
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-purple-200/30 dark:bg-white/10 my-1" />
+        {user?.role === "admin" && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin/users" className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium">
+              Administration
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           className="px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors text-red-600 dark:text-red-400 focus:bg-red-500/10 focus:text-red-600 dark:focus:bg-red-500/15 dark:focus:text-red-300"
           onClick={logout}
