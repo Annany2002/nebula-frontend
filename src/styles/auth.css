@@ -390,3 +390,19 @@
   width: 44px;
   height: 44px;
 }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-block: 22px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: hsl(var(--border));
+}

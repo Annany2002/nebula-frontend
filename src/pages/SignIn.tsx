@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import GitHubSignIn from "@/components/auth/GitHubSignIn";
 import AuthPanel from "@/components/auth/AuthPanel";
 import { useAuth } from "@/context/auth-context";
 
@@ -47,6 +48,7 @@ const SignIn = () => {
       footerLinkText="Sign up"
       footerLinkHref="/sign-up"
     >
+      <GitHubSignIn disabled={isLoading} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form" noValidate>
           <FormField

@@ -49,6 +49,17 @@ export class AccountError extends Error {
 }
 
 const messages: Record<string, string> = {
+  invalid_github_oauth_request:
+    "GitHub sign-in could not start. Start again from the sign-in page.",
+  invalid_github_oauth_state: "This GitHub request has expired or was already used. Start again.",
+  github_verified_email_required: "Verify your primary email on GitHub before trying again.",
+  github_account_unavailable: "This account cannot sign in. Contact the platform operator.",
+  github_account_conflict:
+    "This GitHub account or email already belongs to an account. Sign in with your existing method, then connect GitHub from Your account.",
+  github_oauth_rate_limited: "Too many GitHub requests. Wait before starting again.",
+  github_oauth_busy: "GitHub sign-in is busy. Wait a moment, then start again.",
+  github_oauth_disabled: "GitHub sign-in is not available on this server.",
+  github_oauth_unavailable: "GitHub sign-in could not be confirmed. Start a fresh sign-in attempt.",
   password_reset_disabled:
     "Password recovery is not available on this server. Contact the platform operator.",
   password_reset_busy: "Password recovery is busy. Wait a moment and try again.",
@@ -67,8 +78,7 @@ const messages: Record<string, string> = {
   verification_rate_limited: "Too many email requests. Wait before requesting another.",
   verification_delivery_unconfirmed:
     "Email delivery couldn’t be confirmed. Your current email remains active. Wait before trying again.",
-  reauthentication_required:
-    "Your current password is required to change your email. Please check it and try again.",
+  reauthentication_required: "Confirm your current password and try again.",
   email_conflict: "That email address is already in use. Your current email remains unchanged.",
   session_revoked: "Your sign-in details changed. Sign in again to continue.",
   account_suspended: "This account is suspended. Contact the platform operator.",
@@ -84,7 +94,7 @@ function retrySeconds(value: string | null) {
 }
 
 // One deadline covers headers and JSON consumption; credentials never enter query caches.
-async function request<T>(
+export async function accountRequest<T>(
   path: string,
   options: RequestInit,
   consume: (response: Response) => Promise<T>
@@ -120,6 +130,10 @@ async function request<T>(
               "/auth/resend-verification",
               "/auth/forgot-password",
               "/auth/reset-password",
+              "/auth/providers",
+              "/auth/github/start",
+              "/auth/github/callback",
+              "/api/v1/account/identities/github/start",
             ].includes(path)
             ? "This feature requires an updated Nebula server."
             : "Check your credentials or sign in again."
@@ -144,9 +158,11 @@ async function request<T>(
   } catch (error) {
     if (error instanceof AccountError) throw error;
     throw new AccountError(
-      write
-        ? "The response couldn’t be confirmed. The server may have completed this request. Check your email or try signing in before retrying."
-        : "Couldn’t reach your account. Check your connection and try again.",
+      path.includes("/github/")
+        ? "The GitHub response couldn’t be confirmed. Start a fresh GitHub sign-in to check your account."
+        : write
+          ? "The response couldn’t be confirmed. The server may have completed this request. Check your email or try signing in before retrying."
+          : "Couldn’t reach your account. Check your connection and try again.",
       0,
       "",
       0,
@@ -158,7 +174,7 @@ async function request<T>(
   }
 }
 
-async function parse<T>(
+export async function parseAccountResponse<T>(
   response: Response,
   schema: z.ZodType<T>,
   write = false,
@@ -184,6 +200,13 @@ async function parse<T>(
   return result.data;
 }
 
+export const loginResponseSchema = z.object({
+  token: z.string().min(1),
+  user: profileSchema,
+  message: z.string(),
+});
+export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
 const messageSchema = z.object({ message: z.string() });
 const signupSchema = z
   .object({
@@ -195,24 +218,22 @@ const signupSchema = z
   .refine((data) => !data.verification_required || !!data.verification_delivery);
 
 export function signupAccount(data: SignupCredentials) {
-  return request("/auth/signup", { method: "POST", body: JSON.stringify(data) }, (response) =>
-    parse(response, signupSchema, true, 201)
+  return accountRequest(
+    "/auth/signup",
+    { method: "POST", body: JSON.stringify(data) },
+    (response) => parseAccountResponse(response, signupSchema, true, 201)
   );
 }
 export function loginAccount(data: LoginCredentials) {
-  return request("/auth/login", { method: "POST", body: JSON.stringify(data) }, (response) =>
-    parse(
-      response,
-      z.object({ token: z.string().min(1), user: profileSchema, message: z.string() }),
-      true
-    )
+  return accountRequest("/auth/login", { method: "POST", body: JSON.stringify(data) }, (response) =>
+    parseAccountResponse(response, loginResponseSchema, true)
   );
 }
 export function getAccountProfile(token: string, signal?: AbortSignal) {
-  return request(
+  return accountRequest(
     "/api/v1/account/user/me",
     { headers: { Authorization: `Bearer ${token}` }, signal },
-    (response) => parse(response, profileSchema)
+    (response) => parseAccountResponse(response, profileSchema)
   );
 }
 export type ProfileUpdate =
@@ -224,7 +245,7 @@ export function updateAccountProfile(data: {
 }): Promise<ProfileUpdate> {
   const token = localStorage.getItem("token");
   if (!token) return Promise.reject(new AccountError("Sign in again to update your account.", 401));
-  return request(
+  return accountRequest(
     "/api/v1/account/user/me",
     {
       method: "PUT",
@@ -233,7 +254,7 @@ export function updateAccountProfile(data: {
     },
     async (response) => {
       if (response.status === 202) {
-        const result = await parse(
+        const result = await parseAccountResponse(
           response,
           z.object({ pending_email: z.string().email(), message: z.string() }),
           true,
@@ -257,7 +278,7 @@ export function updateAccountProfile(data: {
           0,
           true
         );
-      const result = await parse(
+      const result = await parseAccountResponse(
         response,
         z.object({ user: profileSchema, message: z.string() }),
         true
@@ -267,31 +288,31 @@ export function updateAccountProfile(data: {
   );
 }
 export function verifyAccountEmail(token: string) {
-  return request(
+  return accountRequest(
     "/auth/verify-email",
     { method: "POST", body: JSON.stringify({ token }) },
-    (response) => parse(response, messageSchema, true)
+    (response) => parseAccountResponse(response, messageSchema, true)
   );
 }
 export function resendAccountVerification(email: string) {
-  return request(
+  return accountRequest(
     "/auth/resend-verification",
     { method: "POST", body: JSON.stringify({ email }) },
-    (response) => parse(response, messageSchema, true, 202)
+    (response) => parseAccountResponse(response, messageSchema, true, 202)
   );
 }
 
 export function requestPasswordReset(email: string) {
-  return request(
+  return accountRequest(
     "/auth/forgot-password",
     { method: "POST", body: JSON.stringify({ email }) },
-    (response) => parse(response, messageSchema, true, 202)
+    (response) => parseAccountResponse(response, messageSchema, true, 202)
   );
 }
 export function resetAccountPassword(token: string, password: string) {
-  return request(
+  return accountRequest(
     "/auth/reset-password",
     { method: "POST", body: JSON.stringify({ token, password }) },
-    (response) => parse(response, messageSchema, true)
+    (response) => parseAccountResponse(response, messageSchema, true)
   );
 }

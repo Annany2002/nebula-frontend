@@ -15,6 +15,7 @@ import {
   loadForgotPassword,
   loadResetPassword,
   loadVerifyEmail,
+  loadGitHubCallback,
 } from "@/lib/auth-pages";
 
 // Lazy load pages
@@ -29,6 +30,7 @@ const SignUp = lazy(loadSignUp);
 const ForgotPassword = lazy(loadForgotPassword);
 const ResetPassword = lazy(loadResetPassword);
 const VerifyEmail = lazy(loadVerifyEmail);
+const GitHubCallback = lazy(loadGitHubCallback);
 const SingleTable = lazy(() => import("./pages/SingleTable"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Administration = lazy(() => import("./pages/Administration"));
@@ -66,6 +68,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route element={<AuthLayout />}>
+                    <Route path="/auth/github/callback" element={<GitHubCallback />} />
                     <Route path="/sign-in" element={<SignIn />} />
                     <Route path="/sign-up" element={<SignUp />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />

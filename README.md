@@ -14,7 +14,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **Database exports:** download a SQLite snapshot or SQL dump, preview SQL, and copy it.
 - **Saved backups:** create and browse retained snapshots, download them with integrity checks, delete saved copies, and restore into a new database. Account history remains accessible after source deletion. Requires the backend managed-backup endpoints and an owner JWT.
 - **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
-- **Account and keys:** signup/login, email verification and resend, forgot/reset password, profile editing with confirmed email changes, and database API key generation, rotation, and revocation.
+- **Account and keys:** password and optional GitHub sign-in, password-confirmed GitHub connection, email verification and resend, forgot/reset password, profile editing with confirmed email changes, and database API key generation, rotation, and revocation.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
 Record search operates on the current page. The backend separately supports column equality filters through the records API. SQLite import creates a new database and accepts snapshots up to 64 MiB; SQL-dump import, scheduled backups and restoring over an existing database are not implemented. Import requires an owner JWT; database API keys cannot provision a new database.
@@ -24,6 +24,16 @@ Use a consistent SQLite snapshot, such as Nebula's SQLite export, rather than co
 Saved backups stay on the backend server and do not protect against host or disk loss. Download a copy to independent storage. Backup creation keeps its request ID across reloads; unconfirmed restores require a fresh database check before retrying. The server limits snapshots to 64 MiB and retained backups to 20 per account within 256 MiB of storage. Deploy the managed-backup backend before enabling this flow; older servers retain the on-demand export tools.
 
 Email verification requires the backend verification endpoints and configured SMTP. Deploy this frontend before enabling `EMAIL_VERIFICATION_ENABLED` on the backend. When enabled, new accounts confirm an email link before login; email changes retain the old address until confirmation and then require signing in again. The frontend supports verification-disabled servers and immediate legacy email updates. Verification links use `/verify-email#token=...`; tokens are removed from the URL before analytics, kept only in memory, and submitted only after explicit confirmation.
+
+### GitHub sign-in
+
+When `GET /auth/providers` reports GitHub enabled, the sign-in and sign-up pages offer **Continue with GitHub**. Disabled, older or unreachable servers keep password sign-in available. Existing password accounts can connect GitHub from **Your account** after confirming their current password. Matching email addresses are never merged automatically.
+
+Register a GitHub OAuth app with its callback set to the frontend’s exact `/auth/github/callback` URL. For local development, use `http://localhost:3000/auth/github/callback`; use HTTPS for production and a separate OAuth app for each environment. On the backend, configure `GITHUB_OAUTH_ENABLED=true`, `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` and `GITHUB_OAUTH_REDIRECT_URL`. The redirect must match the frontend’s origin. Keep the client secret on the backend; no OAuth secret belongs in `VITE_*` variables. SMTP is not required. See the [backend OAuth contract](https://github.com/Annany2002/nebula-backend/blob/main/docs/api-reference/github-sign-in.mdx) for setup, limits and errors.
+
+Each attempt uses S256 PKCE and a ten-minute, tab-scoped transaction. The verifier and a session fingerprint are kept in `sessionStorage`; callback codes stay in memory after their URL is scrubbed before analytics. **Finish signing in** performs one explicit exchange. Reloading, expiry, denial, missing tab storage or an uncertain response requires starting a fresh attempt. A successful GitHub connection signs out existing sessions; sign in again using GitHub or your password. Replacing or disconnecting identities is not supported.
+
+Deploy both compatible frontend and backend versions before enabling GitHub. Serve the callback through the SPA fallback, without caching its response or forwarding query strings to analytics. The included Vercel configuration adds callback cache/referrer protections; other hosts should provide equivalent headers. A no-referrer document policy also protects the initial callback page before JavaScript runs. Live consent testing requires an OAuth app; automated tests use mocked provider responses and do not contact GitHub.
 
 ### Platform administration
 
@@ -116,26 +126,27 @@ src/
 
 Database, project, and profile routes require login.
 
-| Route                                    | View                                      |
-| ---------------------------------------- | ----------------------------------------- |
-| `/`                                      | Landing page                              |
-| `/sign-in`, `/sign-up`                   | Account authentication                    |
-| `/verify-email`                          | Email confirmation and resend             |
-| `/forgot-password`, `/reset-password`    | Password recovery                         |
-| `/admin/users`, `/admin/audit`           | Administrator accounts and access history |
-| `/dashboard/:userId`                     | Projects                                  |
-| `/backups`                               | Account backup history                    |
-| `/profile`                               | Account profile                           |
-| `/databases/:db_name/overview`           | Database overview                         |
-| `/databases/:db_name/tables/:table_name` | Table editor                              |
-| `/databases/:db_name/sql`                | SQL editor                                |
-| `/databases/:db_name/visualizer`         | Schema visualizer                         |
-| `/databases/:db_name/database/tables`    | Table inventory                           |
-| `/databases/:db_name/database/indexes`   | Indexes                                   |
-| `/databases/:db_name/database/triggers`  | Triggers                                  |
-| `/databases/:db_name/database/backups`   | Backups and exports                       |
-| `/databases/:db_name/apikeys`            | API keys                                  |
-| `/databases/:db_name/settings`           | Database settings                         |
+| Route                                    | View                                       |
+| ---------------------------------------- | ------------------------------------------ |
+| `/`                                      | Landing page                               |
+| `/sign-in`, `/sign-up`                   | Account authentication                     |
+| `/auth/github/callback`                  | GitHub sign-in and connection confirmation |
+| `/verify-email`                          | Email confirmation and resend              |
+| `/forgot-password`, `/reset-password`    | Password recovery                          |
+| `/admin/users`, `/admin/audit`           | Administrator accounts and access history  |
+| `/dashboard/:userId`                     | Projects                                   |
+| `/backups`                               | Account backup history                     |
+| `/profile`                               | Account profile                            |
+| `/databases/:db_name/overview`           | Database overview                          |
+| `/databases/:db_name/tables/:table_name` | Table editor                               |
+| `/databases/:db_name/sql`                | SQL editor                                 |
+| `/databases/:db_name/visualizer`         | Schema visualizer                          |
+| `/databases/:db_name/database/tables`    | Table inventory                            |
+| `/databases/:db_name/database/indexes`   | Indexes                                    |
+| `/databases/:db_name/database/triggers`  | Triggers                                   |
+| `/databases/:db_name/database/backups`   | Backups and exports                        |
+| `/databases/:db_name/apikeys`            | API keys                                   |
+| `/databases/:db_name/settings`           | Database settings                          |
 
 Derive active workspace tabs from route segments, so `/databases/...` does not accidentally match every database tab. Backup history is independent of live schema loading, allowing recovery when the source no longer exists.
 

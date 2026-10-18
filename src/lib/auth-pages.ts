@@ -4,6 +4,8 @@ export const loadForgotPassword = () => import("@/pages/ForgotPassword");
 export const loadResetPassword = () => import("@/pages/ResetPassword");
 export const loadVerifyEmail = () => import("@/pages/VerifyEmail");
 
+export const loadGitHubCallback = () => import("@/pages/GitHubCallback");
+
 export function preloadAuthPages() {
   // A failed speculative download must not break the current form or cache a rejected promise.
   void Promise.allSettled([
@@ -12,5 +14,6 @@ export function preloadAuthPages() {
     loadForgotPassword(),
     loadResetPassword(),
     loadVerifyEmail(),
+    loadGitHubCallback(),
   ]);
 }
