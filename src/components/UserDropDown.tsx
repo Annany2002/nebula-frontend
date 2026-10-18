@@ -1,3 +1,4 @@
+import AccountAvatar from "@/components/AccountAvatar";
 import { useAuth } from "@/context/auth-context";
 import {
   DropdownMenu,
@@ -12,7 +13,6 @@ import { Loader } from "lucide-react";
 
 export default function UserDropDown() {
   const { user, isLoading, logout } = useAuth();
-  const initials = user?.username?.substring(0, 2).toLocaleUpperCase() || "";
 
   return (
     <DropdownMenu modal={false}>
@@ -25,7 +25,7 @@ export default function UserDropDown() {
           {isLoading ? (
             <Loader className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />
           ) : (
-            initials || "?"
+            <AccountAvatar user={user} className="h-full w-full text-xs" />
           )}
         </button>
       </DropdownMenuTrigger>

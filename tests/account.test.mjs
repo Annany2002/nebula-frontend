@@ -8,7 +8,7 @@ import { setImmediate as nextTurn } from "node:timers/promises";
 import { createServer } from "vite";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-let server, account, cacheDir;
+let server, account, avatars, cacheDir;
 const originalFetch = globalThis.fetch;
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
 const originalWindow = globalThis.window;
@@ -33,6 +33,7 @@ before(async () => {
     resolve: { alias: { "@": path.join(root, "src") } },
   });
   account = await server.ssrLoadModule("/src/lib/account.ts");
+  avatars = await server.ssrLoadModule("/src/lib/avatars.ts");
 });
 afterEach(() => {
   globalThis.fetch = originalFetch;
@@ -360,4 +361,97 @@ test("new-password policy agrees with the server's Unicode character and UTF-8 b
     assert.equal(account.accountPasswordSchema.safeParse(value).success, true);
   for (const value of ["short", "é".repeat(37), "😀".repeat(7), "😀".repeat(19)])
     assert.equal(account.accountPasswordSchema.safeParse(value).success, false);
+});
+
+test("avatar URLs allow only backend assets and GitHub images", () => {
+  const id = "8b7b6518-0d58-4dbe-af85-c0ded1d1ed3a";
+  assert.equal(avatars.avatarImageURL(`/avatars/${id}`), `http://localhost:8080/avatars/${id}`);
+  const github = "https://avatars.githubusercontent.com/u/123?v=4";
+  assert.equal(avatars.avatarImageURL(github), github);
+  for (const value of [
+    undefined,
+    "",
+    "javascript:alert(1)",
+    "https://evil.test/image",
+    "https://avatars.githubusercontent.com.evil.test/u/1",
+    "https://secret@avatars.githubusercontent.com/u/1",
+    "data:image/svg+xml,test",
+    "/avatars/../data/metadata.db",
+  ])
+    assert.equal(avatars.avatarImageURL(value), undefined);
+});
+
+test("onboarding is offered once, only when the compatible server says it is incomplete", () => {
+  const base = { ...profile, onboarding_completed: false, avatar_url: "" };
+  assert.equal(avatars.postSignInPath(base), "/onboarding");
+  assert.equal(
+    avatars.postSignInPath({ ...base, onboarding_completed: true }),
+    `/dashboard/${profile.userId}`
+  );
+  assert.equal(
+    avatars.postSignInPath({ ...base, avatar_url: "https://avatars.githubusercontent.com/u/123" }),
+    `/dashboard/${profile.userId}`
+  );
+  assert.equal(avatars.postSignInPath(profile), `/dashboard/${profile.userId}`);
+});
+
+test("avatar writes let Fetch set the multipart boundary and preserve unknown outcomes", async () => {
+  let calls = 0;
+  const updated = {
+    ...profile,
+    avatar_url: "/avatars/8b7b6518-0d58-4dbe-af85-c0ded1d1ed3a",
+    avatar_source: "upload",
+    onboarding_completed: true,
+  };
+  globalThis.fetch = async (endpoint, options) => {
+    calls++;
+    assert.equal(options.headers.Authorization, "Bearer owner-token");
+    assert.equal(options.headers["Content-Type"], undefined);
+    if (calls === 1) {
+      assert.equal(options.method, "POST");
+      assert.ok(options.body instanceof FormData);
+      assert.deepEqual([...options.body.keys()], ["avatar"]);
+      return json(updated);
+    }
+    assert.equal(options.method, "DELETE");
+    return json({}, 503);
+  };
+  const file = new File(["fixture"], "photo.png", { type: "image/png" });
+  assert.deepEqual(await avatars.updateAvatar("owner-token", file), updated);
+  await assert.rejects(avatars.updateAvatar("owner-token", null), { outcomeUnknown: true });
+  assert.equal(calls, 2);
+  assert.ok(avatars.avatarFileError(new File([], "empty.png", { type: "image/png" })));
+  assert.ok(avatars.avatarFileError(new File(["<svg/>"], "image.svg", { type: "image/svg+xml" })));
+});
+
+test("avatar setup on older servers reports missing support without suggesting a session problem", async () => {
+  globalThis.fetch = async () => json({}, 404);
+  for (const request of [
+    () => avatars.updateAvatar("fixture-token", null),
+    () => avatars.completeOnboarding("fixture-token"),
+  ])
+    await assert.rejects(request(), (error) => {
+      assert.equal(error.status, 404);
+      assert.match(error.message, /requires an updated Nebula server/);
+      return true;
+    });
+});
+
+test("uncertain avatar writes advise checking the profile, without replaying the request", async () => {
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    throw new TypeError("connection interrupted");
+  };
+  for (const request of [
+    () => avatars.updateAvatar("fixture-token", null),
+    () => avatars.completeOnboarding("fixture-token"),
+  ])
+    await assert.rejects(request(), (error) => {
+      assert.equal(error.outcomeUnknown, true);
+      assert.match(error.message, /Refresh Your account/);
+      assert.doesNotMatch(error.message, /email/);
+      return true;
+    });
+  assert.equal(calls, 2);
 });

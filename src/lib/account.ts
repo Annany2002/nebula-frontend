@@ -16,7 +16,10 @@ export const accountPasswordSchema = z
     "Password must be at most 72 UTF-8 bytes"
   );
 
-const profileSchema = z.object({
+export const profileSchema = z.object({
+  avatar_url: z.string().optional(),
+  avatar_source: z.enum(["", "github", "upload", "none"]).optional(),
+  onboarding_completed: z.boolean().optional(),
   userId: z.string().min(1),
   username: z.string(),
   email: z.string(),
@@ -49,6 +52,9 @@ export class AccountError extends Error {
 }
 
 const messages: Record<string, string> = {
+  invalid_avatar: "Choose a valid JPEG, PNG or WebP photo up to 2 MiB and 4096 pixels per side.",
+  avatar_too_large: "Choose a photo up to 2 MiB.",
+  avatar_busy: "Photo processing is busy. Wait a moment and try again.",
   invalid_github_oauth_request:
     "GitHub sign-in could not start. Start again from the sign-in page.",
   invalid_github_oauth_state: "This GitHub request has expired or was already used. Start again.",
@@ -105,7 +111,7 @@ export async function accountRequest<T>(
   if (external?.aborted) throw new AccountError("Request cancelled before sending.");
   external?.addEventListener("abort", abort, { once: true });
   const timeout = setTimeout(abort, 35_000);
-  const write = options.method === "POST" || options.method === "PUT";
+  const write = ["POST", "PUT", "DELETE"].includes(options.method || "");
   try {
     const response = await fetch(`${url}${path}`, {
       ...options,
@@ -114,7 +120,9 @@ export async function accountRequest<T>(
       redirect: "error",
       cache: "no-store",
       headers: {
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.body && !(options.body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
         ...options.headers,
       },
     });
@@ -134,6 +142,8 @@ export async function accountRequest<T>(
               "/auth/github/start",
               "/auth/github/callback",
               "/api/v1/account/identities/github/start",
+              "/api/v1/account/user/me/avatar",
+              "/api/v1/account/user/me/onboarding",
             ].includes(path)
             ? "This feature requires an updated Nebula server."
             : "Check your credentials or sign in again."
@@ -161,7 +171,9 @@ export async function accountRequest<T>(
       path.includes("/github/")
         ? "The GitHub response couldn’t be confirmed. Start a fresh GitHub sign-in to check your account."
         : write
-          ? "The response couldn’t be confirmed. The server may have completed this request. Check your email or try signing in before retrying."
+          ? path.startsWith("/api/v1/account/user/me/")
+            ? "The profile update couldn’t be confirmed. Refresh Your account before retrying."
+            : "The response couldn’t be confirmed. The server may have completed this request. Check your email or try signing in before retrying."
           : "Couldn’t reach your account. Check your connection and try again.",
       0,
       "",

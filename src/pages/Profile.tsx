@@ -21,6 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/formatDate";
 import "@/styles/profile.css";
 import GitHubSignIn from "@/components/auth/GitHubSignIn";
+import AvatarEditor from "@/components/auth/AvatarEditor";
+import AccountAvatar from "@/components/AccountAvatar";
 import AccountEmail from "@/components/auth/AccountEmail";
 
 const editSchema = z.object({
@@ -89,9 +91,7 @@ const Profile = () => {
         ) : (
           <div className="profile-layout">
             <aside className="profile-summary">
-              <div className="profile-avatar" aria-hidden="true">
-                {profile.username.slice(0, 2).toUpperCase()}
-              </div>
+              <AccountAvatar user={profile} className="profile-avatar" />
               <h2 title={profile.username}>{profile.username}</h2>
               <p>Nebula workspace member</p>
               <div className="profile-member">
@@ -193,6 +193,12 @@ const Profile = () => {
                     </dd>
                   </div>
                 </dl>
+              )}
+              {profile.onboarding_completed !== undefined && (
+                <section className="profile-photo-section" aria-labelledby="profile-photo-heading">
+                  <h2 id="profile-photo-heading">Profile photo</h2>
+                  <AvatarEditor key={user?.userId} />
+                </section>
               )}
               <GitHubSignIn link />
             </section>
