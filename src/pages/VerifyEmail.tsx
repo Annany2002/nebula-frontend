@@ -4,7 +4,7 @@ import { Mail, ShieldCheck, CircleCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AuthLayout from "@/layout/AuthLayout";
+import AuthPanel from "@/components/auth/AuthPanel";
 import { useAuth } from "@/context/auth-context";
 import { useAccountCooldown } from "@/hooks/useAccountCooldown";
 import {
@@ -94,7 +94,7 @@ const VerifyEmail = () => {
   };
 
   return (
-    <AuthLayout
+    <AuthPanel
       icon={
         verified ? (
           <CircleCheck size={28} />
@@ -203,7 +203,7 @@ const VerifyEmail = () => {
           </>
         )}
       </div>
-    </AuthLayout>
+    </AuthPanel>
   );
 };
 export default VerifyEmail;

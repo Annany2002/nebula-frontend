@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import AuthLayout from "@/layout/AuthLayout";
+import AuthPanel from "@/components/auth/AuthPanel";
 import { useAuth } from "@/context/auth-context";
 import { accountEmailSchema, accountPasswordSchema } from "@/lib/account";
 
@@ -46,7 +46,7 @@ const SignUp = () => {
   };
 
   return (
-    <AuthLayout
+    <AuthPanel
       title="Create your workspace."
       description="Start building with your own database backend."
       footerText="Already have an account?"
@@ -118,7 +118,7 @@ const SignUp = () => {
           </Button>
         </form>
       </Form>
-    </AuthLayout>
+    </AuthPanel>
   );
 };
 
