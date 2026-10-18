@@ -8,6 +8,14 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AuthLayout from "@/layout/AuthLayout";
+import {
+  loadSignIn,
+  loadSignUp,
+  loadForgotPassword,
+  loadResetPassword,
+  loadVerifyEmail,
+} from "@/lib/auth-pages";
 
 // Lazy load pages
 const AllTables = lazy(() => import("./pages/AllTables"));
@@ -16,11 +24,11 @@ const Backups = lazy(() => import("./pages/Backups"));
 const DatabaseStudio = lazy(() => import("./pages/DatabaseStudio"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const SignIn = lazy(() => import("./pages/SignIn"));
-const SignUp = lazy(() => import("./pages/SignUp"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const SignIn = lazy(loadSignIn);
+const SignUp = lazy(loadSignUp);
+const ForgotPassword = lazy(loadForgotPassword);
+const ResetPassword = lazy(loadResetPassword);
+const VerifyEmail = lazy(loadVerifyEmail);
 const SingleTable = lazy(() => import("./pages/SingleTable"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Administration = lazy(() => import("./pages/Administration"));
@@ -45,7 +53,8 @@ const App = () => {
         <Toaster />
         <div className="min-h-screen relative">
           <AnimatedBackground />
-          <BrowserRouter>
+          {/* Keep the current page visible while a lazy route loads. */}
+          <BrowserRouter future={{ v7_startTransition: true }}>
             <AuthProvider>
               <Suspense
                 fallback={
@@ -56,11 +65,13 @@ const App = () => {
               >
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/sign-in" element={<SignIn />} />
-                  <Route path="/sign-up" element={<SignUp />} />
-                  <Route path="/verify-email" element={<VerifyEmail />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route element={<AuthLayout />}>
+                    <Route path="/sign-in" element={<SignIn />} />
+                    <Route path="/sign-up" element={<SignUp />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                  </Route>
 
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>

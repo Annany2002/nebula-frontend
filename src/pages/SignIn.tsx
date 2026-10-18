@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import AuthLayout from "@/layout/AuthLayout";
+import AuthPanel from "@/components/auth/AuthPanel";
 import { useAuth } from "@/context/auth-context";
 
 const formSchema = z.object({
@@ -40,7 +40,7 @@ const SignIn = () => {
   };
 
   return (
-    <AuthLayout
+    <AuthPanel
       title="Welcome back."
       description="Sign in to your Nebula workspace."
       footerText="Don't have an account?"
@@ -102,7 +102,7 @@ const SignIn = () => {
           </Button>
         </form>
       </Form>
-    </AuthLayout>
+    </AuthPanel>
   );
 };
 

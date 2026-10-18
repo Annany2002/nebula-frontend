@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Loader2 } from "lucide-react";
-import AuthLayout from "@/layout/AuthLayout";
+import AuthPanel from "@/components/auth/AuthPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -48,7 +48,7 @@ const ForgotPassword = () => {
     }
   };
   return (
-    <AuthLayout
+    <AuthPanel
       icon={<Mail size={28} />}
       title="Forgot your password?"
       description="Enter your account email and we’ll send a link to choose a new password."
@@ -116,7 +116,7 @@ const ForgotPassword = () => {
           </form>
         </Form>
       </div>
-    </AuthLayout>
+    </AuthPanel>
   );
 };
 export default ForgotPassword;

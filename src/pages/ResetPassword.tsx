@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleCheck, KeyRound, Loader2 } from "lucide-react";
-import AuthLayout from "@/layout/AuthLayout";
+import AuthPanel from "@/components/auth/AuthPanel";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/button";
 import {
@@ -171,7 +171,7 @@ const ResetPassword = () => {
     forgetPasswordResetLink();
   };
   return (
-    <AuthLayout
+    <AuthPanel
       icon={complete ? <CircleCheck size={28} /> : <KeyRound size={28} />}
       title={complete ? "Password updated." : "Choose a new password."}
       description={
@@ -214,7 +214,7 @@ const ResetPassword = () => {
           </>
         )}
       </div>
-    </AuthLayout>
+    </AuthPanel>
   );
 };
 export default ResetPassword;
