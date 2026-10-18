@@ -32,6 +32,7 @@ const ResetPassword = lazy(loadResetPassword);
 const VerifyEmail = lazy(loadVerifyEmail);
 const GitHubCallback = lazy(loadGitHubCallback);
 const SingleTable = lazy(() => import("./pages/SingleTable"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Administration = lazy(() => import("./pages/Administration"));
 
@@ -78,6 +79,7 @@ const App = () => {
 
                   {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>
+                    <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/backups" element={<Backups />} />
                     <Route path="/dashboard/:userId" element={<Dashboard />} />
                     <Route path="/databases/:db_name/*" element={<DatabaseStudio />} />

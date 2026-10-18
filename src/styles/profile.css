@@ -318,3 +318,110 @@
   display: block;
   margin-bottom: 8px;
 }
+
+.account-photo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.account-photo-preview {
+  height: 80px;
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 24px;
+  border: 1px solid hsl(var(--border));
+}
+.account-photo-controls {
+  min-width: 0;
+}
+.account-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.account-photo-actions button {
+  min-height: 44px;
+  gap: 8px;
+}
+.account-photo-controls p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: hsl(var(--muted-foreground));
+}
+.account-photo-controls .text-destructive {
+  color: hsl(var(--destructive));
+  margin-top: 8px;
+}
+.account-photo-controls [role="status"]:empty {
+  display: none;
+}
+.profile-photo-section {
+  border-top: 1px solid hsl(var(--border));
+  padding: 24px 28px;
+}
+.profile-photo-section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.onboarding-main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 80px 28px;
+}
+.onboarding-eyebrow {
+  color: hsl(var(--primary));
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.onboarding-main h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+.onboarding-intro {
+  max-width: 52ch;
+  margin-top: 14px;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  line-height: 1.8;
+}
+.onboarding-photo {
+  margin-top: 36px;
+  padding: 28px 0;
+  border-block: 1px solid hsl(var(--border));
+}
+.onboarding-photo h2 {
+  margin-bottom: 22px;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.onboarding-actions button {
+  min-height: 44px;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .onboarding-main {
+    padding: 44px 20px;
+  }
+  .onboarding-main h1 {
+    font-size: 28px;
+  }
+  .profile-photo-section {
+    padding: 22px;
+  }
+  .account-photo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

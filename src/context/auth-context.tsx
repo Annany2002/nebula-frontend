@@ -21,6 +21,8 @@ import {
   signupAccount,
 } from "@/lib/account";
 
+import { postSignInPath } from "@/lib/avatars";
+
 import { finishGitHub, githubCallbackPath } from "@/lib/github-oauth";
 
 interface AuthContextType {
@@ -31,6 +33,7 @@ interface AuthContextType {
   logout: () => void;
   clearSession: () => void;
   refreshUser: () => Promise<void>;
+  applyProfile: (profile: AccountProfile, token: string) => Promise<boolean>;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
@@ -162,6 +165,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("storage", changed);
   }, [clearSession, queryClient, refreshUser]);
 
+  // Account writes return the authoritative profile; cancel older reads before applying it.
+  const applyProfile = useCallback(
+    async (profile: AccountProfile, token: string) => {
+      const currentGeneration = generation.current;
+      refreshController.current?.abort();
+      await queryClient.cancelQueries({ queryKey: ["currentUser"] });
+      if (
+        generation.current !== currentGeneration ||
+        localStorage.getItem("token") !== token ||
+        localStorage.getItem("user_id") !== profile.userId
+      )
+        return false;
+      setUser(profile);
+      hasSession.current = true;
+      setIsLoading(false);
+      queryClient.setQueryData(["currentUser"], profile);
+      return true;
+    },
+    [queryClient]
+  );
+
   const signup = async (data: SignupCredentials) => {
     const currentGeneration = ++generation.current;
     setIsLoading(true);
@@ -203,7 +227,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(result.user);
       hasSession.current = true;
       toast.success("Signed in successfully.");
-      navigate(`/dashboard/${result.user.userId}`);
+      navigate(postSignInPath(result.user));
       // Login intentionally omits platform membership; load it from the profile endpoint.
       void refreshUser();
     },
@@ -270,6 +294,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         clearSession,
         refreshUser,
+        applyProfile,
         isLoading,
         isAuthenticated: !!user,
       }}
