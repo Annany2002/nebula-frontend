@@ -15,6 +15,7 @@ The web frontend for [Nebula](https://github.com/Annany2002/nebula-backend), an 
 - **Saved backups:** create and browse retained snapshots, download them with integrity checks, delete saved copies, and restore into a new database. Account history remains accessible after source deletion. Requires the backend managed-backup endpoints and an owner JWT.
 - **App connections:** REST, Node.js, Python, and SDK examples with copy controls.
 - **Account and keys:** password and optional GitHub sign-in, password-confirmed GitHub connection, email verification and resend, forgot/reset password, profile editing with confirmed email changes, and database API key generation, rotation, and revocation.
+- **Profile photos:** automatic GitHub avatar import, optional photo setup after sign-in, and upload/change/remove controls in Your account.
 - **Themes and accessibility:** light/dark/system appearance, responsive layouts, keyboard controls, and reduced-motion support.
 
 Record search operates on the current page. The backend separately supports column equality filters through the records API. SQLite import creates a new database and accepts snapshots up to 64 MiB; SQL-dump import, scheduled backups and restoring over an existing database are not implemented. Import requires an owner JWT; database API keys cannot provision a new database.
@@ -34,6 +35,14 @@ Register a GitHub OAuth app with its callback set to the frontend’s exact `/au
 Each attempt uses S256 PKCE and a ten-minute, tab-scoped transaction. The verifier and a session fingerprint are kept in `sessionStorage`; callback codes stay in memory after their URL is scrubbed before analytics. **Finish signing in** performs one explicit exchange. Reloading, expiry, denial, missing tab storage or an uncertain response requires starting a fresh attempt. A successful GitHub connection signs out existing sessions; sign in again using GitHub or your password. Replacing or disconnecting identities is not supported.
 
 Deploy both compatible frontend and backend versions before enabling GitHub. Serve the callback through the SPA fallback, without caching its response or forwarding query strings to analytics. The included Vercel configuration adds callback cache/referrer protections; other hosts should provide equivalent headers. A no-referrer document policy also protects the initial callback page before JavaScript runs. Live consent testing requires an OAuth app; automated tests use mocked provider responses and do not contact GitHub.
+
+### Profile photos and onboarding
+
+With the profile-avatar backend, GitHub sign-in imports the GitHub profile photo automatically. Users without a photo are offered a short optional setup step after sign-in; choosing **Skip for now** is saved on the server, so the prompt does not repeat on later sign-ins or other browsers. Users can upload, replace or remove a photo under **Your account**. Explicit uploads and removals take precedence over later GitHub imports.
+
+Uploads accept JPEG, PNG or WebP up to 2 MiB. The server checks decoded dimensions (4096 pixels per side and 8,388,608 total pixels), center-crops to a 256px JPEG and removes metadata. Photos are public through random backend asset URLs; removal/replacement invalidates the previous URL. Broken images fall back to initials. Upload errors preserve the existing photo, and uncertain writes are not automatically replayed.
+
+Deploy the backend avatar routes before this frontend. Older servers omit the avatar/onboarding fields, retain the existing sign-in flow with initials, and hide unsupported photo controls. No storage service, image API key or SMTP setup is required. See the [profile API](https://github.com/Annany2002/nebula-backend/blob/main/docs/api-reference/user-profile.mdx) for limits and contracts.
 
 ### Platform administration
 
