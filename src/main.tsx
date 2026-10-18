@@ -1,3 +1,4 @@
+import "./lib/github-oauth";
 import "./lib/verificationLink";
 import "./lib/passwordResetLink";
 import { createRoot } from "react-dom/client";

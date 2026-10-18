@@ -7,23 +7,27 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   AccountError,
   AccountProfile,
   LoginCredentials,
+  LoginResponse,
   SignupCredentials,
   getAccountProfile,
   loginAccount,
   signupAccount,
 } from "@/lib/account";
 
+import { finishGitHub, githubCallbackPath } from "@/lib/github-oauth";
+
 interface AuthContextType {
   user: AccountProfile | null;
   signup: (data: SignupCredentials) => Promise<void>;
   login: (data: LoginCredentials) => Promise<void>;
+  completeGitHub: () => Promise<void>;
   logout: () => void;
   clearSession: () => void;
   refreshUser: () => Promise<void>;
@@ -34,6 +38,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationKey = useRef(location.key);
+  locationKey.current = location.key;
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
   const queryClient = useQueryClient();
@@ -45,20 +52,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const generation = useRef(0);
   const hasSession = useRef(false);
 
-  const clearSession = useCallback(() => {
-    generation.current += 1;
-    refreshController.current?.abort();
-    setUser(null);
-    hasSession.current = false;
-    setIsLoading(false);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user_id");
-    queryClient.clear();
-  }, [queryClient]);
+  const clearSession = useCallback(
+    (forgetStored = true) => {
+      generation.current += 1;
+      refreshController.current?.abort();
+      setUser(null);
+      hasSession.current = false;
+      setIsLoading(false);
+      if (forgetStored) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user_id");
+      }
+      queryClient.clear();
+    },
+    [queryClient]
+  );
 
   const refreshUser = useCallback(async () => {
     const token = localStorage.getItem("token");
-    if (!token || !localStorage.getItem("user_id")) {
+    const userId = localStorage.getItem("user_id");
+    if (!token || !userId) {
       setIsLoading(false);
       return;
     }
@@ -69,16 +82,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!hasSession.current) setIsLoading(true);
     try {
       const profile = await getAccountProfile(token, controller.signal);
-      if (controller.signal.aborted || generation.current !== currentGeneration) return;
+      if (
+        controller.signal.aborted ||
+        generation.current !== currentGeneration ||
+        localStorage.getItem("token") !== token ||
+        localStorage.getItem("user_id") !== userId
+      )
+        return;
       setUser(profile);
       hasSession.current = true;
     } catch (error) {
-      if (controller.signal.aborted || generation.current !== currentGeneration) return;
+      if (
+        controller.signal.aborted ||
+        generation.current !== currentGeneration ||
+        localStorage.getItem("token") !== token ||
+        localStorage.getItem("user_id") !== userId
+      )
+        return;
       if (error instanceof AccountError && [401, 403, 404].includes(error.status)) {
         clearSession();
         // Leave public email links usable even if a stored JWT has expired or was revoked.
         if (
-          !["/verify-email", "/forgot-password", "/reset-password"].includes(
+          !["/verify-email", "/forgot-password", "/reset-password", githubCallbackPath].includes(
             window.location.pathname.replace(/\/$/, "")
           )
         ) {
@@ -97,7 +122,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearSession]);
 
   useEffect(() => {
-    void refreshUser();
+    // The callback validates its initiating session itself; expired-JWT bootstrap must not erase it.
+    if (window.location.pathname !== githubCallbackPath) void refreshUser();
+    else setIsLoading(false);
     return () => refreshController.current?.abort();
   }, [refreshUser]);
 
@@ -107,6 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const token = localStorage.getItem("token");
       const id = localStorage.getItem("user_id");
       const publicPage = [
+        githubCallbackPath,
         "/verify-email",
         "/forgot-password",
         "/reset-password",
@@ -115,7 +143,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "/",
       ].includes(window.location.pathname);
       if (!token || !id) {
-        clearSession();
+        // A token/user-id pair may still be changing in the other tab.
+        // Clear local state without deleting that tab’s newly written credentials.
+        clearSession(false);
         if (!publicPage) navigateRef.current("/sign-in", { replace: true });
       } else {
         generation.current += 1;
@@ -123,7 +153,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         hasSession.current = false;
         setUser(null);
         queryClient.clear();
-        void refreshUser();
+        if (window.location.pathname !== githubCallbackPath) void refreshUser();
+        else setIsLoading(false);
         if (!publicPage) navigateRef.current(`/dashboard/${id}`, { replace: true });
       }
     };
@@ -158,12 +189,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (data: LoginCredentials) => {
-    const currentGeneration = ++generation.current;
-    setIsLoading(true);
-    try {
-      const result = await loginAccount(data);
-      if (generation.current !== currentGeneration) return;
+  const establishSession = useCallback(
+    (result: LoginResponse) => {
       if (result.user.verification_required && !result.user.email_verified)
         throw new AccountError(
           "Verify your email before signing in.",
@@ -179,6 +206,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       navigate(`/dashboard/${result.user.userId}`);
       // Login intentionally omits platform membership; load it from the profile endpoint.
       void refreshUser();
+    },
+    [clearSession, navigate, refreshUser]
+  );
+
+  const completeGitHub = async () => {
+    const currentGeneration = ++generation.current;
+    const routeKey = locationKey.current;
+    refreshController.current?.abort();
+    try {
+      const result = await finishGitHub();
+      if (
+        generation.current !== currentGeneration ||
+        locationKey.current !== routeKey ||
+        window.location.pathname !== githubCallbackPath ||
+        !result.isCurrentSession()
+      )
+        throw new AccountError("Your session or page changed. Start GitHub sign-in again.");
+      if (result.mode === "link") {
+        clearSession();
+        navigate("/sign-in", { replace: true });
+        toast.success("GitHub connected. Sign in again to continue.");
+      } else establishSession(result.login);
+    } finally {
+      if (generation.current === currentGeneration) setIsLoading(false);
+    }
+  };
+
+  const login = async (data: LoginCredentials) => {
+    const currentGeneration = ++generation.current;
+    setIsLoading(true);
+    try {
+      const result = await loginAccount(data);
+      if (generation.current !== currentGeneration) return;
+      establishSession(result);
     } catch (error) {
       if (generation.current !== currentGeneration) return;
       if (error instanceof AccountError && error.code === "email_verification_required") {
@@ -205,6 +266,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         signup,
         login,
+        completeGitHub,
         logout,
         clearSession,
         refreshUser,

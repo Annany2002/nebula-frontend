@@ -286,3 +286,35 @@
     transition: none !important;
   }
 }
+
+.profile-github {
+  border-top: 1px solid hsl(var(--border));
+  padding: 24px 28px 28px;
+  display: grid;
+  gap: 14px;
+}
+.profile-github h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.profile-github p {
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  line-height: 1.7;
+}
+.profile-github .text-destructive {
+  color: hsl(var(--destructive));
+}
+.profile-github form {
+  max-width: 400px;
+}
+
+@media (max-width: 600px) {
+  .profile-github {
+    padding: 22px;
+  }
+}
+.profile-github form > div > label {
+  display: block;
+  margin-bottom: 8px;
+}

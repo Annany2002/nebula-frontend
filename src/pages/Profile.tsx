@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/formatDate";
 import "@/styles/profile.css";
+import GitHubSignIn from "@/components/auth/GitHubSignIn";
 import AccountEmail from "@/components/auth/AccountEmail";
 
 const editSchema = z.object({
@@ -193,6 +194,7 @@ const Profile = () => {
                   </div>
                 </dl>
               )}
+              <GitHubSignIn link />
             </section>
           </div>
         )}
